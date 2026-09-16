@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
-import { Dialog } from '@astryxdesign/core/Dialog';
-import { DialogHeader } from '@astryxdesign/core/Dialog';
+import { Dialog, DialogHeader } from '@astryxdesign/core/Dialog';
+import { Layout, LayoutContent, LayoutFooter } from '@astryxdesign/core/Layout';
 import { TextInput } from '@astryxdesign/core/TextInput';
 import { Button } from '@astryxdesign/core/Button';
 import { Text } from '@astryxdesign/core/Text';
@@ -8,11 +8,15 @@ import { VStack } from '@astryxdesign/core/VStack';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Token } from '@astryxdesign/core/Token';
 import { Tooltip } from '@astryxdesign/core/Tooltip';
+import { List } from '@astryxdesign/core/List';
+import { Item } from '@astryxdesign/core/Item';
 import { Icon } from '@astryxdesign/core/Icon';
 import { Search, LocateFixed, House, Undo2 } from 'lucide-react';
 import { HOME_BORTLE, DEFAULT_LOC, haversine } from '../lib/astro.js';
 
-/* Location picker: search cities, use geolocation, manage home vs viewing spot. */
+/* Location picker: search cities, use geolocation, manage home vs viewing spot.
+   Follows the Astryx DialogFormDialog recipe: Layout with header/content/footer
+   slots, purpose="form" (it contains an input), and List/Item rows for results. */
 export default function LocationDialog({
   open,
   onOpenChange,
@@ -85,101 +89,118 @@ export default function LocationDialog({
   const homeIsMedford = haversine(home.lat, home.lon, DEFAULT_LOC.lat, DEFAULT_LOC.lon) < 10;
 
   return (
-    <Dialog isOpen={open} onOpenChange={onOpenChange} width={440}>
-      <DialogHeader title="Where are you watching from?" />
-      <VStack gap={3}>
-        <VStack gap={1}>
-          <HStack gap={2} vAlign="center">
-            <Text type="label" color="secondary">
-              Home
-            </Text>
-            <Text>{home.name}</Text>
-            {homeIsMedford && (
-              <Tooltip content={HOME_BORTLE.source}>
-                <Token label={`Bortle ${HOME_BORTLE.value}`} size="sm" color="orange" />
-              </Tooltip>
-            )}
-          </HStack>
-          <HStack gap={2} vAlign="center">
-            <Text type="label" color="secondary">
-              Viewing
-            </Text>
-            <Text>
-              {loc.name}
-              {away && ' · away'}
-            </Text>
-          </HStack>
-          {away && (
-            <Text type="supporting">
-              {miFromHome.toLocaleString()} mi from home — sky data below is for where you are right now.
-            </Text>
-          )}
-          <HStack gap={2}>
-            {away && (
+    <Dialog
+      isOpen={open}
+      onOpenChange={onOpenChange}
+      width={440}
+      purpose="form"
+    >
+      <Layout
+        header={
+          <DialogHeader
+            title="Where are you watching from?"
+            onOpenChange={() => onOpenChange(false)}
+          />
+        }
+        content={
+          <LayoutContent>
+            <VStack gap={3}>
+              <VStack gap={1}>
+                <HStack gap={2} vAlign="center">
+                  <Text type="label" color="secondary">
+                    Home
+                  </Text>
+                  <Text>{home.name}</Text>
+                  {homeIsMedford && (
+                    <Tooltip content={HOME_BORTLE.source}>
+                      <Token label={`Bortle ${HOME_BORTLE.value}`} size="sm" color="orange" />
+                    </Tooltip>
+                  )}
+                </HStack>
+                <HStack gap={2} vAlign="center">
+                  <Text type="label" color="secondary">
+                    Viewing
+                  </Text>
+                  <Text>
+                    {loc.name}
+                    {away && ' · away'}
+                  </Text>
+                </HStack>
+                {away && (
+                  <Text type="supporting">
+                    {miFromHome.toLocaleString()} mi from home — sky data below is for where you are right now.
+                  </Text>
+                )}
+              </VStack>
+
+              <VStack gap={2}>
+                <TextInput
+                  label="Search a city"
+                  isLabelHidden
+                  placeholder="Search a city…"
+                  value={query}
+                  onChange={setQuery}
+                  startIcon={Search}
+                  hasClear
+                  width="100%"
+                />
+                {searching && <Text type="supporting">Searching…</Text>}
+                {!searching && query.trim().length >= 2 && results.length === 0 && (
+                  <Text type="supporting">No matches — try another spelling.</Text>
+                )}
+                {results.length > 0 && (
+                  <List>
+                    {results.map((g) => (
+                      <Item
+                        key={`${g.latitude},${g.longitude}`}
+                        label={g.name}
+                        description={[g.admin1, g.country].filter(Boolean).join(', ')}
+                        onClick={() =>
+                          onPick({
+                            name: `${g.name}${g.country_code ? `, ${g.country_code}` : ''}`,
+                            lat: g.latitude,
+                            lon: g.longitude,
+                          })
+                        }
+                      />
+                    ))}
+                  </List>
+                )}
+              </VStack>
+            </VStack>
+          </LayoutContent>
+        }
+        footer={
+          <LayoutFooter>
+            <HStack gap={2} hAlign="end">
+              {away && (
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={onBackHome}
+                  label="Back home"
+                  icon={<Icon icon={Undo2} size="sm" />}
+                />
+              )}
               <Button
                 variant="secondary"
                 size="sm"
-                onClick={onBackHome}
-                label="Back home"
-                icon={<Icon icon={Undo2} size="sm" />}
+                onClick={onSetHome}
+                label="Set current as home"
+                icon={<Icon icon={House} size="sm" />}
               />
-            )}
-            <Button
-              variant="secondary"
-              size="sm"
-              onClick={onSetHome}
-              label="Set current as home"
-              icon={<Icon icon={House} size="sm" />}
-            />
-          </HStack>
-        </VStack>
-
-        <VStack gap={2}>
-          <TextInput
-            label="Search a city"
-            isLabelHidden
-            placeholder="Search a city…"
-            value={query}
-            onChange={setQuery}
-            startIcon={Search}
-            hasClear
-            width="100%"
-          />
-          <Button
-            variant="secondary"
-            onClick={useGeolocation}
-            isLoading={geoBusy}
-            label="Use my location"
-            icon={<Icon icon={LocateFixed} size="sm" />}
-          />
-        </VStack>
-
-        {searching && <Text type="supporting">Searching…</Text>}
-        {!searching && query.trim().length >= 2 && results.length === 0 && (
-          <Text type="supporting">No matches — try another spelling.</Text>
-        )}
-        <VStack gap={1}>
-          {results.map((g) => (
-            <Button
-              key={`${g.latitude},${g.longitude}`}
-              variant="secondary"
-              label={g.name}
-              onClick={() =>
-                onPick({
-                  name: `${g.name}${g.country_code ? `, ${g.country_code}` : ''}`,
-                  lat: g.latitude,
-                  lon: g.longitude,
-                })
-              }
-            >
-              {g.name}
-              <Text type="supporting">
-                {[g.admin1, g.country].filter(Boolean).join(', ')}
-              </Text>
-            </Button>
-          ))}
-        </VStack>
-      </VStack>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={useGeolocation}
+                isLoading={geoBusy}
+                label="Use my location"
+                icon={<Icon icon={LocateFixed} size="sm" />}
+              />
+            </HStack>
+          </LayoutFooter>
+        }
+      />
     </Dialog>
   );
 }
