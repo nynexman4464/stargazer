@@ -43,10 +43,9 @@ function EventCard({ ev, score }) {
             icon={<Icon icon={TYPE_ICON[ev.type]} size="sm" />}
           />
         </HStack>
-        <HStack gap={2} vAlign="baseline">
-          <Text weight="semibold">{dateStr}</Text>
-          <Text type="supporting">{countdown(ev.date)}</Text>
-        </HStack>
+        <Text weight="semibold">
+          {dateStr} <Text type="supporting" weight="normal">{countdown(ev.date)}</Text>
+        </Text>
         <Text type="large" weight="semibold">
           {ev.title}
         </Text>

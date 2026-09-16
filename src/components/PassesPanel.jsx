@@ -98,12 +98,12 @@ export default function PassesPanel({ loc }) {
                       <ListItem
                         key={i}
                         label={
-                          <HStack gap={2} vAlign="baseline">
-                            <Text weight="semibold">{label}</Text>
-                            <Text type="supporting">
+                          <Text weight="semibold">
+                            {label}{' '}
+                            <Text type="supporting" weight="normal">
                               {countdown(p.start) === 'now' ? 'visible now!' : countdown(p.start)}
                             </Text>
-                          </HStack>
+                          </Text>
                         }
                         description={
                           <Text type="supporting">
