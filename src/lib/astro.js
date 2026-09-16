@@ -379,16 +379,14 @@ export function auroraOutlookVerdict(kp, lat) {
   if (lat < 40) {
     if (kp >= 8)
       return {
-        verdict: 'Could reach this far south — get outside and look north.',
+        verdict: 'Could reach this far south — get outside.',
         band: 'storm',
       };
     return { verdict: 'Unlikely to reach this far south.', band: 'quiet' };
   }
-  if (kp >= 7)
-    return { verdict: 'Could reach us — get outside and look north.', band: 'storm' };
-  if (kp >= 5)
-    return { verdict: 'May dip far enough south — worth a look north.', band: 'possible' };
-  if (kp >= 3) return { verdict: 'Busy up north, but likely not for us.', band: 'quiet' };
+  if (kp >= 7) return { verdict: 'Could reach us — get outside.', band: 'storm' };
+  if (kp >= 5) return { verdict: 'Might reach us — look north.', band: 'possible' };
+  if (kp >= 3) return { verdict: 'Stays up north.', band: 'quiet' };
   return { verdict: 'Nothing expected for us.', band: 'quiet' };
 }
 
