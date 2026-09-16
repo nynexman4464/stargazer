@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { twoline2satrec } from 'satellite.js';
 import { Card } from '@astryxdesign/core/Card';
 import { Heading } from '@astryxdesign/core/Text';
@@ -16,7 +16,7 @@ import {
   SATS,
   fetchTLE,
   computePasses,
-  passQuality,
+  passScore,
   fmtTime,
   fmtDate,
   countdown,
@@ -24,17 +24,20 @@ import {
 } from '../lib/astro.js';
 
 /* Bright flyovers: ISS / Tiangong / Hubble tabs with visible-pass predictions.
-   Passes for every satellite are computed up front so each tab can show a
-   peak-elevation badge — the best viewing score at a glance. */
+   Each pass gets a 0-100 visibility score from peak elevation, the satellite's
+   typical visual magnitude, and forecast cloud cover at pass time. Tabs show
+   the best score at a glance. */
 export default function PassesPanel({ loc }) {
   const [norad, setNorad] = useState(SATS[0].norad);
-  const [allPasses, setAllPasses] = useState(null); // null = loading, else { [norad]: passes[] }
+  const [allPasses, setAllPasses] = useState(null); // null = loading, else { [norad]: scored passes }
   const [failedSats, setFailedSats] = useState([]);
+  const wxCache = useRef({});
 
   useEffect(() => {
     let cancelled = false;
     setAllPasses(null);
     setFailedSats([]);
+    wxCache.current = {};
     // let the first paint happen before the (synchronous) orbital math runs
     const t = setTimeout(async () => {
       const results = await Promise.all(
@@ -42,7 +45,14 @@ export default function PassesPanel({ loc }) {
           try {
             const [l1, l2] = await fetchTLE(s.norad);
             const satrec = twoline2satrec(l1, l2);
-            return [s.norad, computePasses(satrec, loc.lat, loc.lon, 72)];
+            const passes = computePasses(satrec, loc.lat, loc.lon, 72);
+            const scored = await Promise.all(
+              passes.map(async (p) => {
+                const sc = await passScore(p, s.mag, loc, wxCache.current);
+                return { ...p, score: sc.score, label: sc.label };
+              }),
+            );
+            return [s.norad, scored];
           } catch {
             return [s.norad, null];
           }
@@ -68,20 +78,21 @@ export default function PassesPanel({ loc }) {
   const passes = allPasses?.[norad] ?? null;
   const failed = failedSats.includes(norad);
 
-  // Best peak elevation per satellite, for the tab badges.
-  const bestPeak = (id) => {
+  // Best-scoring pass per satellite, for the tab badges.
+  const bestPass = (id) => {
     const p = allPasses?.[id];
     if (!p || p.length === 0) return null;
-    return Math.max(...p.map((x) => x.maxEl));
+    return p.reduce((a, b) => (a.score >= b.score ? a : b));
   };
-  const peakVariant = (peak) => (peak > 60 ? 'success' : peak > 35 ? 'warning' : 'neutral');
+  const scoreVariant = (label) =>
+    label === 'Excellent' ? 'success' : label === 'Good' ? 'warning' : 'neutral';
 
   return (
     <Card padding={4}>
       <VStack gap={3}>
         <VStack gap={1}>
           <Heading level={2}>Bright flyovers</Heading>
-          <Text type="supporting">ISS · Tiangong · Hubble — next 3 days</Text>
+          <Text type="supporting">ISS · Tiangong · Hubble — next 3 days. Tab badge is the visibility score (0–100): height, brightness, clouds.</Text>
         </VStack>
         <VStack gap={3}>
           <TabList
@@ -91,7 +102,7 @@ export default function PassesPanel({ loc }) {
             aria-label="Satellite"
           >
             {SATS.map((s) => {
-              const peak = bestPeak(s.norad);
+              const best = bestPass(s.norad);
               return (
                 <Tab
                   key={s.norad}
@@ -99,8 +110,8 @@ export default function PassesPanel({ loc }) {
                   label={s.name}
                   panelId={`passes-${s.norad}`}
                   endContent={
-                    peak !== null ? (
-                      <Badge label={`${Math.round(peak)}°`} variant={peakVariant(peak)} />
+                    best !== null ? (
+                      <Badge label={`${best.score}`} variant={scoreVariant(best.label)} />
                     ) : null
                   }
                 />
@@ -144,7 +155,7 @@ export default function PassesPanel({ loc }) {
                       description={
                         <Text type="supporting">
                           {compass(p.startAz)} → {compass(p.endAz)} · peaks {Math.round(p.maxEl)}°
-                          at {fmtTime(p.maxT)} · {dur} min · {passQuality(p.maxEl)}
+                          at {fmtTime(p.maxT)} · {dur} min · score {p.score} — {p.label.toLowerCase()}
                         </Text>
                       }
                       endContent={

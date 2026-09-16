@@ -17,9 +17,12 @@ export const HOME_BORTLE = {
     'Inferred from Sky & Telescope zenith SQM readings in adjacent Arlington and Cambridge; no Medford measurement published.',
 };
 export const SATS = [
-  { norad: 25544, name: 'ISS' },
-  { norad: 48274, name: 'Tiangong' },
-  { norad: 20580, name: 'Hubble' },
+  // mag: typical peak visual magnitude (lower = brighter). ISS can flare to
+  // -5.9; Tiangong runs about -2 to -3; Hubble (~mag 1.5-3) is usually a
+  // binocular target. Used only for visibility scoring, not displayed.
+  { norad: 25544, name: 'ISS', mag: -4 },
+  { norad: 48274, name: 'Tiangong', mag: -2.5 },
+  { norad: 20580, name: 'Hubble', mag: 2 },
 ];
 export const TIER_META = {
   backyard: { label: 'Backyard', blurb: 'Step outside tonight.' },
@@ -258,33 +261,102 @@ export function normalizeEvents(showers, eclipses, conjs, comets) {
 }
 
 /* ============================== weather / scoring ============================== */
-export async function cloudCover(date, loc, cache) {
-  const key = isoDay(date);
-  if (cache[key] !== undefined) return cache[key];
+/* Fetch one day of hourly cloud cover from Open-Meteo, cached by day. */
+async function hourlyCloud(dayKey, loc, cache) {
+  if (cache[dayKey] !== undefined) return cache[dayKey];
   try {
     const url =
       `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat.toFixed(3)}&longitude=${loc.lon.toFixed(3)}` +
-      `&hourly=cloud_cover&start_date=${key}&end_date=${key}&timezone=auto`;
+      `&hourly=cloud_cover&start_date=${dayKey}&end_date=${dayKey}&timezone=auto`;
     const r = await fetch(url);
     const j = await r.json();
-    const times = j.hourly.time;
-    const vals = j.hourly.cloud_cover;
-    // prefer 10pm local, fall back to darkest hour available
-    let best = vals[Math.floor(vals.length / 2)];
-    let bestScore = 1e9;
-    times.forEach((t, i) => {
-      const hr = parseInt(t.slice(11, 13), 10);
-      const dist = Math.min(Math.abs(hr - 22), 24 - Math.abs(hr - 22));
-      if (dist < bestScore) {
-        bestScore = dist;
-        best = vals[i];
-      }
-    });
-    cache[key] = best;
-    return best;
+    const entry = { times: j.hourly.time, vals: j.hourly.cloud_cover };
+    cache[dayKey] = entry;
+    return entry;
   } catch {
     return null;
   }
+}
+
+export async function cloudCover(date, loc, cache) {
+  const day = await hourlyCloud(isoDay(date), loc, cache);
+  if (!day) return null;
+  const { times, vals } = day;
+  // prefer 10pm local, fall back to darkest hour available
+  let best = vals[Math.floor(vals.length / 2)];
+  let bestScore = 1e9;
+  times.forEach((t, i) => {
+    const hr = parseInt(t.slice(11, 13), 10);
+    const dist = Math.min(Math.abs(hr - 22), 24 - Math.abs(hr - 22));
+    if (dist < bestScore) {
+      bestScore = dist;
+      best = vals[i];
+    }
+  });
+  return best;
+}
+
+/* Cloud cover at the hour nearest the given time, in the observer's timezone. */
+export async function cloudCoverAt(date, loc, cache) {
+  const off = await utcOffsetSeconds(loc);
+  const shift = (off ?? 0) * 1000;
+  // location-local day of the pass: shift the clock so UTC getters read the
+  // observer's wall time (same trick as the aurora outlook)
+  const d = new Date(date.getTime() + shift);
+  const dayKey =
+    d.getUTCFullYear() +
+    '-' +
+    String(d.getUTCMonth() + 1).padStart(2, '0') +
+    '-' +
+    String(d.getUTCDate()).padStart(2, '0');
+  const day = await hourlyCloud(dayKey, loc, cache);
+  if (!day) return null;
+  // Open-Meteo hourly times are location wall-clock; parsing them as UTC puts
+  // them on the same wall-clock scale as the shifted pass instant.
+  const targetWall = date.getTime() + shift;
+  let best = day.vals[0];
+  let bestDiff = Infinity;
+  day.times.forEach((t, i) => {
+    const diff = Math.abs(Date.parse(t + 'Z') - targetWall);
+    if (diff < bestDiff) {
+      bestDiff = diff;
+      best = day.vals[i];
+    }
+  });
+  return best;
+}
+
+/* Visibility score for a satellite pass (0-100): height in the sky, typical
+   visual magnitude, and forecast cloud cover at pass time. */
+export async function passScore(pass, mag, loc, cache) {
+  const cloud = await cloudCoverAt(pass.maxT, loc, cache);
+  const factors = [];
+  let score = 50;
+  // height in the sky
+  const el = Math.round(pass.maxEl);
+  if (pass.maxEl > 60) score += 22;
+  else if (pass.maxEl > 35) score += 12;
+  else if (pass.maxEl > 25) score += 4;
+  else score -= 8;
+  factors.push({ icon: 'angle', text: `peaks ${el}°` });
+  // brightness (lower magnitude = brighter)
+  if (mag <= -3) score += 14;
+  else if (mag <= -1) score += 7;
+  else if (mag <= 1) score -= 2;
+  else score -= 10;
+  factors.push({ icon: 'star', text: `magnitude ${mag > 0 ? '+' : ''}${mag}` });
+  // predicted weather
+  if (cloud === null) {
+    factors.push({ icon: 'cloudOff', text: 'forecast unavailable' });
+  } else {
+    factors.push({ icon: 'cloud', text: `${cloud}% clouds` });
+    if (cloud < 15) score += 14;
+    else if (cloud < 40) score += 6;
+    else if (cloud < 70) score -= 10;
+    else score -= 22;
+  }
+  score = Math.max(5, Math.min(99, Math.round(score)));
+  return { score, factors, label: score >= 75 ? 'Excellent' : score >= 55 ? 'Good' : 'Poor' };
 }
 
 export async function goScore(ev, loc, cache) {
@@ -449,7 +521,7 @@ const tzOffsetCache = {};
 
 /* Seconds east of UTC for the observer's location, via Open-Meteo. Needed so
  * "tonight" means tonight where the observer is, not where the browser is. */
-async function utcOffsetSeconds(loc) {
+export async function utcOffsetSeconds(loc) {
   const key = `${loc.lat.toFixed(1)},${loc.lon.toFixed(1)}`;
   if (tzOffsetCache[key] !== undefined) return tzOffsetCache[key];
   try {
