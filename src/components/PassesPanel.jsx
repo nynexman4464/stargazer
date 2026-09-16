@@ -56,10 +56,10 @@ export default function PassesPanel({ loc }) {
   return (
     <Card padding={4}>
       <VStack gap={3}>
-        <HStack gap={2} vAlign="baseline">
+        <VStack gap={1}>
           <Heading level={2}>Bright flyovers</Heading>
           <Text type="supporting">ISS · Tiangong · Hubble — next 3 days</Text>
-        </HStack>
+        </VStack>
           <VStack gap={3}>
             <TabList
               value={String(norad)}
