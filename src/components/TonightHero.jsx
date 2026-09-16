@@ -22,11 +22,15 @@ function scoreVariant(label) {
 }
 
 export default function TonightHero({ pick, score }) {
+  // Everything in this card refers to the pick's own date — never mix
+  // tonight's moon/conditions with a future event's.
+  const isTonight = pick && Math.abs(pick.date.getTime() - Date.now()) < 36 * 3600000;
+  const moon = pick ? moonIllum(pick.date) : 0;
   return (
     <Card className="sg-hero" padding={4}>
       <VStack gap={3}>
         <Text type="label" color="accent">
-          Tonight's sky
+          {isTonight ? "Tonight's sky" : 'Coming up'}
         </Text>
         <Starfield />
         <VStack gap={3} className="sg-hero-content">
@@ -62,8 +66,7 @@ export default function TonightHero({ pick, score }) {
                       {fmtDate(pick.date)} · {countdown(pick.date)}
                     </Text>
                     <Text type="supporting">
-                      Moon tonight: {Math.round(moonIllum(new Date()) * 100)}%{' '}
-                      {moonName(moonIllum(new Date()))}
+                      Moon that night: {Math.round(moon * 100)}% {moonName(moon)}
                     </Text>
                   </VStack>
                   <VStack gap={1}>
