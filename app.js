@@ -173,7 +173,8 @@ function normalizeEvents(showers, eclipses, conjs, comets) {
       : 'backyard';
     push({
       ...e, kind: 'eclipse', type: 'eclipse', tier,
-      title: `${cap(e.type)} ${e.solar ? 'solar' : 'lunar'} eclipse`,
+      // plain-language type names ("penumbral"/"annular" mean nothing to most people)
+      title: `${({ penumbral: 'Faint', partial: 'Partial', total: 'Total', annular: 'Ring-of-fire' })[e.type] || cap(e.type)} ${e.solar ? 'solar' : 'lunar'} eclipse`,
       desc: [e.ne_note || '', e.regions ? `Where: ${e.regions}` : ''].filter(Boolean).join(' '),
     });
   });
@@ -187,7 +188,7 @@ function normalizeEvents(showers, eclipses, conjs, comets) {
     const per = new Date(c.perihelion + 'T12:00:00');
     push({
       ...c, kind: 'comet', type: 'comet', tier: 'backyard',
-      title: isNaN(per) ? c.name : `${c.name} — perihelion ${fmtDate(per)}`,
+      title: isNaN(per) ? c.name : `${c.name} — closest to the sun ${fmtDate(per)}`,
       desc: [c.magnitude_peak ? `Peak magnitude ${c.magnitude_peak}.` : '', c.note || ''].filter(Boolean).join(' '),
     });
   });
@@ -279,25 +280,27 @@ async function loadAurora() {
 
     const lat = state.loc.lat;
     let verdict, sub;
+    // Kp runs 0-9, a global gauge of geomagnetic activity. ~5 is where things
+    // get interesting this far south; 7+ is a full storm.
     if (kp >= 7) {
-      verdict = '🌌 Get outside — aurora likely visible from here.';
-      sub = `Kp ${kp.toFixed(1)} is storm-level. Look north, away from city lights. This is the real deal.`;
+      verdict = 'Get outside — aurora likely visible from here.';
+      sub = `Kp ${kp.toFixed(1)} is storm-level. The northern lights can reach Massachusetts now — look north, away from city lights.`;
     } else if (kp >= 5.5) {
-      verdict = '👀 Possible — watch the northern horizon.';
-      sub = `Kp ${kp.toFixed(1)}. From ${state.loc.name} you might catch a glow low in the north if skies are dark and clear.`;
+      verdict = 'Possible — watch the northern horizon.';
+      sub = `Kp ${kp.toFixed(1)}. Strong enough to drag the aurora's usual ring around the North Pole down toward New England — you might catch a glow low in the north if skies are dark and clear.`;
     } else if (kp >= 4) {
-      verdict = '😴 Quiet for now.';
-      sub = `Kp ${kp.toFixed(1)} — aurora is hugging the Arctic. Check back during stronger activity.`;
+      verdict = 'Quiet for now.';
+      sub = `Kp ${kp.toFixed(1)}. The aurora is sticking to its usual ring around the North Pole. Check back when activity picks up.`;
     } else {
-      verdict = '😴 Quiet for now.';
-      sub = `Kp ${kp.toFixed(1)} — the oval is far north tonight.`;
+      verdict = 'Quiet for now.';
+      sub = `Kp ${kp.toFixed(1)} — calm space weather. The aurora's ring is parked around the Arctic, far north of us. (Kp runs 0–9; about 5 is when it gets interesting this far south.)`;
     }
     if (prob !== null && prob > 5) {
-      sub += ` Model puts aurora probability near you at ~${Math.round(prob)}%.`;
+      sub += ` NOAA's model puts aurora probability near you at ~${Math.round(prob)}%.`;
     }
     if (lat < 40 && kp < 7) {
-      verdict = '😴 Too far south tonight.';
-      sub = `Kp ${kp.toFixed(1)} — you'd need a serious storm (Kp 8+) for aurora this far south.`;
+      verdict = 'Too far south tonight.';
+      sub = `Kp ${kp.toFixed(1)}. From here you'd need a serious storm (Kp 8+) to pull the aurora down this far.`;
     }
     verdictEl.textContent = verdict;
     subEl.textContent = sub;
@@ -567,40 +570,23 @@ function applyLoc() {
 
 /* ============================== starfield ============================== */
 function starfield() {
+  // Static starfield: drawn once, no animation loop. (The twinkling/meteor
+  // animation was removed per feedback — see git history to restore.)
   const c = document.getElementById('starfield'), x = c.getContext('2d');
-  let W, H, stars = [], meteors = [];
-  function size() {
-    W = c.width = innerWidth * devicePixelRatio; H = c.height = innerHeight * devicePixelRatio;
+  function draw() {
+    const W = c.width = innerWidth * devicePixelRatio, H = c.height = innerHeight * devicePixelRatio;
     c.style.width = innerWidth + 'px'; c.style.height = innerHeight + 'px';
-    stars = Array.from({ length: Math.min(240, innerWidth / 5) }, () => ({
-      x: Math.random() * W, y: Math.random() * H,
-      r: (Math.random() * 1.4 + 0.3) * devicePixelRatio,
-      p: Math.random() * Math.PI * 2, s: 0.5 + Math.random() * 1.5,
-    }));
-  }
-  size(); addEventListener('resize', size);
-  function frame(t) {
     x.clearRect(0, 0, W, H);
-    for (const s of stars) {
-      const a = 0.25 + 0.55 * Math.abs(Math.sin(t / 1000 * s.s + s.p));
-      x.globalAlpha = a; x.fillStyle = '#dfe6ff';
-      x.beginPath(); x.arc(s.x, s.y, s.r, 0, 7); x.fill();
+    const n = Math.min(240, innerWidth / 5);
+    for (let i = 0; i < n; i++) {
+      const sx = Math.random() * W, sy = Math.random() * H;
+      const r = (Math.random() * 1.4 + 0.3) * devicePixelRatio;
+      x.globalAlpha = 0.25 + Math.random() * 0.55; x.fillStyle = '#dfe6ff';
+      x.beginPath(); x.arc(sx, sy, r, 0, 7); x.fill();
     }
     x.globalAlpha = 1;
-    if (Math.random() < 0.006 && meteors.length < 2) {
-      meteors.push({ x: Math.random() * W * 0.7 + W * 0.15, y: Math.random() * H * 0.3, vx: -9 * devicePixelRatio, vy: 4 * devicePixelRatio, life: 1 });
-    }
-    meteors = meteors.filter(m => m.life > 0);
-    for (const m of meteors) {
-      m.x += m.vx; m.y += m.vy; m.life -= 0.02;
-      const g = x.createLinearGradient(m.x, m.y, m.x - m.vx * 8, m.y - m.vy * 8);
-      g.addColorStop(0, `rgba(255,255,255,${0.9 * m.life})`); g.addColorStop(1, 'rgba(255,255,255,0)');
-      x.strokeStyle = g; x.lineWidth = 2 * devicePixelRatio;
-      x.beginPath(); x.moveTo(m.x, m.y); x.lineTo(m.x - m.vx * 8, m.y - m.vy * 8); x.stroke();
-    }
-    requestAnimationFrame(frame);
   }
-  requestAnimationFrame(frame);
+  draw(); addEventListener('resize', draw);
 }
 
 /* ============================== init ============================== */
