@@ -144,6 +144,7 @@ export function countdown(to) {
   if (ms < 0) return 'now';
   const h = Math.floor(ms / 3600000);
   const d = Math.floor(h / 24);
+  if (d >= 365) return `in ${Math.floor(d / 365)}y ${d % 365}d`;
   if (d > 1) return `in ${d}d ${h % 24}h`;
   if (h > 1) return `in ${h}h ${Math.floor(ms / 60000) % 60}m`;
   const m = Math.max(1, Math.floor(ms / 60000));
