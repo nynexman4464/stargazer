@@ -319,25 +319,41 @@ export async function goScore(ev, loc, cache) {
 /* Pure verdict builder — kp, ovation probability near observer, observer latitude.
  * Keeps the plain-language copy in one testable place. */
 export function auroraVerdict(kp, prob, lat) {
-  // Kp runs 0-9, a global gauge of geomagnetic activity. ~5 is where things
-  // get interesting this far south; 7+ is a full storm.
+  // Kp runs 0-9, a global gauge of geomagnetic activity.
+  const kps = `Kp ${kp.toFixed(1)}`;
   let verdict, sub, band;
-  if (kp >= 7) {
+  if (lat >= 55) {
+    // Auroral zone (e.g. Fairbanks): the observer sits under the aurora's
+    // usual ring, so even modest activity can light it up after dark.
+    if (kp >= 4) {
+      band = 'possible';
+      verdict = 'Good chance — look north after dark.';
+      sub = `${kps} is active, and you're right under the aurora's usual ring around the North Pole. If the sky is dark and clear, look north.`;
+    } else if (kp >= 2) {
+      band = 'quiet';
+      verdict = 'Possible if the sky cooperates.';
+      sub = `${kps} is middling. You're sitting under the aurora's usual ring, so even modest activity can light it up once it's properly dark.`;
+    } else {
+      band = 'quiet';
+      verdict = 'Quiet for now.';
+      sub = `${kps} — calm space weather, and the ring overhead is quiet. (Kp runs 0–9; this far north, even a 2 or 3 can put on a show after dark.)`;
+    }
+  } else if (kp >= 7) {
     band = 'storm';
     verdict = 'Get outside — aurora likely visible from here.';
-    sub = `Kp ${kp.toFixed(1)} is storm-level. The northern lights can reach Massachusetts now — look north, away from city lights.`;
+    sub = `${kps} is storm-level. The northern lights can reach well south of their usual ring tonight — look north, away from city lights.`;
   } else if (kp >= 5.5) {
     band = 'possible';
     verdict = 'Possible — watch the northern horizon.';
-    sub = `Kp ${kp.toFixed(1)}. Strong enough to drag the aurora's usual ring around the North Pole down toward New England — you might catch a glow low in the north if skies are dark and clear.`;
+    sub = `${kps}. Strong enough to drag the aurora's usual ring around the North Pole down toward you — you might catch a glow low in the north if skies are dark and clear.`;
   } else if (kp >= 4) {
     band = 'quiet';
     verdict = 'Quiet for now.';
-    sub = `Kp ${kp.toFixed(1)}. The aurora is sticking to its usual ring around the North Pole. Check back when activity picks up.`;
+    sub = `${kps}. The aurora is sticking to its usual ring around the North Pole. Check back when activity picks up.`;
   } else {
     band = 'quiet';
     verdict = 'Quiet for now.';
-    sub = `Kp ${kp.toFixed(1)} — calm space weather. The aurora's ring is parked around the Arctic, far north of us. (Kp runs 0–9; about 5 is when it gets interesting this far south.)`;
+    sub = `${kps} — calm space weather. The aurora's ring is parked around the Arctic, far north of us. (Kp runs 0–9; about 5 is when it gets interesting this far south.)`;
   }
   if (prob !== null && prob !== undefined && prob > 5) {
     sub += ` NOAA's model puts aurora probability near you at ~${Math.round(prob)}%.`;
@@ -345,28 +361,55 @@ export function auroraVerdict(kp, prob, lat) {
   if (lat < 40 && kp < 7) {
     band = 'south';
     verdict = 'Too far south tonight.';
-    sub = `Kp ${kp.toFixed(1)}. From here you'd need a serious storm (Kp 8+) to pull the aurora down this far.`;
+    sub = `${kps}. From here you'd need a serious storm (Kp 8+) to pull the aurora down this far.`;
   }
   return { verdict, sub, band };
 }
 
 export async function loadAuroraData(loc) {
-  const [kpR, ovR] = await Promise.all([
+  const [kpR, kp3hR, ovR] = await Promise.all([
     fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json'),
+    fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index.json'),
     fetch('https://services.swpc.noaa.gov/json/ovation_aurora_latest.json'),
   ]);
   const kpJ = await kpR.json();
   const valid = kpJ.filter((k) => k.kp_index !== null && k.kp_index !== undefined);
-  const cur = valid[valid.length - 1];
-  const kp = parseFloat(cur.kp_index);
 
-  // aurora probability near observer from ovation grid
+  // Headline number + trend: the steadier 3-hourly planetary Kp (the same one
+  // NOAA's own dashboard shows), not the jumpy 1-minute estimate. Falls back
+  // to the 1-minute feed if the 3-hourly product is unreachable.
+  let series = null;
+  try {
+    const h3 = await kp3hR.json();
+    const rows = h3.filter((r) => r.Kp !== null && r.Kp !== undefined);
+    if (rows.length) {
+      series = rows.slice(-8).map((r) => ({
+        value: parseFloat(r.Kp),
+        hour: new Date(r.time_tag).getHours(),
+      }));
+    }
+  } catch {}
+  if (!series || !series.length) {
+    series = valid.slice(-8).map((k) => ({
+      value: parseFloat(k.kp_index),
+      hour: new Date(k.time_tag).getHours(),
+    }));
+  }
+  if (!series.length) throw new Error('no Kp data');
+  const kp = series[series.length - 1].value;
+
+  // aurora probability near observer from ovation grid. Grid longitudes run
+  // 0-359, so convert the observer's -180..180 longitude first — otherwise
+  // every location in the Americas matches the wrong side of the planet.
   let prob = null;
   try {
     const ov = await ovR.json();
+    const lon360 = ((loc.lon % 360) + 360) % 360;
     let bestD = 1e9;
     for (const [clon, clat, v] of ov.coordinates) {
-      const d = (clon - loc.lon) ** 2 + (clat - loc.lat) ** 2;
+      let dl = Math.abs(clon - lon360);
+      dl = Math.min(dl, 360 - dl);
+      const d = dl * dl + (clat - loc.lat) ** 2;
       if (d < bestD) {
         bestD = d;
         prob = v;
@@ -374,11 +417,7 @@ export async function loadAuroraData(loc) {
     }
   } catch {}
 
-  const recent = valid.slice(-8).map((k) => ({
-    value: parseFloat(k.kp_index),
-    hour: new Date(k.time_tag).getHours(),
-  }));
-  return { kp, prob, recent, ...auroraVerdict(kp, prob, loc.lat) };
+  return { kp, prob, recent: series, ...auroraVerdict(kp, prob, loc.lat) };
 }
 
 /* ============================== satellite passes ============================== */

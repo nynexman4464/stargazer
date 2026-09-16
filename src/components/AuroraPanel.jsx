@@ -76,7 +76,7 @@ export default function AuroraPanel({ loc }) {
           ) : (
             <VStack gap={3}>
               <HStack gap={3} vAlign="center">
-                <Text type="display-1" hasTabularNumbers>
+                <Text type="large" size="4xl">
                   {data.kp.toFixed(1)}
                 </Text>
                 <VStack gap={1}>
