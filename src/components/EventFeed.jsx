@@ -51,7 +51,7 @@ function EventCard({ ev, score }) {
           {ev.title}
         </Text>
         <Text type="supporting">{ev.desc}</Text>
-        {score ? (
+        {score && (
           <VStack gap={1}>
             <ProgressBar
               label="Go score"
@@ -68,8 +68,6 @@ function EventCard({ ev, score }) {
               ))}
             </HStack>
           </VStack>
-        ) : (
-          <Text type="supporting">Beyond the 15-day forecast — tier says it all.</Text>
         )}
       </VStack>
   );
