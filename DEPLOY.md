@@ -14,7 +14,7 @@ let Amplify rebuild on every push.
 2. **Push:**
    ```bash
    cd ~/workspace/stargazer
-   git remote add origin git@github.com:<you>/stargazer.git
+   git remote add origin git@github.com:nynexman4464/stargazer.git
    git branch -M main
    git push -u origin main
    ```
