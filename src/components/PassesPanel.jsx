@@ -40,11 +40,24 @@ export default function PassesPanel({ loc }) {
     wxCache.current = {};
     // let the first paint happen before the (synchronous) orbital math runs
     const t = setTimeout(async () => {
+      // Fetch the TLEs one satellite at a time: CelesTrak throttles bursts
+      // per IP, and the last request in a parallel burst is the one that
+      // tends to fail. (Cached TLEs return instantly, so this is only slow
+      // on the first load of the day.)
+      const tleById = {};
+      for (const s of SATS) {
+        try {
+          tleById[s.norad] = await fetchTLE(s.norad);
+        } catch {
+          tleById[s.norad] = null;
+        }
+      }
       const results = await Promise.all(
         SATS.map(async (s) => {
           try {
-            const [l1, l2] = await fetchTLE(s.norad);
-            const satrec = twoline2satrec(l1, l2);
+            const tle = tleById[s.norad];
+            if (!tle) throw new Error('no TLE');
+            const satrec = twoline2satrec(tle[0], tle[1]);
             const passes = computePasses(satrec, loc.lat, loc.lon, 72);
             const scored = await Promise.all(
               passes.map(async (p) => {

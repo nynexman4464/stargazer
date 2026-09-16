@@ -35,6 +35,23 @@ export const TYPE_META = {
   planet: { label: 'Planets', blurb: 'Planets at their closest and brightest, or planets appearing close together in the sky.' },
   comet: { label: 'Comets', blurb: 'Visiting ice-balls from the outer solar system. Bright ones are rare.' },
 };
+
+/* Illustration for an event card / hero: per-planet portraits for planet
+ * events (first planet named in the title), sun/moon for eclipses, a meteor
+ * for showers, a comet for comets. Returns a public/ path or null. */
+const EVENT_PLANETS = ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
+export function eventImage(ev) {
+  if (!ev) return null;
+  if (ev.type === 'planet') {
+    const t = (ev.title || '').toLowerCase();
+    const p = EVENT_PLANETS.find((name) => t.includes(name));
+    return p ? `/img/events/${p}.jpg` : null;
+  }
+  if (ev.type === 'eclipse') return ev.solar ? '/img/events/sun.jpg' : '/img/events/moon.jpg';
+  if (ev.type === 'shower') return '/img/events/meteor.jpg';
+  if (ev.type === 'comet') return '/img/events/comet.jpg';
+  return null;
+}
 export const GLOSSARY = [
   ['Bortle scale', '1-to-9 rating of light pollution. 1 is pristine desert darkness, 9 is downtown. Lower means darker.'],
   ['Magnitude', 'How bright something looks — and it\u2019s backwards: lower (or negative) means brighter. Venus is about \u22124; the faintest stars most people can see are around 6.'],
@@ -579,18 +596,80 @@ export async function loadAuroraOutlook(loc) {
 }
 
 /* ============================== satellite passes ============================== */
+/* --- CelesTrak TLE fetching, hardened ---
+ * CelesTrak throttles aggressively per IP: bursts of requests sometimes hang
+ * or come back as errors, and the last request in a parallel burst tends to
+ * be the one that fails. So each fetch gets a 15s timeout, 3 attempts with
+ * backoff, and results are cached in localStorage (fresh for 24h, usable
+ * stale for 7 days — TLEs stay good enough for pass predictions for days).
+ * Only when there is no cached data at all does this throw. */
+const TLE_TTL = 24 * 3600 * 1000;
+const TLE_STALE_OK = 7 * 24 * 3600 * 1000;
+const tleKey = (norad) => `sg-tle-${norad}`;
+
+function readTleCache(norad) {
+  if (!hasStorage()) return null;
+  try {
+    const raw = localStorage.getItem(tleKey(norad));
+    if (!raw) return null;
+    const { t, l1, l2 } = JSON.parse(raw);
+    if (!t || !l1 || !l2) return null;
+    return { t, l1, l2 };
+  } catch {
+    return null;
+  }
+}
+
+function writeTleCache(norad, l1, l2) {
+  if (!hasStorage()) return;
+  try {
+    localStorage.setItem(tleKey(norad), JSON.stringify({ t: Date.now(), l1, l2 }));
+  } catch {
+    /* private mode etc — caching is best-effort */
+  }
+}
+
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms));
+
+async function rawTleFetch(norad) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 15000);
+  try {
+    const r = await fetch(`https://celestrak.org/NORAD/elements/gp.php?CATNR=${norad}&FORMAT=TLE`, {
+      signal: ctrl.signal,
+    });
+    const t = await r.text();
+    const lines = t
+      .trim()
+      .split('\n')
+      .map((s) => s.trim())
+      .filter(Boolean);
+    const l1 = lines.find((l) => l.startsWith('1 '));
+    const l2 = lines.find((l) => l.startsWith('2 '));
+    if (!l1 || !l2) throw new Error('bad TLE');
+    return [l1, l2];
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 export async function fetchTLE(norad) {
-  const r = await fetch(`https://celestrak.org/NORAD/elements/gp.php?CATNR=${norad}&FORMAT=TLE`);
-  const t = await r.text();
-  const lines = t
-    .trim()
-    .split('\n')
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const l1 = lines.find((l) => l.startsWith('1 '));
-  const l2 = lines.find((l) => l.startsWith('2 '));
-  if (!l1 || !l2) throw new Error('bad TLE');
-  return [l1, l2];
+  const cached = readTleCache(norad);
+  if (cached && Date.now() - cached.t < TLE_TTL) return [cached.l1, cached.l2];
+  let lastErr = null;
+  for (let attempt = 0; attempt < 3; attempt++) {
+    if (attempt > 0) await sleep(attempt * 1500);
+    try {
+      const [l1, l2] = await rawTleFetch(norad);
+      writeTleCache(norad, l1, l2);
+      return [l1, l2];
+    } catch (e) {
+      lastErr = e;
+    }
+  }
+  // CelesTrak unreachable: reuse a stale TLE rather than failing outright.
+  if (cached && Date.now() - cached.t < TLE_STALE_OK) return [cached.l1, cached.l2];
+  throw lastErr || new Error('TLE unavailable');
 }
 
 /* satrec: built by the caller via satellite.js twoline2satrec (kept injectable for tests) */
