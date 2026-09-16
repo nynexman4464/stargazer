@@ -366,6 +366,32 @@ export function auroraVerdict(kp, prob, lat) {
   return { verdict, sub, band };
 }
 
+/* Forecast-flavored aurora verdict for the Outlook rows. Phrased as a
+ * prediction, never repeating the "right now" wording, and honest about why
+ * a middling Kp number still means nothing for mid-latitudes. */
+export function auroraOutlookVerdict(kp, lat) {
+  if (lat >= 55) {
+    // Auroral zone: the observer sits under the aurora's usual ring.
+    if (kp >= 4) return { verdict: 'Good chance — look north after dark.', band: 'possible' };
+    if (kp >= 2) return { verdict: 'Possible if the sky cooperates.', band: 'quiet' };
+    return { verdict: 'Nothing expected.', band: 'quiet' };
+  }
+  if (lat < 40) {
+    if (kp >= 8)
+      return {
+        verdict: 'Could reach this far south — get outside and look north.',
+        band: 'storm',
+      };
+    return { verdict: 'Unlikely to reach this far south.', band: 'quiet' };
+  }
+  if (kp >= 7)
+    return { verdict: 'Could reach us — get outside and look north.', band: 'storm' };
+  if (kp >= 5)
+    return { verdict: 'May dip far enough south — worth a look north.', band: 'possible' };
+  if (kp >= 3) return { verdict: 'Busy up north, but likely not for us.', band: 'quiet' };
+  return { verdict: 'Nothing expected for us.', band: 'quiet' };
+}
+
 export async function loadAuroraData(loc) {
   const [kpR, kp3hR, ovR] = await Promise.all([
     fetch('https://services.swpc.noaa.gov/json/planetary_k_index_1m.json'),
@@ -472,7 +498,7 @@ export async function loadAuroraOutlook(loc) {
         });
         if (!inWin.length) return null;
         const kp = Math.max(...inWin.map((p) => p.kp));
-        const v = auroraVerdict(kp, null, loc.lat);
+        const v = auroraOutlookVerdict(kp, loc.lat);
         return { label: w.label, kp, verdict: v.verdict, band: v.band };
       })
       .filter(Boolean);
