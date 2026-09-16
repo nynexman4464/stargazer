@@ -85,7 +85,13 @@ export default function AuroraPanel({ loc }) {
                   {data.kp.toFixed(1)}
                 </Text>
                 <VStack gap={1}>
-                  <Tooltip content="0-to-9 scale of geomagnetic storm strength. 5+ means aurora might reach New England; 7+ means get outside now.">
+                  <Tooltip
+                    content={
+                      loc.lat >= 55
+                        ? '0-to-9 scale of geomagnetic storm strength. This far north, even a 2 or 3 can put on a show after dark; 5+ means a strong display overhead.'
+                        : '0-to-9 scale of geomagnetic storm strength. 5+ means aurora might reach New England; 7+ means get outside now.'
+                    }
+                  >
                     <Text type="label" color="secondary">
                       Planetary K-index
                     </Text>

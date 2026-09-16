@@ -41,7 +41,7 @@ export const GLOSSARY = [
   ['Penumbral eclipse', 'The moon drifts through Earth\u2019s faint outer shadow. Just a subtle shading — the least dramatic kind of lunar eclipse.'],
   ['Radiant', 'The patch of sky meteors appear to fly out from during a shower. Named after its constellation — Perseids radiate from Perseus.'],
   ['Go score', 'Our 0\u2013100 \u201cshould you go outside\u201d rating, built from cloud cover, moonlight, and how special the event is.'],
-  ['Kp index', '0-to-9 scale of geomagnetic storm strength. 5+ means aurora might reach New England; 7+ means get outside now.'],
+  ['Kp index', '0-to-9 scale of geomagnetic storm strength. Higher numbers mean the aurora reaches further from the poles.'],
 ];
 
 /* ============================== location storage ============================== */
