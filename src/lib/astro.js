@@ -387,7 +387,7 @@ export function auroraOutlookVerdict(kp, lat) {
   }
   if (kp >= 7) return { verdict: 'Could reach us — get outside.', band: 'storm' };
   if (kp >= 5) return { verdict: 'Might reach us — look north.', band: 'possible' };
-  if (kp >= 3) return { verdict: 'Stays up north.', band: 'quiet' };
+  if (kp >= 3) return { verdict: 'Only visible up north.', band: 'quiet' };
   return { verdict: 'Nothing expected for us.', band: 'quiet' };
 }
 
