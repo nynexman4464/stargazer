@@ -3,6 +3,10 @@
 
 /* ============================== config ============================== */
 const DEFAULT_LOC = { name: 'Medford, MA', lat: 42.4184, lon: -71.1062 };
+// Medford Bortle 8 inferred from Sky & Telescope zenith SQM in adjacent Arlington (17.9)
+// and Cambridge (17.3-17.4) — no published Medford measurement. Only shown while home is Medford.
+const HOME_BORTLE = { value: '8',
+  source: 'Inferred from Sky & Telescope zenith SQM readings in adjacent Arlington and Cambridge; no Medford measurement published.' };
 const SATS = [
   { norad: 25544, name: 'ISS' },
   { norad: 48274, name: 'Tiangong' },
@@ -479,7 +483,7 @@ function renderSpots() {
       <div><div class="name">${s.name}</div>
       <div class="meta">${s.highlights || ''}</div>
       ${s.access ? `<div class="meta" style="margin-top:6px;opacity:.75">🅿️ ${s.access}</div>` : ''}</div>
-      <div class="go"><span class="bortle" title="Bortle scale: 1 = pristine dark sky, 9 = inner city. Lower is darker.">Bortle ${s.bortle_est || '~?'}</span>
+      <div class="go"><span class="bortle" title="${s.bortle_source || 'Bortle scale: 1 = pristine dark sky, 9 = inner city. Lower is darker.'}">Bortle ${s.bortle || '~?'}</span>
       <div class="drive">${away ? `${Math.round(s.dist)} mi from you` : (s.drive_from_medford ? `~${s.drive_from_medford} from home` : `${Math.round(s.dist)} mi`)}</div></div>
     </div>`).join('');
 }
@@ -495,8 +499,9 @@ function renderLocStatus() {
   if (!el) return;
   const away = isAway();
   const miFromHome = Math.round(haversine(state.home.lat, state.home.lon, state.loc.lat, state.loc.lon));
+  const homeIsMedford = haversine(state.home.lat, state.home.lon, DEFAULT_LOC.lat, DEFAULT_LOC.lon) < 10;
   el.innerHTML = `
-    <div class="loc-line"><span class="k">Home</span><span>${state.home.name}</span></div>
+    <div class="loc-line"><span class="k">Home</span><span>${state.home.name}${homeIsMedford ? ` <span class="bortle" title="${HOME_BORTLE.source}">Bortle ${HOME_BORTLE.value}</span>` : ''}</span></div>
     <div class="loc-line"><span class="k">Viewing</span><span>${state.loc.name}${away ? '<em class="away-tag">away</em>' : ''}</span></div>
     ${away ? `<div class="loc-away-note">${miFromHome.toLocaleString()} mi from home — sky data below is for where you are right now.</div>` : ''}
     <div class="loc-btns">
