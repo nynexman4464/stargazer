@@ -90,11 +90,16 @@ export default function Starfield() {
       onscreen = entry.isIntersecting;
     });
     io.observe(c);
-    window.addEventListener('resize', layout);
+    // Re-fit the canvas whenever its size changes for any reason (content
+    // loading, window resize, URL bar showing/hiding). Without this, the
+    // backing store can end up smaller than the element and the browser
+    // stretches the bitmap — stars turn into streaks.
+    const ro = new ResizeObserver(() => layout());
+    ro.observe(c);
     return () => {
       cancelAnimationFrame(raf);
       io.disconnect();
-      window.removeEventListener('resize', layout);
+      ro.disconnect();
     };
   }, []);
 
