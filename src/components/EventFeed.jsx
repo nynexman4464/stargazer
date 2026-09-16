@@ -11,6 +11,7 @@ import { ProgressBar } from '@astryxdesign/core/ProgressBar';
 import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
+import { useMediaQuery } from '@astryxdesign/core/hooks';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Telescope } from 'lucide-react';
 import { TIER_META, TYPE_META, fmtDate, countdown, DAY } from '../lib/astro.js';
 
@@ -75,6 +76,10 @@ function EventCard({ ev, score }) {
 }
 
 export default function EventFeed({ events, scores, loaded, tier, setTier, type, setType }) {
+  // Responsive contract: below 640px the filter rows can't fit all segments,
+  // so they hug content and scroll inside the card instead of forcing the page
+  // wider; the event cards stack in a single column.
+  const isNarrow = useMediaQuery('(max-width: 640px)');
   const counts = {};
   events.forEach((e) => {
     if (tier === 'all' || e.tier === tier) counts[e.type] = (counts[e.type] || 0) + 1;
@@ -95,7 +100,8 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
             setType('all');
           }}
           label="Filter by trip tier"
-          layout="fill"
+          layout={isNarrow ? undefined : 'fill'}
+          style={isNarrow ? { overflowX: 'auto' } : undefined}
         >
           <SegmentedControlItem value="all" label="All" />
           {Object.entries(TIER_META).map(([k, m]) => (
@@ -107,7 +113,13 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
             />
           ))}
         </SegmentedControl>
-        <SegmentedControl value={type} onChange={setType} label="Filter by event type" layout="fill">
+        <SegmentedControl
+          value={type}
+          onChange={setType}
+          label="Filter by event type"
+          layout={isNarrow ? undefined : 'fill'}
+          style={isNarrow ? { overflowX: 'auto' } : undefined}
+        >
           <SegmentedControlItem value="all" label="All" />
           {types.map((t) => (
             <SegmentedControlItem
@@ -119,7 +131,7 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
           ))}
         </SegmentedControl>
         {!loaded ? (
-          <Grid columns={{ minWidth: 300 }} gap={3}>
+          <Grid columns={isNarrow ? 1 : { minWidth: 300 }} gap={3}>
             {[0, 1, 2].map((i) => (
               <VStack key={i} gap={2}>
                 <Skeleton height={20} width="70%" />
@@ -135,7 +147,7 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
             icon={<Icon icon={Telescope} size="lg" color="secondary" />}
           />
         ) : (
-          <Grid columns={{ minWidth: 300 }} gap={3}>
+          <Grid columns={isNarrow ? 1 : { minWidth: 300 }} gap={3}>
             {list.map((e) => (
               <EventCard key={e.id} ev={e} score={scores[e.id]} />
             ))}
