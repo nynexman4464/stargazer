@@ -41,7 +41,7 @@ export const GLOSSARY = [
   ['Opposition', 'A planet sits opposite the sun in our sky — so it\u2019s at its closest, brightest, and up all night. The best time to look at it.'],
   ['Conjunction', 'Two planets (or the moon and a planet) appear close together in the sky. Just a line-of-sight thing — they\u2019re still millions of miles apart.'],
   ['Perihelion', 'When a comet is closest to the sun. Usually its brightest moment — unless it\u2019s so close to the sun we can\u2019t see it at all.'],
-  ['Penumbral eclipse', 'The moon drifts through Earth\u2019s faint outer shadow. Just a subtle shading — the least dramatic kind of lunar eclipse.'],
+  ['Eclipse kinds', 'The labels the app uses. Faint: the moon only skims Earth\u2019s outer shadow \u2014 just a subtle smudge of shading, the least dramatic kind. Partial: part of the moon or sun goes dark, like a bite taken out. Total: the whole moon turns red, or the sun is completely covered. Ring-of-fire: the moon lines up with the sun but is too far away to cover it fully, leaving a bright ring.'],
   ['Radiant', 'The patch of sky meteors appear to fly out from during a shower. Named after its constellation — Perseids radiate from Perseus.'],
   ['Go score', 'Our 0\u2013100 \u201cshould you go outside\u201d rating, built from cloud cover, moonlight, and how special the event is.'],
   ['Kp index', '0-to-9 scale of geomagnetic storm strength. Higher numbers mean the aurora reaches further from the poles.'],
