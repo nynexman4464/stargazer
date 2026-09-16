@@ -1,8 +1,11 @@
 import { useEffect, useRef } from 'react';
 
-/* Static starfield — drawn once on mount (and on resize). No animation loop.
-   Star positions come from a seeded PRNG so the pattern is identical on every
-   draw; a resize never reshuffles the sky. */
+/* Slow-drifting starfield. The star layout comes from a seeded PRNG so the
+   pattern is identical on every load and never reshuffles; the stars then
+   drift almost imperceptibly in one direction (a few pixels per second,
+   wrapping at the edges), like the sky turning overhead. No twinkling.
+   Honors prefers-reduced-motion with a single static frame, and pauses
+   drawing while the hero is offscreen. */
 function mulberry32(seed) {
   return function () {
     seed |= 0;
@@ -13,6 +16,8 @@ function mulberry32(seed) {
   };
 }
 
+const DRIFT_PX_PER_SEC = 2.5;
+
 export default function Starfield() {
   const ref = useRef(null);
 
@@ -20,8 +25,14 @@ export default function Starfield() {
     const c = ref.current;
     if (!c) return;
     const x = c.getContext('2d');
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let stars = [];
+    let starColor = '#dfe6ff';
+    let raf = 0;
+    let onscreen = true;
 
-    const draw = () => {
+    // Fixed sky layout; per-star speed varies slightly for a hint of depth.
+    const layout = () => {
       const rand = mulberry32(20260916);
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const w = c.clientWidth;
@@ -29,29 +40,62 @@ export default function Starfield() {
       if (!w || !h) return;
       c.width = w * dpr;
       c.height = h * dpr;
-      x.clearRect(0, 0, c.width, c.height);
-      // star color from the theme token so it stays on-palette
-      const star =
+      starColor =
         getComputedStyle(document.documentElement)
           .getPropertyValue('--color-text-primary')
           .trim() || '#dfe6ff';
       const n = Math.min(220, Math.floor((w * h) / 2200));
+      stars = [];
       for (let i = 0; i < n; i++) {
-        const sx = rand() * c.width;
-        const sy = rand() * c.height;
-        const r = (rand() * 1.4 + 0.3) * dpr;
-        x.globalAlpha = 0.25 + rand() * 0.55;
-        x.fillStyle = star;
+        const speed = DRIFT_PX_PER_SEC * dpr * (0.7 + rand() * 0.6);
+        stars.push({
+          bx: rand() * c.width,
+          by: rand() * c.height,
+          r: (rand() * 1.4 + 0.3) * dpr,
+          a: 0.25 + rand() * 0.55,
+          vx: speed,
+          vy: -speed * 0.25,
+        });
+      }
+    };
+
+    const draw = (tSec) => {
+      x.clearRect(0, 0, c.width, c.height);
+      x.fillStyle = starColor;
+      for (const s of stars) {
+        let sx = (s.bx + s.vx * tSec) % c.width;
+        let sy = (s.by + s.vy * tSec) % c.height;
+        if (sx < 0) sx += c.width;
+        if (sy < 0) sy += c.height;
+        x.globalAlpha = s.a;
         x.beginPath();
-        x.arc(sx, sy, r, 0, 7);
+        x.arc(sx, sy, s.r, 0, 7);
         x.fill();
       }
       x.globalAlpha = 1;
     };
 
-    draw();
-    window.addEventListener('resize', draw);
-    return () => window.removeEventListener('resize', draw);
+    layout();
+    if (reduceMotion) {
+      draw(0);
+    } else {
+      const frame = (now) => {
+        if (onscreen) draw(now / 1000);
+        raf = requestAnimationFrame(frame);
+      };
+      raf = requestAnimationFrame(frame);
+    }
+
+    const io = new IntersectionObserver(([entry]) => {
+      onscreen = entry.isIntersecting;
+    });
+    io.observe(c);
+    window.addEventListener('resize', layout);
+    return () => {
+      cancelAnimationFrame(raf);
+      io.disconnect();
+      window.removeEventListener('resize', layout);
+    };
   }, []);
 
   return <canvas ref={ref} className="sg-stars" aria-hidden="true" />;
