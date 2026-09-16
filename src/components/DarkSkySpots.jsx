@@ -11,7 +11,7 @@ import { haversine } from '../lib/astro.js';
 const BORTLE_EXPLAINER =
   'Bortle scale: 1 = pristine dark sky, 9 = inner city. Lower is darker.';
 
-/* New England dark-sky picks, nearest first, with sourced Bortle ratings. */
+/* Nationwide certified dark-sky places, nearest first, with sourced Bortle ratings. */
 export default function DarkSkySpots({ spots, loc, away }) {
   const withDist = spots
     .map((s) => ({ ...s, dist: haversine(loc.lat, loc.lon, s.lat, s.lon) }))
@@ -29,8 +29,8 @@ export default function DarkSkySpots({ spots, loc, away }) {
           </Text>
           {away && (
             <Text type="supporting">
-              You're away from home — these are our New England dark-sky picks, shown by distance
-              from where you are now.
+              You're away from home — these are the nearest certified dark-sky places in the
+              country, shown by distance from where you are now.
             </Text>
           )}
         </VStack>
