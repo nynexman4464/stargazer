@@ -112,7 +112,7 @@ export default function App() {
     soon[0] ||
     events[0] ||
     null;
-  const pickIsTonight = !!pick && Math.abs(pick.date - Date.now()) < 36 * 3600000;
+  const pickIsTonight = !!pick && soon.includes(pick);
 
   return (
     <>
