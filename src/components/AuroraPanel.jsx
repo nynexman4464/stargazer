@@ -7,7 +7,7 @@ import { HStack } from '@astryxdesign/core/HStack';
 import { StatusDot } from '@astryxdesign/core/StatusDot';
 import { Tooltip } from '@astryxdesign/core/Tooltip';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
-import { loadAuroraData } from '../lib/astro.js';
+import { loadAuroraData, loadAuroraOutlook } from '../lib/astro.js';
 
 const BAND_DOT = { storm: 'error', possible: 'warning', quiet: 'success', south: 'neutral' };
 
@@ -31,16 +31,21 @@ function TrendBars({ recent }) {
 
 export default function AuroraPanel({ loc }) {
   const [data, setData] = useState(null);
+  const [outlook, setOutlook] = useState([]);
   const [error, setError] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
     setData(null);
+    setOutlook([]);
     setError(false);
     (async () => {
       try {
-        const d = await loadAuroraData(loc);
-        if (!cancelled) setData(d);
+        const [d, o] = await Promise.all([loadAuroraData(loc), loadAuroraOutlook(loc)]);
+        if (!cancelled) {
+          setData(d);
+          setOutlook(o);
+        }
       } catch {
         if (!cancelled) setError(true);
       }
@@ -92,6 +97,21 @@ export default function AuroraPanel({ loc }) {
                 </VStack>
               </HStack>
               <Text type="supporting">{data.sub}</Text>
+              {outlook.length > 0 && (
+                <VStack gap={1}>
+                  <Text type="label" color="secondary">
+                    Outlook
+                  </Text>
+                  {outlook.map((o) => (
+                    <HStack key={o.label} gap={2} vAlign="center">
+                      <StatusDot variant={BAND_DOT[o.band]} label={o.label} />
+                      <Text>
+                        <strong>{o.label}</strong> — Kp up to {o.kp.toFixed(1)}. {o.verdict}
+                      </Text>
+                    </HStack>
+                  ))}
+                </VStack>
+              )}
               <TrendBars recent={data.recent} />
             </VStack>
           )}

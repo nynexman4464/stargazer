@@ -420,6 +420,67 @@ export async function loadAuroraData(loc) {
   return { kp, prob, recent: series, ...auroraVerdict(kp, prob, loc.lat) };
 }
 
+const tzOffsetCache = {};
+
+/* Seconds east of UTC for the observer's location, via Open-Meteo. Needed so
+ * "tonight" means tonight where the observer is, not where the browser is. */
+async function utcOffsetSeconds(loc) {
+  const key = `${loc.lat.toFixed(1)},${loc.lon.toFixed(1)}`;
+  if (tzOffsetCache[key] !== undefined) return tzOffsetCache[key];
+  try {
+    const r = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat.toFixed(3)}&longitude=${loc.lon.toFixed(3)}&current=temperature_2m&timezone=auto`,
+    );
+    const j = await r.json();
+    tzOffsetCache[key] = j.utc_offset_seconds ?? null;
+  } catch {
+    tzOffsetCache[key] = null;
+  }
+  return tzOffsetCache[key];
+}
+
+/* Tonight + tomorrow night aurora outlook from NOAA's 3-day Kp forecast
+ * (the same predicted values behind their aurora dashboard). Returns [] if
+ * the forecast or the location timezone is unavailable. */
+export async function loadAuroraOutlook(loc) {
+  try {
+    const [fr, off] = await Promise.all([
+      fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json'),
+      utcOffsetSeconds(loc),
+    ]);
+    if (off === null || off === undefined) return [];
+    const j = await fr.json();
+    const pred = j
+      .filter((x) => x.observed === 'predicted' && x.kp !== null && x.kp !== undefined)
+      .map((x) => ({ time: new Date(`${x.time_tag}Z`), kp: parseFloat(x.kp) }));
+    if (!pred.length) return [];
+
+    // "tonight" = 6pm–6am location-local time. Shift clock so UTC getters read
+    // the observer's wall time, then compare in shifted milliseconds.
+    const nowL = Date.now() + off * 1000;
+    const d = new Date(nowL);
+    const midnightL = Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    const windows = [
+      { label: 'Tonight', start: midnightL + 18 * 3600e3, end: midnightL + 30 * 3600e3 },
+      { label: 'Tomorrow night', start: midnightL + 42 * 3600e3, end: midnightL + 54 * 3600e3 },
+    ];
+    return windows
+      .map((w) => {
+        const inWin = pred.filter((p) => {
+          const tL = p.time.getTime() + off * 1000;
+          return tL >= w.start && tL < w.end;
+        });
+        if (!inWin.length) return null;
+        const kp = Math.max(...inWin.map((p) => p.kp));
+        const v = auroraVerdict(kp, null, loc.lat);
+        return { label: w.label, kp, verdict: v.verdict, band: v.band };
+      })
+      .filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
 /* ============================== satellite passes ============================== */
 export async function fetchTLE(norad) {
   const r = await fetch(`https://celestrak.org/NORAD/elements/gp.php?CATNR=${norad}&FORMAT=TLE`);
