@@ -1,3 +1,4 @@
+import { Card } from '@astryxdesign/core/Card';
 import { Heading } from '@astryxdesign/core/Text';
 import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
@@ -7,8 +8,8 @@ import { GLOSSARY } from '../lib/astro.js';
 /* Sky talk — the jargon, translated. */
 export default function Glossary() {
   return (
-    <section aria-label="Sky talk">
-      <VStack gap={2}>
+    <Card padding={4}>
+      <VStack gap={3}>
         <VStack gap={1}>
           <Heading level={2}>Sky talk</Heading>
           <Text type="supporting">the jargon, translated</Text>
@@ -21,6 +22,6 @@ export default function Glossary() {
           ))}
         </CollapsibleGroup>
       </VStack>
-    </section>
+    </Card>
   );
 }

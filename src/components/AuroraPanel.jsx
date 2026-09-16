@@ -51,8 +51,8 @@ export default function AuroraPanel({ loc }) {
   }, [loc]);
 
   return (
-    <section aria-label="Aurora now">
-      <VStack gap={2}>
+    <Card padding={4}>
+      <VStack gap={3}>
         <HStack gap={2} vAlign="center">
           <Heading level={2}>Aurora now</Heading>
           {!error && (
@@ -62,7 +62,6 @@ export default function AuroraPanel({ loc }) {
             </HStack>
           )}
         </HStack>
-        <Card padding={4}>
           {error ? (
             <VStack gap={1}>
               <Text weight="semibold">Aurora data unavailable right now.</Text>
@@ -96,8 +95,7 @@ export default function AuroraPanel({ loc }) {
               <TrendBars recent={data.recent} />
             </VStack>
           )}
-        </Card>
       </VStack>
-    </section>
+    </Card>
   );
 }

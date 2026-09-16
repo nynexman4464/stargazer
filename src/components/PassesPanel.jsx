@@ -54,13 +54,12 @@ export default function PassesPanel({ loc }) {
   const satName = SATS.find((s) => s.norad === norad)?.name || '';
 
   return (
-    <section aria-label="Bright flyovers">
-      <VStack gap={2}>
+    <Card padding={4}>
+      <VStack gap={3}>
         <HStack gap={2} vAlign="baseline">
           <Heading level={2}>Bright flyovers</Heading>
           <Text type="supporting">ISS · Tiangong · Hubble — next 3 days</Text>
         </HStack>
-        <Card padding={4}>
           <VStack gap={3}>
             <TabList
               value={String(norad)}
@@ -127,8 +126,7 @@ export default function PassesPanel({ loc }) {
               )}
             </div>
           </VStack>
-        </Card>
       </VStack>
-    </section>
+    </Card>
   );
 }

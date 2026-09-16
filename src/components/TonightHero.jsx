@@ -23,14 +23,13 @@ function scoreVariant(label) {
 
 export default function TonightHero({ pick, score }) {
   return (
-    <section aria-label="Tonight's sky">
-      <VStack gap={2}>
+    <Card className="sg-hero" padding={4}>
+      <VStack gap={3}>
         <Text type="label" color="accent">
           Tonight's sky
         </Text>
-        <Card className="sg-hero" padding={4}>
-          <Starfield />
-          <VStack gap={3} className="sg-hero-content">
+        <Starfield />
+        <VStack gap={3} className="sg-hero-content">
             {!pick ? (
               <VStack gap={2}>
                 <Skeleton height={24} width="60%" />
@@ -103,8 +102,7 @@ export default function TonightHero({ pick, score }) {
               </>
             )}
           </VStack>
-        </Card>
       </VStack>
-    </section>
+    </Card>
   );
 }

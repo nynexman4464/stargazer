@@ -3,6 +3,7 @@ import { AppShell } from '@astryxdesign/core/AppShell';
 import { Layout } from '@astryxdesign/core/Layout';
 import { LayoutContent } from '@astryxdesign/core/Layout';
 import { VStack } from '@astryxdesign/core/VStack';
+import { Grid, GridSpan } from '@astryxdesign/core/Grid';
 import { Text } from '@astryxdesign/core/Text';
 import TopBar from './components/TopBar.jsx';
 import LocationDialog from './components/LocationDialog.jsx';
@@ -123,21 +124,31 @@ export default function App() {
       >
         <Layout contentWidth={960} padding={4} height="auto">
           <LayoutContent>
-            <VStack gap={5}>
-              <TonightHero pick={pick} score={pick ? scores[pick.id] : null} />
-              <AuroraPanel loc={loc} />
-              <PassesPanel loc={loc} />
-              <EventFeed
-                events={events}
-                scores={scores}
-                loaded={loaded}
-                tier={tier}
-                setTier={setTier}
-                type={type}
-                setType={setType}
-              />
-              <DarkSkySpots spots={spots} loc={loc} away={away} />
-              <Glossary />
+            <VStack gap={4}>
+              <Grid columns={{ minWidth: 320, max: 2 }} gap={4} width="100%">
+                <GridSpan columns="full">
+                  <TonightHero pick={pick} score={pick ? scores[pick.id] : null} />
+                </GridSpan>
+                <AuroraPanel loc={loc} />
+                <PassesPanel loc={loc} />
+                <GridSpan columns="full">
+                  <EventFeed
+                    events={events}
+                    scores={scores}
+                    loaded={loaded}
+                    tier={tier}
+                    setTier={setTier}
+                    type={type}
+                    setType={setType}
+                  />
+                </GridSpan>
+                <GridSpan columns="full">
+                  <DarkSkySpots spots={spots} loc={loc} away={away} />
+                </GridSpan>
+                <GridSpan columns="full">
+                  <Glossary />
+                </GridSpan>
+              </Grid>
               <VStack gap={1} hAlign="center">
                 <Text type="supporting" justify="center">
                   In memory of <strong>Jack Horkheimer</strong> (1938–2010), whose five minutes on

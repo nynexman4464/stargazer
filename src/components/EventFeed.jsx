@@ -29,10 +29,9 @@ function EventCard({ ev, score }) {
       ? `${fmtDate(ev.date)} – ${fmtDate(ev.end)}`
       : fmtDate(ev.date);
   return (
-    <Card>
-      <VStack gap={2}>
-        <HStack gap={2}>
-          <Token
+    <VStack gap={2}>
+      <HStack gap={2}>
+        <Token
             label={TIER_META[ev.tier]?.label || ev.tier}
             color={TIER_COLOR[ev.tier] || 'default'}
             size="sm"
@@ -73,7 +72,6 @@ function EventCard({ ev, score }) {
           <Text type="supporting">Beyond the 15-day forecast — tier says it all.</Text>
         )}
       </VStack>
-    </Card>
   );
 }
 
@@ -88,8 +86,8 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
   );
 
   return (
-    <section aria-label="Upcoming events">
-      <VStack gap={2}>
+    <Card padding={4}>
+      <VStack gap={3}>
         <Heading level={2}>Upcoming events</Heading>
         <SegmentedControl
           value={tier}
@@ -124,13 +122,11 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
         {!loaded ? (
           <Grid columns={{ minWidth: 300 }} gap={3}>
             {[0, 1, 2].map((i) => (
-              <Card key={i}>
-                <VStack gap={2}>
-                  <Skeleton height={20} width="70%" />
-                  <Skeleton height={16} width="95%" />
-                  <Skeleton height={16} width="80%" />
-                </VStack>
-              </Card>
+              <VStack key={i} gap={2}>
+                <Skeleton height={20} width="70%" />
+                <Skeleton height={16} width="95%" />
+                <Skeleton height={16} width="80%" />
+              </VStack>
             ))}
           </Grid>
         ) : list.length === 0 ? (
@@ -147,6 +143,6 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
           </Grid>
         )}
       </VStack>
-    </section>
+    </Card>
   );
 }
