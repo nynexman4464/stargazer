@@ -2,6 +2,20 @@
    var(--radius-*)), no raw colors or sizes. Structural bits the component
    library doesn't cover: the static hero starfield and the Kp trend bars. */
 
+/* Page background: a Star Gazer-style purple nebula, fixed while the page
+   scrolls. It sits on the shell's content area (over the theme's surface
+   color, which remains as the fallback underneath); the image itself is dark
+   so text stays readable. */
+body {
+  background-color: var(--color-background-body);
+}
+#astryx-app-shell-main {
+  background-image: url('/bg-nebula.jpg');
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
+}
+
 .sg-hero {
   position: relative;
   overflow: hidden;
