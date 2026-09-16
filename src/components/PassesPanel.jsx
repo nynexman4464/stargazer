@@ -4,7 +4,6 @@ import { Card } from '@astryxdesign/core/Card';
 import { Heading } from '@astryxdesign/core/Text';
 import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
-import { HStack } from '@astryxdesign/core/HStack';
 import { TabList, Tab } from '@astryxdesign/core/TabList';
 import { List } from '@astryxdesign/core/List';
 import { ListItem } from '@astryxdesign/core/List';
