@@ -116,13 +116,21 @@ export default function LocationDialog({
           )}
           <HStack gap={2}>
             {away && (
-              <Button variant="secondary" size="sm" onClick={onBackHome}>
-                <Icon icon={Undo2} size="sm" /> Back home
-              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={onBackHome}
+                label="Back home"
+                icon={<Icon icon={Undo2} size="sm" />}
+              />
             )}
-            <Button variant="secondary" size="sm" onClick={onSetHome}>
-              <Icon icon={House} size="sm" /> Set current as home
-            </Button>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={onSetHome}
+              label="Set current as home"
+              icon={<Icon icon={House} size="sm" />}
+            />
           </HStack>
         </VStack>
 
@@ -137,9 +145,13 @@ export default function LocationDialog({
             hasClear
             width="100%"
           />
-          <Button variant="secondary" onClick={useGeolocation} isLoading={geoBusy}>
-            <Icon icon={LocateFixed} size="sm" /> Use my location
-          </Button>
+          <Button
+            variant="secondary"
+            onClick={useGeolocation}
+            isLoading={geoBusy}
+            label="Use my location"
+            icon={<Icon icon={LocateFixed} size="sm" />}
+          />
         </VStack>
 
         {searching && <Text type="supporting">Searching…</Text>}
@@ -151,6 +163,7 @@ export default function LocationDialog({
             <Button
               key={`${g.latitude},${g.longitude}`}
               variant="secondary"
+              label={g.name}
               onClick={() =>
                 onPick({
                   name: `${g.name}${g.country_code ? `, ${g.country_code}` : ''}`,

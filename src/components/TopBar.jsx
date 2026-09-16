@@ -16,12 +16,14 @@ export default function TopBar({ locName, away, onOpenLocation }) {
         />
       }
       endContent={
-        <Button variant="secondary" onClick={onOpenLocation} aria-label="Change viewing location">
-          <Icon icon={MapPin} size="sm" />
-          {locName}
-          {away ? ' · away' : ''}
-          <Icon icon={ChevronDown} size="sm" />
-        </Button>
+        <Button
+          variant="secondary"
+          onClick={onOpenLocation}
+          aria-label="Change viewing location"
+          label={`${locName}${away ? ' · away' : ''}`}
+          icon={<Icon icon={MapPin} size="sm" />}
+          endContent={<Icon icon={ChevronDown} size="sm" />}
+        />
       }
     />
   );
