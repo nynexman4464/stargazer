@@ -1,0 +1,91 @@
+{
+  "_note": "Bortle classes: Frosty Drew and K.D. Dubuque are published values; Myles Standish, Race Point, Heins Farm, and Kancamagus are light-pollution map estimates (no published on-site measurements found as of 2026-09-16) — each entry says which. Medford, MA home Bortle 8 is inferred from Sky & Telescope zenith SQM readings in adjacent Arlington (17.9) and Cambridge (17.3–17.4), not a Medford measurement. Drive times are typical ranges.",
+  "_source": [
+    "Frosty Drew Observatory observing log (frostydrew.org/publications.dc/show/entry-113)",
+    "go-astronomy.com dark-sky directory (verified listings)",
+    "Sky & Telescope — Tony Flanders skyglow measurements (Boston area, for Medford proxy)",
+    "Frederick William House New England stargazing guide (outer-Cape Bortle 3–4)",
+    "Boston Magazine (Heins Farm qualitative)",
+    "frostydrew.org; mass.gov; The Last Green Valley (site access details)"
+  ],
+  "sites": [
+    {
+      "access": "Free public stargazing every Friday night, year-round (weather permitting). Red-light-only campus: no white lights dusk–dawn.",
+      "address": "Ninigret Park, 62 Park Lane, Charlestown, RI 02813",
+      "drive_from_medford": "~1h45–2h",
+      "highlights": "Guided observing with large telescopes; Milky Way plainly visible; special events for meteor showers and eclipses.",
+      "id": "frosty-drew",
+      "lat": 41.3672,
+      "lon": -71.6636,
+      "name": "Frosty Drew Observatory",
+      "tier": "drive",
+      "bortle": "~2.5–4.5",
+      "bortle_source": "Frosty Drew's own observing log: ~2.5 overhead, ~4.5 toward the Providence/Westerly horizons (NELM ~6.25)"
+    },
+    {
+      "access": "Night access via seasonal campgrounds (400+ sites; advance reservations). Day-use areas close at dusk.",
+      "address": "194 Cranberry Rd, Carver, MA 02330",
+      "drive_from_medford": "~1h10",
+      "highlights": "Big dark pine-barrens forest close to Boston; combine observing with an overnight camp.",
+      "id": "myles-standish",
+      "lat": 41.8395,
+      "lon": -70.6913,
+      "name": "Myles Standish State Forest",
+      "tier": "drive",
+      "bortle": "~4",
+      "bortle_source": "Light-pollution map estimate — no published on-site measurement found"
+    },
+    {
+      "access": "Seashore beaches, parking, and trails open 6 AM–midnight — fine for evening observing, not an all-night site. Seasonal beach fees may apply.",
+      "address": "Race Point Beach, Provincetown, MA",
+      "drive_from_medford": "~2h+",
+      "highlights": "Open ocean horizons in nearly every direction at the tip of the Cape; classic meteor-shower spot.",
+      "id": "race-point",
+      "lat": 42.0606,
+      "lon": -70.1903,
+      "name": "Cape Cod National Seashore — Race Point",
+      "tier": "drive",
+      "bortle": "~3–4",
+      "bortle_source": "Map estimate; outer-Cape beaches described as Bortle 3–4 in a local guide — no site-specific measurement found"
+    },
+    {
+      "access": "Free parking at the trailhead. Organized night events have been held here; confirm after-dark access before visiting.",
+      "address": "197 Leadmine Rd, Sturbridge, MA 01518",
+      "drive_from_medford": "~1h10",
+      "highlights": "Big open field shielded from headlights, in the dark-sky corridor of the Last Green Valley.",
+      "id": "heins-farm",
+      "lat": 42.0929,
+      "lon": -72.1115,
+      "name": "Heins Farm Conservation Area (Sturbridge Trails)",
+      "tier": "drive",
+      "bortle": "~3–4",
+      "bortle_source": "Light-pollution map estimate — no published on-site measurement found"
+    },
+    {
+      "access": "Public highway through White Mountain National Forest; overlook pullouts accessible at night. A day-use pass may be required for parking areas.",
+      "address": "Kancamagus Hwy, Lincoln, NH 03251",
+      "drive_from_medford": "~2h–2h15",
+      "highlights": "Mountain pass at 2,855 ft with wide scenic overlooks (e.g., Pemigewasset Overlook); genuinely dark northern skies.",
+      "id": "kancamagus",
+      "lat": 44.0271,
+      "lon": -71.4947,
+      "name": "Kancamagus Highway — Pemigewasset Overlook",
+      "tier": "expedition",
+      "bortle": "~2–3",
+      "bortle_source": "Light-pollution map estimate — no published on-site measurement found"
+    },
+    {
+      "access": "mass.gov lists hours as sunrise–sunset; night access is via wilderness camping only. Remote area — plan accordingly.",
+      "address": "466 W. Hawley Road, Plainfield, MA 01070 (entrance on MA-8A, Hawley)",
+      "drive_from_medford": "~2h15",
+      "highlights": "One of the darkest accessible spots in Massachusetts; wilderness camping under the Milky Way.",
+      "id": "kd-dubuque",
+      "lat": 42.5515,
+      "lon": -72.9412,
+      "name": "Kenneth Dubuque Memorial State Forest",
+      "tier": "expedition",
+      "bortle": "3",
+      "bortle_source": "Published rating on the go-astronomy.com dark-sky directory"
+    }
+  ]
+}

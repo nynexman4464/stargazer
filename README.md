@@ -1,10 +1,11 @@
 # Stargazer
 
 **What's worth looking up for.** A personalized guide to the night sky: ISS and bright-satellite
-flyovers, meteor showers, eclipses, aurora, planetary conjunctions and oppositions, and the rare
+flyovers, meteor showers, eclipses, aurora, planet pairings and closest-approach nights, and the rare
 bright comet — scored for *your* location, weather, and moonlight.
 
-Built for a work hackathon. Static site, no backend, deployable free on AWS Amplify.
+Built for a work hackathon. React 19 single-page app on [Astryx](https://github.com/nynexman4464/astryx)
+(the gothic theme, dark mode), deployable free on AWS Amplify.
 
 ## How it works
 
@@ -13,27 +14,34 @@ Built for a work hackathon. Static site, no backend, deployable free on AWS Ampl
 - **Go scores (0–100)** — each event is scored from live cloud cover (Open-Meteo), moon phase and
   illumination, and how special the event is.
 - **Live data**
-  - ISS, Tiangong, and Hubble passes computed in-browser with [satellite.js](https://github.com/shinglyu/satellite.js)
-    from public CelesTrak orbital elements
+  - ISS, Tiangong, and Hubble passes computed in-browser with
+    [satellite.js](https://github.com/shinglyu/satellite.js) (pure-JS SGP4 modules) from public
+    CelesTrak orbital elements
   - Aurora outlook from NOAA's planetary K-index and OVATION model
   - Weather and cloud cover from Open-Meteo
-- **Curated catalogs** — meteor showers, eclipses, conjunctions/oppositions, comets, and New England
-  dark-sky sites, researched from published sources (see `data/_manifest.json` for sources and caveats).
+- **Curated catalogs** — meteor showers, eclipses, planet events, comets, and New England
+  dark-sky sites, researched from published sources (see `public/data/_manifest.json` for sources and caveats).
   Bortle ratings are published values where they exist, labeled estimates otherwise.
 - **Home/away mode** — your home location is saved separately from where you're currently viewing;
   more than 50 miles out counts as away.
 - **Sky talk glossary** — the jargon (Bortle, opposition, perihelion, Kp…) translated into plain language.
+  Inline tooltips explain terms where they appear.
 
 ## Run it locally
 
 ```bash
 cd stargazer
-python3 -m http.server 8080
-# open http://localhost:8080
+npm install
+npm run dev
+# open the printed localhost URL
 ```
 
-Note: opening `index.html` via `file://` won't work — the app fetches its `data/*.json` files and
-calls live APIs, which browsers block from file URLs. Serve over http(s).
+Production build:
+
+```bash
+npm run build   # outputs dist/
+npm run preview # serve the production build locally
+```
 
 ## Deploy
 
@@ -44,13 +52,25 @@ See [DEPLOY.md](DEPLOY.md). Short version: connect this repo to AWS Amplify (fre
 ## Project layout
 
 ```
-index.html      app shell
-styles.css      dark glass UI
-app.js          location, weather, moon, aurora, satellite passes, scoring
-data/           curated event catalogs + sources manifest
-amplify.yml     Amplify build config
-DEPLOY.md       deployment guide
+index.html          Vite entry
+src/
+  main.jsx          Astryx CSS + gothic Theme provider
+  App.jsx           shell, data boot, scoring, location state
+  lib/astro.js      astronomy math, event engine, scoring (pure, framework-free)
+  lib/satpure.js    pure-JS satellite.js re-export (see note below)
+  components/       TonightHero, AuroraPanel, PassesPanel, EventFeed,
+                    DarkSkySpots, Glossary, LocationDialog, TopBar, Starfield
+  extras.css        tiny token-based CSS (hero starfield, Kp trend bars)
+public/data/        curated event catalogs + sources manifest
+amplify.yml         Amplify build config (npm ci + npm run build -> dist/)
+DEPLOY.md           deployment guide
 ```
+
+Note: `satellite.js` v7's package root re-exports its WebAssembly build, whose
+top-level await breaks Vite's production bundle. `vite.config.js` aliases
+`satellite.js` to `src/lib/satpure.js`, which re-exports only the pure-JS SGP4
+modules (`twoline2satrec`, `propagate`, `gstime`, `eciToEcf`, `ecfToLookAngles`).
+If the library restructures, revisit the alias.
 
 ## License
 

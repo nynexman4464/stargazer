@@ -2,13 +2,17 @@ version: 1
 frontend:
   phases:
     preBuild:
-      commands: []
+      commands:
+        - nvm install 20
+        - nvm use 20
+        - npm ci
     build:
       commands:
-        - echo "Static site - no build step"
+        - npm run build
   artifacts:
-    baseDirectory: /
+    baseDirectory: dist
     files:
       - '**/*'
   cache:
-    paths: []
+    paths:
+      - node_modules/**/*

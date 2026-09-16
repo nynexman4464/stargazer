@@ -1,8 +1,9 @@
 # Deploying Stargazer — $0 on the AWS free tier
 
-Stargazer is a 100% static site (HTML/CSS/JS). All the smarts run in the
-browser; the only "backend" is free public APIs (Open-Meteo, NOAA, CelesTrak).
-So hosting is just file storage + CDN — squarely inside AWS free tier.
+Stargazer is a static single-page app (React 19 + Vite, built to `dist/`).
+All the smarts run in the browser; the only "backend" is free public APIs
+(Open-Meteo, NOAA, CelesTrak). So hosting is just file storage + CDN —
+squarely inside AWS free tier.
 
 ## Option A: AWS Amplify + GitHub auto-deploy (recommended)
 
@@ -19,8 +20,9 @@ let Amplify rebuild on every push.
    git push -u origin main
    ```
 3. **Amplify Console** → *Host web app* → **GitHub** → authorize, pick the
-   `stargazer` repo and `main` branch. Amplify detects `amplify.yml` and
-   deploys automatically — every future `git push` redeploys.
+   `stargazer` repo and `main` branch. Amplify reads `amplify.yml`
+   (`npm ci`, `npm run build`, publishes `dist/`) and deploys automatically —
+   every future `git push` redeploys.
 4. **Custom domain:** Amplify → *App settings → Domain management* →
    *Add domain* → enter `alexrock.com`, add the `stargazer` subdomain.
    Amplify provisions a free SSL certificate and shows the exact DNS record.
@@ -34,11 +36,11 @@ let Amplify rebuild on every push.
 **Cost:** Amplify free tier = 5 GB stored + 15 GB served/month free for the
 first 12 months. This site is a few hundred KB — effectively $0.
 
-## Option B: Amplify drag-and-drop zip (no git)
+## Option B: Amplify drag-and-drop (no git)
 
-1. **Zip the site:** `zip -r stargazer.zip index.html styles.css app.js data amplify.yml`
+1. **Build:** `npm run build`
 2. **Amplify Console** → *Host web app* → **Deploy without Git provider** →
-   drag-and-drop the zip. Live at `https://<something>.amplifyapp.com`.
+   drag-and-drop the contents of `dist/`. Live at `https://<something>.amplifyapp.com`.
 3. Same custom-domain + DreamHost CNAME steps as above.
 
 ## Option C: S3 + CloudFront (manual, same cost)
@@ -50,13 +52,10 @@ first 12 months. This site is a few hundred KB — effectively $0.
 ## Local test first
 
 ```bash
-cd ~/workspace/stargazer && python3 -m http.server 8080
-# open http://localhost:8080
+cd ~/workspace/stargazer && npm run dev
+# or serve the production build:
+npm run build && npm run preview
 ```
-
-Note: `file://` won't work (the app fetches its `data/*.json` files and
-calls live APIs — browsers block that from file URLs). Always serve over
-http(s).
 
 ## Redeploys
 
