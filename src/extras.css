@@ -64,3 +64,21 @@ body {
 .sg-kpbar.sg-hot > i {
   background: var(--color-error);
 }
+
+/* Event + hero illustrations (generated images in public/img/events). */
+.sg-event-thumb,
+.sg-hero-img {
+  object-fit: cover;
+  border-radius: var(--radius-element);
+  flex: none;
+}
+
+.sg-event-thumb {
+  width: calc(var(--spacing-12) * 1.5);
+  height: calc(var(--spacing-12) * 1.5);
+}
+
+.sg-hero-img {
+  width: calc(var(--spacing-12) * 2.5);
+  height: calc(var(--spacing-12) * 2.5);
+}

@@ -10,7 +10,7 @@ import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon } from 'lucide-react';
 import Starfield from './Starfield.jsx';
-import { TIER_META, TYPE_META, fmtDate, countdown, moonIllum, moonName } from '../lib/astro.js';
+import { TIER_META, TYPE_META, fmtDate, countdown, moonIllum, moonName, eventImage } from '../lib/astro.js';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
@@ -25,6 +25,7 @@ export default function TonightHero({ pick, score, isTonight }) {
   // Everything in this card refers to the pick's own date — never mix
   // tonight's moon/conditions with a future event's.
   const moon = pick ? moonIllum(pick.date) : 0;
+  const img = pick ? eventImage(pick) : null;
   return (
     <Card className="sg-hero" padding={4}>
       <VStack gap={3}>
@@ -52,6 +53,7 @@ export default function TonightHero({ pick, score, isTonight }) {
                     icon={<Icon icon={TYPE_ICON[pick.type]} size="sm" />}
                   />
                 </HStack>
+                {img && <img src={img} alt="" className="sg-hero-img" />}
                 <Heading level={1} type="display-2">
                   {pick.title}
                 </Heading>

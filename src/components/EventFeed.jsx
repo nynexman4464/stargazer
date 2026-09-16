@@ -13,7 +13,7 @@ import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { useMediaQuery } from '@astryxdesign/core/hooks';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Telescope } from 'lucide-react';
-import { TIER_META, TYPE_META, fmtDate, countdown, DAY } from '../lib/astro.js';
+import { TIER_META, TYPE_META, fmtDate, countdown, DAY, eventImage } from '../lib/astro.js';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
@@ -29,6 +29,7 @@ function EventCard({ ev, score }) {
     ev.end && ev.end - ev.date > 2 * DAY
       ? `${fmtDate(ev.date)} – ${fmtDate(ev.end)}`
       : fmtDate(ev.date);
+  const img = eventImage(ev);
   return (
     <VStack gap={2}>
       <HStack gap={2}>
@@ -44,12 +45,17 @@ function EventCard({ ev, score }) {
             icon={<Icon icon={TYPE_ICON[ev.type]} size="sm" />}
           />
         </HStack>
-        <Text weight="semibold">
-          {dateStr} <Text type="supporting" weight="normal">{countdown(ev.date)}</Text>
-        </Text>
-        <Text type="large" weight="semibold">
-          {ev.title}
-        </Text>
+        <HStack gap={3} vAlign="center">
+          {img && <img src={img} alt="" loading="lazy" className="sg-event-thumb" />}
+          <VStack gap={1}>
+            <Text weight="semibold">
+              {dateStr} <Text type="supporting" weight="normal">{countdown(ev.date)}</Text>
+            </Text>
+            <Text type="large" weight="semibold">
+              {ev.title}
+            </Text>
+          </VStack>
+        </HStack>
         <Text type="supporting">{ev.desc}</Text>
         {score && (
           <VStack gap={1}>
