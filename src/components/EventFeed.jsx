@@ -54,7 +54,7 @@ function EventCard({ ev, score }) {
         {score ? (
           <VStack gap={1}>
             <ProgressBar
-              label={`Go score for ${ev.title}`}
+              label="Go score"
               value={score.score}
               hasValueLabel
               variant={scoreVariant(score.label)}
@@ -89,8 +89,10 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
     (e) => (tier === 'all' || e.tier === tier) && (type === 'all' || e.type === type),
   );
 
+  // minWidth: 0 lets this Card (a grid item) shrink below its content's
+  // intrinsic width on narrow screens; the filter rows scroll instead.
   return (
-    <Card padding={4}>
+    <Card padding={4} style={{ minWidth: 0 }}>
       <VStack gap={3}>
         <Heading level={2}>Upcoming events</Heading>
         <SegmentedControl
