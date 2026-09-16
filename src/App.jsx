@@ -112,6 +112,7 @@ export default function App() {
     soon[0] ||
     events[0] ||
     null;
+  const pickIsTonight = !!pick && Math.abs(pick.date - Date.now()) < 36 * 3600000;
 
   return (
     <>
@@ -127,7 +128,7 @@ export default function App() {
             <VStack gap={4}>
               <Grid columns={{ minWidth: 320, max: 2 }} gap={4} width="100%">
                 <GridSpan columns="full">
-                  <TonightHero pick={pick} score={pick ? scores[pick.id] : null} />
+                  <TonightHero pick={pick} score={pick ? scores[pick.id] : null} isTonight={pickIsTonight} />
                 </GridSpan>
                 <AuroraPanel loc={loc} />
                 <PassesPanel loc={loc} />

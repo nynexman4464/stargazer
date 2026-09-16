@@ -21,10 +21,9 @@ function scoreVariant(label) {
   return label === 'Go' ? 'success' : label === 'Maybe' ? 'warning' : 'error';
 }
 
-export default function TonightHero({ pick, score }) {
+export default function TonightHero({ pick, score, isTonight }) {
   // Everything in this card refers to the pick's own date — never mix
   // tonight's moon/conditions with a future event's.
-  const isTonight = pick && Math.abs(pick.date.getTime() - Date.now()) < 36 * 3600000;
   const moon = pick ? moonIllum(pick.date) : 0;
   return (
     <Card className="sg-hero" padding={4}>
