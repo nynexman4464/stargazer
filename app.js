@@ -18,10 +18,10 @@ const TIER_META = {
   expedition: { label: 'Expedition',     icon: '✈️', blurb: 'Once in a decade. Book travel.' },
 };
 const TYPE_META = {
-  shower:      { label: 'Showers',  icon: '☄️' },
-  eclipse:     { label: 'Eclipses', icon: '🌑' },
-  planet:      { label: 'Planets',  icon: '🪐' },
-  comet:       { label: 'Comets',   icon: '💫' },
+  shower:      { label: 'Showers',  icon: '☄️', blurb: 'Meteor showers: bits of comet dust burning up. Best after midnight.' },
+  eclipse:     { label: 'Eclipses', icon: '🌑', blurb: 'Solar and lunar eclipses: shadows lining up between sun, Earth, and moon.' },
+  planet:      { label: 'Planets',  icon: '🪐', blurb: 'Oppositions (planet at its best) and conjunctions (planets close together in the sky).' },
+  comet:       { label: 'Comets',   icon: '💫', blurb: 'Visiting ice-balls from the outer solar system. Bright ones are rare.' },
 };
 
 const state = {
@@ -441,7 +441,7 @@ function renderTypeRow() {
   state.events.forEach(e => { if (state.tier === 'all' || e.tier === state.tier) counts[e.type] = (counts[e.type] || 0) + 1; });
   const types = Object.keys(TYPE_META).filter(t => counts[t]);
   row.innerHTML = `<button class="type-chip${state.type === 'all' ? ' active' : ''}" data-type="all">All</button>` +
-    types.map(t => `<button class="type-chip${state.type === t ? ' active' : ''}" data-type="${t}">${TYPE_META[t].icon} ${TYPE_META[t].label} · ${counts[t]}</button>`).join('');
+    types.map(t => `<button class="type-chip${state.type === t ? ' active' : ''}" data-type="${t}" title="${TYPE_META[t].blurb}">${TYPE_META[t].icon} ${TYPE_META[t].label} · ${counts[t]}</button>`).join('');
   row.querySelectorAll('.type-chip').forEach(b => b.onclick = () => { state.type = b.dataset.type; renderTypeRow(); renderEvents(); });
 }
 

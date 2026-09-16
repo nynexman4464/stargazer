@@ -219,6 +219,12 @@ dialog::backdrop { background: rgba(2, 4, 10, .7); backdrop-filter: blur(6px); }
 .loc-away-note { font-size: 12.5px; color: var(--muted); margin: 8px 0 2px; }
 .loc-btns { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
 .loc-btns .btn { padding: 8px 14px; font-size: 12.5px; }
+.glossary { display: grid; gap: 10px; margin: 0; }
+.glossary > div { background: rgba(255,255,255,.03); border: 1px solid var(--stroke);
+  border-radius: 10px; padding: 10px 14px; }
+.glossary dt { font-weight: 700; font-size: 13.5px; margin-bottom: 3px; }
+.glossary dd { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.55; }
+@media (min-width: 700px) { .glossary { grid-template-columns: 1fr 1fr; } }
 
 @media (max-width: 640px) {
   .aurora-grid { grid-template-columns: 1fr; text-align: center; }
