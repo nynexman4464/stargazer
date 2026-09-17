@@ -27,13 +27,16 @@ import {
    Each pass gets a 0-100 visibility score from peak elevation, the satellite's
    typical visual magnitude, and forecast cloud cover at pass time. Tabs show
    the best score at a glance. */
-export default function PassesPanel({ loc }) {
+export default function PassesPanel({ loc, bundledTles }) {
   const [norad, setNorad] = useState(SATS[0].norad);
   const [allPasses, setAllPasses] = useState(null); // null = loading, else { [norad]: scored passes }
   const [failedSats, setFailedSats] = useState([]);
   const wxCache = useRef({});
 
   useEffect(() => {
+    // Wait for the bundled TLEs (loaded by the app boot) so the first
+    // attempt never needs the network when the site ships fresh data.
+    if (!bundledTles) return;
     let cancelled = false;
     setAllPasses(null);
     setFailedSats([]);
@@ -49,7 +52,7 @@ export default function PassesPanel({ loc }) {
       await Promise.all(
         SATS.map(async (s) => {
           try {
-            const [l1, l2] = await fetchTLE(s.norad);
+            const [l1, l2] = await fetchTLE(s.norad, bundledTles);
             if (cancelled) return;
             const satrec = twoline2satrec(l1, l2);
             const passes = computePasses(satrec, loc.lat, loc.lon, 72);
@@ -72,7 +75,7 @@ export default function PassesPanel({ loc }) {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [loc]);
+  }, [loc, bundledTles]);
 
   const satName = SATS.find((s) => s.norad === norad)?.name || '';
   const passes = allPasses?.[norad] ?? null;

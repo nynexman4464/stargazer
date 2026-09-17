@@ -605,6 +605,9 @@ export async function loadAuroraOutlook(loc) {
  * Only when there is no cached data at all does this throw. */
 const TLE_TTL = 24 * 3600 * 1000;
 const TLE_STALE_OK = 7 * 24 * 3600 * 1000;
+// Bundled TLEs ship with the site and are refreshed daily by automation;
+// they keep flyovers working when CelesTrak is unreachable from the client.
+const BUNDLED_TTL = 48 * 3600 * 1000;
 const tleKey = (norad) => `sg-tle-${norad}`;
 
 function readTleCache(norad) {
@@ -653,9 +656,16 @@ async function rawTleFetch(norad) {
   }
 }
 
-export async function fetchTLE(norad) {
+export async function fetchTLE(norad, bundled) {
   const cached = readTleCache(norad);
   if (cached && Date.now() - cached.t < TLE_TTL) return [cached.l1, cached.l2];
+  // TLEs bundled with the site (refreshed daily): no network needed.
+  const b = bundled?.tles?.[String(norad)];
+  const bTime = bundled?.updated ? Date.parse(bundled.updated) : NaN;
+  if (b && b[0] && b[1] && !isNaN(bTime) && Date.now() - bTime < BUNDLED_TTL) {
+    writeTleCache(norad, b[0], b[1]); // seed the device cache
+    return [b[0], b[1]];
+  }
   let lastErr = null;
   for (let attempt = 0; attempt < 3; attempt++) {
     if (attempt > 0) await sleep(attempt * 1500);

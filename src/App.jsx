@@ -36,6 +36,7 @@ export default function App() {
   const [spots, setSpots] = useState([]);
   const [scores, setScores] = useState({});
   const [sources, setSources] = useState('');
+  const [tles, setTles] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [locOpen, setLocOpen] = useState(false);
   const weatherCache = useRef({});
@@ -45,16 +46,18 @@ export default function App() {
   /* ---- data boot ---- */
   useEffect(() => {
     (async () => {
-      const [showers, eclipses, conjs, comets, spotsData, man] = await Promise.all([
+      const [showers, eclipses, conjs, comets, spotsData, man, tlesData] = await Promise.all([
         loadJSON(`${base}data/showers.json`),
         loadJSON(`${base}data/eclipses.json`),
         loadJSON(`${base}data/conjunctions.json`),
         loadJSON(`${base}data/comets.json`),
         loadJSON(`${base}data/darksky.json`),
         loadJSON(`${base}data/_manifest.json`),
+        loadJSON(`${base}data/tles.json`),
       ]);
       setEvents(normalizeEvents(showers, eclipses, conjs, comets));
       setSpots(spotsData?.sites || []);
+      setTles(tlesData);
       if (man?.sources) setSources('Data: ' + man.sources.join(' · '));
       setLoaded(true);
     })();
@@ -131,7 +134,7 @@ export default function App() {
                   <TonightHero pick={pick} score={pick ? scores[pick.id] : null} isTonight={pickIsTonight} />
                 </GridSpan>
                 <AuroraPanel loc={loc} />
-                <PassesPanel loc={loc} />
+                <PassesPanel loc={loc} bundledTles={tles} />
                 <GridSpan columns="full">
                   <EventFeed
                     events={events}
