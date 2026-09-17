@@ -80,7 +80,7 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc }) {
                     </Heading>
                   </VStack>
                 </HStack>
-                <Text color="secondary">{pick.desc}</Text>
+                <Text color="secondary"><TermText text={pick.desc} /></Text>
                 <Grid columns={{ minWidth: 220 }} gap={3}>
                   <VStack gap={1}>
                     <Text type="label" color="secondary">
