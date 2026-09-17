@@ -102,14 +102,16 @@ body {
   max-width: none;
 }
 .sg-darksky-map .leaflet-tooltip {
-  background: var(--color-background-popover);
-  border: 1px solid var(--color-border);
+  /* Hardcoded (not theme tokens): Leaflet tooltips must stay readable over the
+     map tiles regardless of theme token resolution. */
+  background: #14172e;
+  border: 1px solid #4a5178;
   border-radius: var(--radius-element);
-  color: var(--color-text-primary);
-  box-shadow: none;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
 }
 .sg-darksky-map .leaflet-tooltip-top:before {
-  border-top-color: var(--color-border);
+  border-top-color: #4a5178;
 }
 
 .sg-hero-img {
