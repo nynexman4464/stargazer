@@ -112,7 +112,9 @@ export default function AuroraPanel({ loc, viewDate }) {
                       content={
                         loc.lat >= 55
                           ? '0-to-9 scale of geomagnetic storm strength. This far north, even a 2 or 3 can put on a show after dark; 5+ means a strong display overhead.'
-                          : '0-to-9 scale of geomagnetic storm strength. 5+ means aurora might reach New England; 7+ means get outside now.'
+                          : loc.lat < 0
+                            ? '0-to-9 scale of geomagnetic storm strength. 5+ can push the aurora far enough north to see; 7+ means get outside and look south now.'
+                            : '0-to-9 scale of geomagnetic storm strength. 5+ means aurora might reach New England; 7+ means get outside now.'
                       }
                     >
                       <Text type="label" color="secondary">
@@ -148,7 +150,9 @@ export default function AuroraPanel({ loc, viewDate }) {
                     content={
                       loc.lat >= 55
                         ? '0-to-9 scale of geomagnetic storm strength. This far north, even a 2 or 3 can put on a show after dark; 5+ means a strong display overhead.'
-                        : '0-to-9 scale of geomagnetic storm strength. 5+ means aurora might reach New England; 7+ means get outside now.'
+                        : loc.lat < 0
+                          ? '0-to-9 scale of geomagnetic storm strength. 5+ can push the aurora far enough north to see; 7+ means get outside and look south now.'
+                          : '0-to-9 scale of geomagnetic storm strength. 5+ means aurora might reach New England; 7+ means get outside now.'
                     }
                   >
                     <Text type="label" color="secondary">

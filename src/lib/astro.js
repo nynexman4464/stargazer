@@ -708,14 +708,26 @@ export function typicalCloud(daily, date) {
 export function auroraVerdict(kp, prob, lat) {
   // Kp runs 0-9, a global gauge of geomagnetic activity.
   const kps = `Kp ${kp.toFixed(1)}`;
+  // Southern-hemisphere observers get mirrored copy: the aurora's ring is
+  // around the South Pole, storms pull it *up* toward the equator, and you
+  // look south — not north.
+  const south = lat < 0;
+  const alat = Math.abs(lat);
+  const pole = south ? 'South' : 'North';
+  const polar = south ? 'Antarctica' : 'the Arctic';
+  const towardYou = south ? 'up' : 'down';
+  const lookDir = south ? 'south' : 'north';
+  const lights = south ? 'southern lights' : 'northern lights';
+  const farSide = south ? 'north' : 'south';
   let verdict, sub, band;
-  if (lat >= 55) {
-    // Auroral zone (e.g. Fairbanks): the observer sits under the aurora's
-    // usual ring, so even modest activity can light it up after dark.
+  if (alat >= 55) {
+    // Auroral zone (e.g. Fairbanks, or Ushuaia down south): the observer
+    // sits under the aurora's usual ring, so even modest activity can light
+    // it up after dark.
     if (kp >= 4) {
       band = 'possible';
-      verdict = 'Good chance — look north after dark.';
-      sub = `${kps} is active, and you're right under the aurora's usual ring around the North Pole. If the sky is dark and clear, look north.`;
+      verdict = `Good chance — look ${lookDir} after dark.`;
+      sub = `${kps} is active, and you're right under the aurora's usual ring around the ${pole} Pole. If the sky is dark and clear, look ${lookDir}.`;
     } else if (kp >= 2) {
       band = 'quiet';
       verdict = 'Possible if the sky cooperates.';
@@ -723,32 +735,32 @@ export function auroraVerdict(kp, prob, lat) {
     } else {
       band = 'quiet';
       verdict = 'Quiet for now.';
-      sub = `${kps} — calm space weather, and the ring overhead is quiet. (Kp runs 0–9; this far north, even a 2 or 3 can put on a show after dark.)`;
+      sub = `${kps} — calm space weather, and the ring overhead is quiet. (Kp runs 0–9; this close to the pole, even a 2 or 3 can put on a show after dark.)`;
     }
   } else if (kp >= 7) {
     band = 'storm';
     verdict = 'Get outside — aurora likely visible from here.';
-    sub = `${kps} is storm-level. The northern lights can reach well south of their usual ring tonight — look north, away from city lights.`;
+    sub = `${kps} is storm-level. The ${lights} can reach well ${farSide} of their usual ring tonight — look ${lookDir}, away from city lights.`;
   } else if (kp >= 5.5) {
     band = 'possible';
-    verdict = 'Possible — watch the northern horizon.';
-    sub = `${kps}. Strong enough to drag the aurora's usual ring around the North Pole down toward you — you might catch a glow low in the north if skies are dark and clear.`;
+    verdict = `Possible — watch the ${lookDir}ern horizon.`;
+    sub = `${kps}. Strong enough to drag the aurora's usual ring around the ${pole} Pole ${towardYou} toward you — you might catch a glow low in the ${lookDir} if skies are dark and clear.`;
   } else if (kp >= 4) {
     band = 'quiet';
     verdict = 'Quiet for now.';
-    sub = `${kps}. The aurora is sticking to its usual ring around the North Pole. Check back when activity picks up.`;
+    sub = `${kps}. The aurora is sticking to its usual ring around the ${pole} Pole. Check back when activity picks up.`;
   } else {
     band = 'quiet';
     verdict = 'Quiet for now.';
-    sub = `${kps} — calm space weather. The aurora's ring is parked around the Arctic, far north of us. (Kp runs 0–9; about 5 is when it gets interesting this far south.)`;
+    sub = `${kps} — calm space weather. The aurora's ring is parked around ${polar}, far ${lookDir} of us. (Kp runs 0–9; about 5 is when it gets interesting this far ${farSide}.)`;
   }
   if (prob !== null && prob !== undefined && prob > 5) {
     sub += ` NOAA's model puts aurora probability near you at ~${Math.round(prob)}%.`;
   }
-  if (lat < 40 && kp < 7) {
+  if (alat < 40 && kp < 7) {
     band = 'south';
-    verdict = 'Too far south tonight.';
-    sub = `${kps}. From here you'd need a serious storm (Kp 8+) to pull the aurora down this far.`;
+    verdict = south ? 'Too far north tonight.' : 'Too far south tonight.';
+    sub = `${kps}. From here you'd need a serious storm (Kp 8+) to pull the aurora ${towardYou} this far.`;
   }
   return { verdict, sub, band };
 }
@@ -757,23 +769,27 @@ export function auroraVerdict(kp, prob, lat) {
  * prediction, never repeating the "right now" wording, and honest about why
  * a middling Kp number still means nothing for mid-latitudes. */
 export function auroraOutlookVerdict(kp, lat) {
-  if (lat >= 55) {
+  const south = lat < 0;
+  const alat = Math.abs(lat);
+  const lookDir = south ? 'south' : 'north';
+  const farSide = south ? 'north' : 'south';
+  if (alat >= 55) {
     // Auroral zone: the observer sits under the aurora's usual ring.
-    if (kp >= 4) return { verdict: 'Good chance — look north after dark.', band: 'possible' };
+    if (kp >= 4) return { verdict: `Good chance — look ${lookDir} after dark.`, band: 'possible' };
     if (kp >= 2) return { verdict: 'Possible if the sky cooperates.', band: 'quiet' };
     return { verdict: 'Nothing expected.', band: 'quiet' };
   }
-  if (lat < 40) {
+  if (alat < 40) {
     if (kp >= 8)
       return {
-        verdict: 'Could reach this far south — get outside.',
+        verdict: `Could reach this far ${farSide} — get outside.`,
         band: 'storm',
       };
-    return { verdict: 'Unlikely to reach this far south.', band: 'quiet' };
+    return { verdict: `Unlikely to reach this far ${farSide}.`, band: 'quiet' };
   }
   if (kp >= 7) return { verdict: 'Could reach us — get outside.', band: 'storm' };
-  if (kp >= 5) return { verdict: 'Might reach us — look north.', band: 'possible' };
-  if (kp >= 3) return { verdict: 'Only visible up north.', band: 'quiet' };
+  if (kp >= 5) return { verdict: `Might reach us — look ${lookDir}.`, band: 'possible' };
+  if (kp >= 3) return { verdict: south ? 'Only visible down south.' : 'Only visible up north.', band: 'quiet' };
   return { verdict: 'Nothing expected for us.', band: 'quiet' };
 }
 
