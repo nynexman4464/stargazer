@@ -21,7 +21,7 @@ function scoreVariant(label) {
   return label === 'Go' ? 'success' : label === 'Maybe' ? 'warning' : 'error';
 }
 
-export default function TonightHero({ pick, score, isTonight, viewDate, histCloud, histCloudLoading }) {
+export default function TonightHero({ pick, score, isTonight, viewDate }) {
   // Everything in this card refers to the pick's own date — never mix
   // tonight's moon/conditions with a future event's. The full current-moon
   // picture lives in the Moon panel below.
@@ -92,14 +92,21 @@ export default function TonightHero({ pick, score, isTonight, viewDate, histClou
                   </VStack>
                   <VStack gap={1}>
                     <Text type="label" color="secondary">
-                      Go score
+                      {score?.estimated ? 'Est. go score' : 'Go score'}
                     </Text>
                     {score ? (
-                      <ProgressBar
-                        value={score.score}
-                        hasValueLabel
-                        variant={scoreVariant(score.label)}
-                      />
+                      <VStack gap={1}>
+                        <ProgressBar
+                          value={score.score}
+                          hasValueLabel
+                          variant={scoreVariant(score.label)}
+                        />
+                        {score.estimated && (
+                          <Text type="supporting">
+                            Historical estimate, not a forecast.
+                          </Text>
+                        )}
+                      </VStack>
                     ) : beyondForecast ? (
                       <Text type="supporting">Too far out — forecasts only reach about two weeks.</Text>
                     ) : (
@@ -119,23 +126,6 @@ export default function TonightHero({ pick, score, isTonight, viewDate, histClou
                           </HStack>
                         ))}
                       </VStack>
-                    ) : beyondForecast ? (
-                      histCloud != null ? (
-                        <VStack gap={1}>
-                          <HStack gap={1} vAlign="center">
-                            <Icon icon={Cloud} size="sm" color="secondary" />
-                            <Text type="supporting">Typically {histCloud}% cloudy</Text>
-                          </HStack>
-                          <Text type="supporting">
-                            20-year average for this time of year — a historical
-                            estimate, not a forecast.
-                          </Text>
-                        </VStack>
-                      ) : histCloudLoading ? (
-                        <Text type="supporting">Checking historical skies…</Text>
-                      ) : (
-                        <Text type="supporting">—</Text>
-                      )
                     ) : (
                       <Text type="supporting">—</Text>
                     )}

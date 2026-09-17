@@ -89,11 +89,14 @@ function EventCard({ ev, score }) {
         {score && (
           <VStack gap={1}>
             <ProgressBar
-              label="Go score"
+              label={score.estimated ? 'Est. go score' : 'Go score'}
               value={score.score}
               hasValueLabel
               variant={scoreVariant(score.label)}
             />
+            {score.estimated && (
+              <Text type="supporting">Historical estimate, not a forecast.</Text>
+            )}
             <HStack gap={3}>
               {score.factors.map((f, i) => (
                 <HStack key={i} gap={1} vAlign="center">

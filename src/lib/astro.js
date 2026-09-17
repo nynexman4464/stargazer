@@ -532,17 +532,16 @@ export async function passScore(pass, mag, loc, cache) {
   return { score, factors, label: score >= 75 ? 'Excellent' : score >= 55 ? 'Good' : 'Poor' };
 }
 
-export async function goScore(ev, loc, cache) {
-  const daysOut = (ev.date - Date.now()) / DAY;
-  if (daysOut > 15) return null; // beyond forecast range
-  const cloud = await cloudCover(ev.date, loc, cache);
+/* Shared scoring core: cloud % (forecast or historical), exact moon math, and
+   tier bonus. cloudText is the human-readable cloud factor line. */
+function scoreCore(ev, cloud, cloudText) {
   const illum = moonIllum(ev.date);
   let score = 55;
   const factors = [];
   if (cloud === null) {
-    factors.push({ icon: 'cloudOff', text: 'forecast unavailable' });
+    factors.push({ icon: 'cloudOff', text: cloudText });
   } else {
-    factors.push({ icon: 'cloud', text: `${cloud}% clouds` });
+    factors.push({ icon: 'cloud', text: cloudText });
     if (cloud < 15) score += 28;
     else if (cloud < 40) score += 14;
     else if (cloud < 70) score -= 8;
@@ -559,6 +558,30 @@ export async function goScore(ev, loc, cache) {
   if (ev.tier === 'expedition') score += 10;
   score = Math.max(5, Math.min(99, Math.round(score)));
   return { score, factors, label: score >= 78 ? 'Go' : score >= 55 ? 'Maybe' : 'Risky' };
+}
+
+export async function goScore(ev, loc, cache) {
+  const daysOut = (ev.date - Date.now()) / DAY;
+  if (daysOut > 15) return null; // beyond forecast range
+  const cloud = await cloudCover(ev.date, loc, cache);
+  return {
+    ...scoreCore(ev, cloud, cloud === null ? 'forecast unavailable' : `${cloud}% clouds`),
+    estimated: false,
+  };
+}
+
+/* Estimated go-score for dates beyond the forecast range: the same scoring,
+   but the cloud term comes from the 20-year historical climatology
+   (loadCloudClimatology) instead of a forecast. The moon term is exact for
+   any date. Returns { ...score, estimated: true } — callers must label it
+   as an estimate, never as a forecast. */
+export function estimatedGoScore(ev, climDaily) {
+  const cloud = typicalCloud(climDaily, ev.date);
+  if (cloud === null) return null;
+  return {
+    ...scoreCore(ev, cloud, `typically ${cloud}% cloudy`),
+    estimated: true,
+  };
 }
 
 /* ============================== cloud climatology ============================== */

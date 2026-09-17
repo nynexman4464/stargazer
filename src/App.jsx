@@ -27,8 +27,8 @@ import {
   loadTles,
   normalizeEvents,
   goScore,
+  estimatedGoScore,
   loadCloudClimatology,
-  typicalCloud,
   startOfDay,
 } from './lib/astro.js';
 
@@ -95,6 +95,27 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
+      /* Estimated scores first: one climatology fetch, then pure math for
+         every event beyond the forecast range. These land before the slower
+         forecast fetches below, so far-future cards/hero populate quickly. */
+      let climDaily = null;
+      try {
+        climDaily = await loadCloudClimatology(loc);
+      } catch {
+        /* historical data unavailable — forecast path below is unaffected */
+      }
+      if (cancelled) return;
+      if (climDaily) {
+        const est = {};
+        for (const e of events) {
+          if ((e.date - Date.now()) / DAY > 15) {
+            const sc = estimatedGoScore(e, climDaily);
+            if (sc) est[e.id] = sc;
+          }
+        }
+        if (!cancelled) setScores((prev) => ({ ...est, ...prev }));
+      }
+      /* Forecast scores for the hero candidates (existing behavior). */
       let targets;
       if (anchorDay) {
         const start = anchorDay.getTime();
@@ -196,36 +217,6 @@ export default function App() {
     null;
   const pickIsTonight = !anchorDay && !!pick && heroCands.includes(pick);
 
-  /* ---- cloud climatology (historical typical cloudiness) ----
-     For a fast-forwarded hero pick beyond the ~15-day forecast, there is no
-     go-score; instead we show the historical typical cloud cover for that
-     time of year, clearly labeled as an estimate, not a forecast. */
-  const [climDaily, setClimDaily] = useState(null);
-  const [climFailed, setClimFailed] = useState(false);
-  const pickBeyondForecast = !!pick && (pick.date - Date.now()) / DAY > 15;
-  useEffect(() => {
-    setClimDaily(null);
-    setClimFailed(false);
-    if (!anchorDay || !pickBeyondForecast) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const daily = await loadCloudClimatology(loc);
-        if (!cancelled) setClimDaily(daily);
-      } catch {
-        if (!cancelled) setClimFailed(true);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // pick identity is stable (same event object) unless the chosen event changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [anchorDay, loc, pick]);
-  const histCloud =
-    pickBeyondForecast && pick ? typicalCloud(climDaily, pick.date) : null;
-  const histCloudLoading = pickBeyondForecast && climDaily == null && !climFailed;
-
   return (
     <>
       <AppShell
@@ -255,8 +246,6 @@ export default function App() {
                     score={pick ? scores[pick.id] : null}
                     isTonight={pickIsTonight}
                     viewDate={viewDate}
-                    histCloud={histCloud}
-                    histCloudLoading={histCloudLoading}
                   />
                 </GridSpan>
                 <AuroraPanel loc={loc} viewDate={viewDate} />
