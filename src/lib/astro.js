@@ -201,9 +201,8 @@ export async function loadJSON(path) {
 
 /* TLE backend cache (AWS Lambda + S3, see cloudformation/tle-cache.yaml).
  * When set, the app fetches fresh TLEs from this endpoint at boot; the
- * bundled data/tles.json file remains the offline fallback. Empty until
- * the stack is deployed — set it to the stack's FunctionUrl output. */
-export const TLE_ENDPOINT = '';
+ * bundled data/tles.json file remains the offline fallback. */
+export const TLE_ENDPOINT = 'https://5qqsnsuufj6mxadrc4g67vqohe0vkkgg.lambda-url.us-east-1.on.aws/';
 
 export async function loadTles(bundledPath) {
   if (TLE_ENDPOINT) {

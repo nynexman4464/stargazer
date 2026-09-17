@@ -167,6 +167,21 @@ Resources:
       Principal: scheduler.amazonaws.com
       SourceArn: !GetAtt TleRefreshSchedule.Arn
 
+  TleFunctionPublicUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref TleFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: '*'
+      FunctionUrlAuthType: NONE
+  TleFunctionPublicInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref TleFunction
+      Action: lambda:InvokeFunction
+      Principal: '*'
+      InvokedViaFunctionUrl: true
+
   TleRefreshSchedule:
     Type: AWS::Scheduler::Schedule
     Properties:
