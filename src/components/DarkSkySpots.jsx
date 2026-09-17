@@ -7,6 +7,7 @@ import { Tooltip } from '@astryxdesign/core/Tooltip';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { List, ListItem } from '@astryxdesign/core/List';
 import { haversine } from '../lib/astro.js';
+import DarkSkyMap from './DarkSkyMap.jsx';
 
 const BORTLE_EXPLAINER =
   'Bortle scale: 1 = pristine dark sky, 9 = inner city. Lower is darker.';
@@ -34,6 +35,15 @@ export default function DarkSkySpots({ spots, loc, away }) {
             </Text>
           )}
         </VStack>
+        {spots.length > 0 && (
+          <VStack gap={1}>
+            <DarkSkyMap spots={withDist} loc={loc} />
+            <Text type="supporting">
+              Glow is city lights (NASA Black Marble) — the darker the area, the darker the
+              sky. Blue dots are the drives below; the gold dot is you.
+            </Text>
+          </VStack>
+        )}
         {!spots.length ? (
           <VStack gap={2}>
             <Skeleton height={64} />
