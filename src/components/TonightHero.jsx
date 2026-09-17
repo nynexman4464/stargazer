@@ -8,7 +8,7 @@ import { Token } from '@astryxdesign/core/Token';
 import { ProgressBar } from '@astryxdesign/core/ProgressBar';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
-import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon } from 'lucide-react';
+import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Eye, Telescope } from 'lucide-react';
 import Starfield from './Starfield.jsx';
 import { TermText } from './Term.jsx';
 import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eventImage, eclipseVisibleFrom } from '../lib/astro.js';
@@ -16,7 +16,7 @@ import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eve
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
 const TYPE_ICON = { shower: Sparkles, eclipse: Eclipse, planet: Orbit, comet: Star };
-const FACTOR_ICON = { cloud: Cloud, cloudOff: CloudOff, moon: Moon };
+const FACTOR_ICON = { cloud: Cloud, cloudOff: CloudOff, moon: Moon, eye: Eye, telescope: Telescope };
 
 function scoreVariant(label) {
   return label === 'Go' ? 'success' : label === 'Maybe' ? 'warning' : 'error';

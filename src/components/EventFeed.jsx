@@ -17,7 +17,7 @@ import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { useMediaQuery } from '@astryxdesign/core/hooks';
-import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Telescope, Map, CalendarDays, Maximize2 } from 'lucide-react';
+import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Eye, Telescope, Map, CalendarDays, Maximize2 } from 'lucide-react';
 import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage, eclipseVisibleFrom } from '../lib/astro.js';
 import MapLightbox from './MapLightbox.jsx';
 import { TermText } from './Term.jsx';
@@ -25,7 +25,7 @@ import { TermText } from './Term.jsx';
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
 const TYPE_ICON = { shower: Sparkles, eclipse: Eclipse, planet: Orbit, comet: Star };
-const FACTOR_ICON = { cloud: Cloud, cloudOff: CloudOff, moon: Moon };
+const FACTOR_ICON = { cloud: Cloud, cloudOff: CloudOff, moon: Moon, eye: Eye, telescope: Telescope };
 
 function scoreVariant(label) {
   return label === 'Go' ? 'success' : label === 'Maybe' ? 'warning' : 'error';

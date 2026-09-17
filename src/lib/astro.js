@@ -554,6 +554,27 @@ function scoreCore(ev, cloud, cloudText) {
     else if (illum > 0.5) score -= 10;
     else if (illum < 0.25) score += 6;
   }
+  /* Brightness: a target you can't see with the naked eye from a lit backyard
+     is a lesser candidate. ev.mag is the limiting magnitude (dimmest body
+     that matters). Bands assume suburban skies — about mag 4 is the
+     naked-eye limit from a place like Medford. */
+  if (Number.isFinite(ev.mag)) {
+    const m = ev.mag;
+    const magLabel = `magnitude ${m}`;
+    if (m <= 4) {
+      score += 4;
+      factors.push({ icon: 'eye', text: `${magLabel} — bright, an easy naked-eye target` });
+    } else if (m <= 6) {
+      score -= 4;
+      factors.push({ icon: 'eye', text: `${magLabel} — too faint for the naked eye from town; needs dark skies or binoculars` });
+    } else if (m <= 10) {
+      score -= 10;
+      factors.push({ icon: 'telescope', text: `${magLabel} — needs binoculars or a telescope` });
+    } else {
+      score -= 18;
+      factors.push({ icon: 'telescope', text: `${magLabel} — telescope only` });
+    }
+  }
   if (ev.tier === 'drive') score += 6;
   if (ev.tier === 'expedition') score += 10;
   score = Math.max(5, Math.min(99, Math.round(score)));

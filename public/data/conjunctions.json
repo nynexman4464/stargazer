@@ -1,5 +1,5 @@
 {
-  "_note": "Close planetary pairings, groupings, and oppositions worth observing, late 2026 through 2027. Conjunction dates follow the JPL DE440-derived tables (in-the-sky.org); local-date discrepancies are noted where sources differ. Opposition/conjunction magnitudes added 2026-09-17 from in-the-sky.org (JPL DE440) and EarthSky; Uranus 2027 at ~5.7 per Sky & Telescope.",
+  "_note": "Close planetary pairings, groupings, and oppositions worth observing, late 2026 through 2027. Conjunction dates follow the JPL DE440-derived tables (in-the-sky.org); local-date discrepancies are noted where sources differ. Opposition/conjunction magnitudes added 2026-09-17 from in-the-sky.org (JPL DE440) and EarthSky; Uranus 2027 at ~5.7 per Sky & Telescope. Each event carries mag = limiting magnitude (dimmest body that matters; for pairings the fainter planet). Used by the go-score brightness factor: targets past the suburban naked-eye limit score lower.",
   "_source": [
     "in-the-sky.org conjunction tables (JPL DE440 ephemeris)",
     "Hong Kong Observatory — 2027 astronomical phenomena",
@@ -16,7 +16,8 @@
       "detail": "Nearest and brightest for the year at about magnitude 7.8. A binocular/telescope target in Aquarius.",
       "id": "neptune-opp-2026",
       "kind": "opposition",
-      "title": "Neptune at opposition"
+      "title": "Neptune at opposition",
+      "mag": 7.8
     },
     {
       "bodies": [
@@ -26,7 +27,8 @@
       "detail": "Saturn's closest and brightest of 2026 at about magnitude 0.3 — prime ring-viewing season.",
       "id": "saturn-opp-2026",
       "kind": "opposition",
-      "title": "Saturn at opposition"
+      "title": "Saturn at opposition",
+      "mag": 0.3
     },
     {
       "bodies": [
@@ -37,7 +39,8 @@
       "detail": "The two planets pass about 1.2° apart in Leo, near Regulus, in the morning sky — Jupiter at magnitude -2.1, Mars at magnitude 0.7. Closest approach Nov 15, 02:42 UTC (≈9:42 PM EST Nov 14); some listings date the conjunction Nov 16.",
       "id": "mars-jupiter-2026",
       "kind": "conjunction",
-      "title": "Mars–Jupiter conjunction"
+      "title": "Mars–Jupiter conjunction",
+      "mag": 0.7
     },
     {
       "bodies": [
@@ -47,7 +50,8 @@
       "detail": "Nearest and brightest for the year at about magnitude 5.6 — a binocular target, and near naked-eye limit under dark skies.",
       "id": "uranus-opp-2026",
       "kind": "opposition",
-      "title": "Uranus at opposition"
+      "title": "Uranus at opposition",
+      "mag": 5.6
     },
     {
       "bodies": [
@@ -57,7 +61,8 @@
       "detail": "Jupiter's closest and brightest of 2027 at about magnitude -2.5 — peak season for cloud belts and the Galilean moons.",
       "id": "jupiter-opp-2027",
       "kind": "opposition",
-      "title": "Jupiter at opposition"
+      "title": "Jupiter at opposition",
+      "mag": -2.5
     },
     {
       "bodies": [
@@ -67,7 +72,8 @@
       "detail": "Mars's closest and brightest of 2027 at about magnitude -1.2 — best telescopic views of the Red Planet for the year.",
       "id": "mars-opp-2027",
       "kind": "opposition",
-      "title": "Mars at opposition"
+      "title": "Mars at opposition",
+      "mag": -1.2
     },
     {
       "bodies": [
@@ -78,7 +84,8 @@
       "detail": "The two planets stand just 0°36′ apart, about 26° west of the Sun — a fine dawn pairing, with Venus at magnitude -3.9 and Saturn at magnitude 0.6.",
       "id": "venus-saturn-2027",
       "kind": "conjunction",
-      "title": "Venus–Saturn conjunction"
+      "title": "Venus–Saturn conjunction",
+      "mag": 0.6
     },
     {
       "bodies": [
@@ -88,7 +95,8 @@
       "detail": "Neptune's closest and brightest of 2027 at about magnitude 7.8. A binocular/telescope target.",
       "id": "neptune-opp-2027",
       "kind": "opposition",
-      "title": "Neptune at opposition"
+      "title": "Neptune at opposition",
+      "mag": 7.8
     },
     {
       "bodies": [
@@ -98,7 +106,8 @@
       "detail": "Saturn's closest and brightest of 2027 at about magnitude 0.1 — prime ring-viewing season.",
       "id": "saturn-opp-2027",
       "kind": "opposition",
-      "title": "Saturn at opposition"
+      "title": "Saturn at opposition",
+      "mag": 0.1
     },
     {
       "bodies": [
@@ -109,7 +118,8 @@
       "detail": "The two planets stand just 0°19′ apart, about 27° east of the Sun — a striking dusk pairing, with Venus at magnitude -3.9 and Mars at magnitude 1.3.",
       "id": "venus-mars-2027",
       "kind": "conjunction",
-      "title": "Venus–Mars conjunction"
+      "title": "Venus–Mars conjunction",
+      "mag": 1.3
     },
     {
       "bodies": [
@@ -119,7 +129,8 @@
       "detail": "Uranus's closest and brightest of 2027 at about magnitude 5.7 — a binocular target, near naked-eye limit under dark skies.",
       "id": "uranus-opp-2027",
       "kind": "opposition",
-      "title": "Uranus at opposition"
+      "title": "Uranus at opposition",
+      "mag": 5.7
     }
   ]
 }
