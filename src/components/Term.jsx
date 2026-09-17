@@ -82,23 +82,31 @@ const MAG_REFS = [
 const fmtMag = (m) => `${m > 0 ? '+' : ''}${m}`;
 
 /* Plain-language comparison of a magnitude against familiar objects, plus
-   what it takes to see it. */
-function magGuide(m) {
+   what it takes to see it. `exclude` skips reference labels containing it
+   (case-insensitive) — e.g. an ISS pass shouldn't be compared to the ISS. */
+function magGuide(m, exclude) {
+  const refs = exclude
+    ? MAG_REFS.filter(([, label]) => !label.toLowerCase().includes(exclude.toLowerCase()))
+    : MAG_REFS;
   let compare;
-  const nearest = MAG_REFS.reduce((a, b) =>
-    Math.abs(b[0] - m) < Math.abs(a[0] - m) ? b : a,
-  );
-  if (Math.abs(nearest[0] - m) <= 0.4) {
-    compare = `About as bright as ${nearest[1]} (${fmtMag(nearest[0])}).`;
+  if (refs.length === 0) {
+    compare = '';
   } else {
-    const brighter = [...MAG_REFS].reverse().find(([v]) => v < m);
-    const dimmer = MAG_REFS.find(([v]) => v > m);
-    if (brighter && dimmer) {
-      compare = `Dimmer than ${brighter[1]} (${fmtMag(brighter[0])}), brighter than ${dimmer[1]} (${fmtMag(dimmer[0])}).`;
-    } else if (dimmer) {
-      compare = `Brighter than ${dimmer[1]} (${fmtMag(dimmer[0])}) — one of the brightest things in the sky.`;
+    const nearest = refs.reduce((a, b) =>
+      Math.abs(b[0] - m) < Math.abs(a[0] - m) ? b : a,
+    );
+    if (Math.abs(nearest[0] - m) <= 0.4) {
+      compare = `About as bright as ${nearest[1]} (${fmtMag(nearest[0])}).`;
     } else {
-      compare = `Dimmer than ${brighter[1]} (${fmtMag(brighter[0])}) — very faint.`;
+      const brighter = [...refs].reverse().find(([v]) => v < m);
+      const dimmer = refs.find(([v]) => v > m);
+      if (brighter && dimmer) {
+        compare = `Dimmer than ${brighter[1]} (${fmtMag(brighter[0])}), brighter than ${dimmer[1]} (${fmtMag(dimmer[0])}).`;
+      } else if (dimmer) {
+        compare = `Brighter than ${dimmer[1]} (${fmtMag(dimmer[0])}) — one of the brightest things in the sky.`;
+      } else {
+        compare = `Dimmer than ${brighter[1]} (${fmtMag(brighter[0])}) — very faint.`;
+      }
     }
   }
   let verdict;
@@ -110,10 +118,10 @@ function magGuide(m) {
 
 /* A magnitude reading with a value-aware hover: what the scale means, how
    this brightness compares to familiar objects, and what it takes to see. */
-export function Mag({ value, children }) {
+export function Mag({ value, children, exclude }) {
   const m = Number(value);
   if (!Number.isFinite(m)) return children ?? null;
-  const { compare, verdict } = magGuide(m);
+  const { compare, verdict } = magGuide(m, exclude);
   return (
     <HoverCard
       label={`Magnitude ${fmtMag(m)}: brightness guide`}
@@ -124,7 +132,7 @@ export function Mag({ value, children }) {
             Brightness scale — and it runs backwards: lower (or negative)
             means brighter.
           </Text>
-          <Text type="supporting">{compare}</Text>
+          {compare ? <Text type="supporting">{compare}</Text> : null}
           <Text type="supporting">{verdict}</Text>
         </VStack>
       }

@@ -168,7 +168,7 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
                       description={
                         <Text type="supporting">
                           {compass(p.startAz)} → {compass(p.endAz)} · peaks {Math.round(p.maxEl)}°
-                          at {fmtTime(p.maxT)} · <Mag value={p.mag}>mag {p.mag}</Mag> ({brightnessWords(p.mag)}) · {dur} min · score {p.score} — {p.label.toLowerCase()}
+                          at {fmtTime(p.maxT)} · <Mag value={p.mag} exclude={satName}>mag {p.mag}</Mag> ({brightnessWords(p.mag)}) · {dur} min · score {p.score} — {p.label.toLowerCase()}
                         </Text>
                       }
                       endContent={
