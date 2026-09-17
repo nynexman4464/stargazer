@@ -8,11 +8,14 @@ import { createRoot } from 'react-dom/client';
 import { Theme } from '@astryxdesign/core/theme';
 import { stargazerTheme } from './theme/stargazer/stargazer.js';
 import App from './App.jsx';
+import ErrorBoundary from './components/ErrorBoundary.jsx';
 
 createRoot(document.getElementById('root')).render(
   <React.StrictMode>
     <Theme theme={stargazerTheme} mode="dark">
-      <App />
+      <ErrorBoundary>
+        <App />
+      </ErrorBoundary>
     </Theme>
   </React.StrictMode>,
 );
