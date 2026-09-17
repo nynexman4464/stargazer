@@ -10,7 +10,7 @@ import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon } from 'lucide-react';
 import Starfield from './Starfield.jsx';
-import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eventImage } from '../lib/astro.js';
+import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eventImage, eclipseVisibleFrom } from '../lib/astro.js';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
@@ -21,7 +21,9 @@ function scoreVariant(label) {
   return label === 'Go' ? 'success' : label === 'Maybe' ? 'warning' : 'error';
 }
 
-export default function TonightHero({ pick, score, isTonight, viewDate }) {
+export default function TonightHero({ pick, score, isTonight, viewDate, loc }) {
+  const notVisible =
+    pick && pick.tier === 'expedition' && !eclipseVisibleFrom(pick, loc);
   // Everything in this card refers to the pick's own date — never mix
   // tonight's moon/conditions with a future event's. The full current-moon
   // picture lives in the Moon panel below.
@@ -107,6 +109,10 @@ export default function TonightHero({ pick, score, isTonight, viewDate }) {
                           </Text>
                         )}
                       </VStack>
+                    ) : notVisible ? (
+                      <Text type="supporting">
+                        Not visible from {loc?.name || 'your location'} — worth traveling for.
+                      </Text>
                     ) : beyondForecast ? (
                       <Text type="supporting">Too far out — forecasts only reach about two weeks.</Text>
                     ) : (

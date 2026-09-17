@@ -109,7 +109,7 @@ export default function App() {
         const est = {};
         for (const e of events) {
           if ((e.date - Date.now()) / DAY > 15) {
-            const sc = estimatedGoScore(e, climDaily);
+            const sc = estimatedGoScore(e, climDaily, loc);
             if (sc) est[e.id] = sc;
           }
         }
@@ -246,6 +246,7 @@ export default function App() {
                     score={pick ? scores[pick.id] : null}
                     isTonight={pickIsTonight}
                     viewDate={viewDate}
+                    loc={loc}
                   />
                 </GridSpan>
                 <AuroraPanel loc={loc} viewDate={viewDate} />
@@ -265,6 +266,7 @@ export default function App() {
                     range={range}
                     setRange={setRange}
                     anchor={anchorDay}
+                    loc={loc}
                   />
                 </GridSpan>
                 <GridSpan columns="full">

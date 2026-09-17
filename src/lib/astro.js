@@ -560,7 +560,25 @@ function scoreCore(ev, cloud, cloudText) {
   return { score, factors, label: score >= 78 ? 'Go' : score >= 55 ? 'Maybe' : 'Risky' };
 }
 
+/* Expedition-tier events are total solar eclipses: only worth a go-score when
+   the eclipse is at all visible (even partially) from the viewer's location.
+   Each total solar eclipse record carries `vis`, a generous lat/lon bounding
+   box covering the full partial-visibility zone (sources documented in the
+   data file's _note). Missing data or location -> visible: a score is never
+   hidden without evidence. */
+export function eclipseVisibleFrom(ev, loc) {
+  const vis = ev.vis;
+  if (!vis || !loc || loc.lat == null || loc.lon == null) return true;
+  return (
+    loc.lat >= vis.lat[0] &&
+    loc.lat <= vis.lat[1] &&
+    loc.lon >= vis.lon[0] &&
+    loc.lon <= vis.lon[1]
+  );
+}
+
 export async function goScore(ev, loc, cache) {
+  if (ev.tier === 'expedition' && !eclipseVisibleFrom(ev, loc)) return null;
   const daysOut = (ev.date - Date.now()) / DAY;
   if (daysOut > 15) return null; // beyond forecast range
   const cloud = await cloudCover(ev.date, loc, cache);
@@ -575,7 +593,8 @@ export async function goScore(ev, loc, cache) {
    (loadCloudClimatology) instead of a forecast. The moon term is exact for
    any date. Returns { ...score, estimated: true } — callers must label it
    as an estimate, never as a forecast. */
-export function estimatedGoScore(ev, climDaily) {
+export function estimatedGoScore(ev, climDaily, loc) {
+  if (ev.tier === 'expedition' && !eclipseVisibleFrom(ev, loc)) return null;
   const cloud = typicalCloud(climDaily, ev.date);
   if (cloud === null) return null;
   return {

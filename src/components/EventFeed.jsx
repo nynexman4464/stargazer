@@ -18,7 +18,7 @@ import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { useMediaQuery } from '@astryxdesign/core/hooks';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Telescope, Map, CalendarDays, Maximize2 } from 'lucide-react';
-import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage } from '../lib/astro.js';
+import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage, eclipseVisibleFrom } from '../lib/astro.js';
 import MapLightbox from './MapLightbox.jsx';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
@@ -30,9 +30,10 @@ function scoreVariant(label) {
   return label === 'Go' ? 'success' : label === 'Maybe' ? 'warning' : 'error';
 }
 
-function EventCard({ ev, score }) {
+function EventCard({ ev, score, loc }) {
   const [mapOpen, setMapOpen] = useState(false);
   const [lightbox, setLightbox] = useState(false);
+  const notVisible = ev.tier === 'expedition' && !eclipseVisibleFrom(ev, loc);
   const mapCaption = ev.solar
     ? 'Dark band: where the total or annular eclipse is visible. Map: NASA.'
     : 'White area: where the eclipse is visible. Map: NASA.';
@@ -137,11 +138,16 @@ function EventCard({ ev, score }) {
             </HStack>
           </VStack>
         )}
+        {!score && notVisible && (
+          <Text type="supporting">
+            Not visible from {loc?.name || 'your location'} — worth traveling for.
+          </Text>
+        )}
       </VStack>
   );
 }
 
-export default function EventFeed({ events, scores, loaded, tier, setTier, type, setType, range, setRange, anchor }) {
+export default function EventFeed({ events, scores, loaded, tier, setTier, type, setType, range, setRange, anchor, loc }) {
   // Responsive contract: below 640px the filter bar wraps onto multiple lines
   // and the event cards stack in a single column.
   const isNarrow = useMediaQuery('(max-width: 640px)');
@@ -297,7 +303,7 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
           <VStack gap={3}>
             <Grid columns={isNarrow ? 1 : { minWidth: 300 }} gap={3}>
               {shown.map((e) => (
-                <EventCard key={e.id} ev={e} score={scores[e.id]} />
+                <EventCard key={e.id} ev={e} score={scores[e.id]} loc={loc} />
               ))}
             </Grid>
             {remaining > 0 && (

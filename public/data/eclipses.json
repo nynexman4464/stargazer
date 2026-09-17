@@ -1,5 +1,5 @@
 {
-  "_note": "new_england = visible from Boston/New England per timeanddate's Boston eclipse listings, cross-checked against NASA path/region data. Lunar eclipses are visible everywhere on Earth's night side; per-event global maps live in NASA's lunar eclipse catalog (see _source). Magnitude figures are Boston-local where stated.",
+  "_note": "new_england = visible from Boston/New England per timeanddate's Boston eclipse listings, cross-checked against NASA path/region data. Lunar eclipses are visible everywhere on Earth's night side; per-event global maps live in NASA's lunar eclipse catalog (see _source). Magnitude figures are Boston-local where stated. vis = generous lat/lon bounding box of the full partial-visibility zone for total solar eclipses (used to hide go-scores where the eclipse isn't visible at all; boxes intentionally generous so a score is never hidden without evidence). 2027-08-02 partial zone per Wikipedia (eastern Maine to South/SE Asia); 2028-07-22 per Wikipedia (SE Asia, Australia, Oceania); 2030-11-25 per Wikipedia + space.com (central/southern Africa, Antarctica, Australia, Indonesia, NZ).",
   "_source": [
     "NASA Goddard solar eclipse catalog (eclipse.gsfc.nasa.gov/solar.html) and 2021–2040 path table (SEgoogle2021.html)",
     "NASA-derived solar eclipse list (List of solar eclipses in the 21st century)",
@@ -160,7 +160,17 @@
       "new_england": false,
       "regions": "Total: Spain, Morocco, Algeria, Tunisia, Libya, Egypt, Saudi Arabia, Yemen, Somalia.",
       "type": "total",
-      "map": "/img/eclipse-maps/solar-2027-08-02.gif"
+      "map": "/img/eclipse-maps/solar-2027-08-02.gif",
+      "vis": {
+        "lat": [
+          -25,
+          70
+        ],
+        "lon": [
+          -70,
+          125
+        ]
+      }
     },
     {
       "date": "2028-01-26",
@@ -178,7 +188,17 @@
       "new_england": false,
       "regions": "Total: Australia and New Zealand.",
       "type": "total",
-      "map": "/img/eclipse-maps/solar-2028-07-22.gif"
+      "map": "/img/eclipse-maps/solar-2028-07-22.gif",
+      "vis": {
+        "lat": [
+          -50,
+          22
+        ],
+        "lon": [
+          92,
+          180
+        ]
+      }
     },
     {
       "date": "2029-01-14",
@@ -232,7 +252,17 @@
       "new_england": false,
       "regions": "Total: Namibia, Botswana, South Africa, Lesotho, Australia.",
       "type": "total",
-      "map": "/img/eclipse-maps/solar-2030-11-25.gif"
+      "map": "/img/eclipse-maps/solar-2030-11-25.gif",
+      "vis": {
+        "lat": [
+          -65,
+          18
+        ],
+        "lon": [
+          -40,
+          180
+        ]
+      }
     },
     {
       "date": "2031-05-21",
