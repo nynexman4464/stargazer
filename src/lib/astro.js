@@ -751,6 +751,40 @@ export async function loadAuroraOutlook(loc) {
   }
 }
 
+/* Max predicted Kp for the night of the given date (6pm–6am observer-local),
+ * from NOAA's 3-day Kp forecast. Returns { kp, verdict, band }, or null when
+ * the forecast doesn't reach that night. */
+export async function loadAuroraForecastNight(loc, date) {
+  try {
+    const [fr, off] = await Promise.all([
+      fetch('https://services.swpc.noaa.gov/products/noaa-planetary-k-index-forecast.json'),
+      utcOffsetSeconds(loc),
+    ]);
+    if (off === null || off === undefined) return null;
+    const j = await fr.json();
+    const pred = j
+      .filter((x) => x.observed === 'predicted' && x.kp !== null && x.kp !== undefined)
+      .map((x) => ({ time: new Date(`${x.time_tag}Z`), kp: parseFloat(x.kp) }));
+    if (!pred.length) return null;
+
+    // Night window on the shifted clock, where UTC getters read the
+    // observer's wall time (same trick as loadAuroraOutlook).
+    const midnightL = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
+    const start = midnightL + 18 * 3600e3;
+    const end = midnightL + 30 * 3600e3;
+    const inWin = pred.filter((p) => {
+      const tL = p.time.getTime() + off * 1000;
+      return tL >= start && tL < end;
+    });
+    if (!inWin.length) return null;
+    const kp = Math.max(...inWin.map((p) => p.kp));
+    const v = auroraOutlookVerdict(kp, loc.lat);
+    return { kp, verdict: v.verdict, band: v.band };
+  } catch {
+    return null;
+  }
+}
+
 /* ============================== satellite passes ============================== */
 /* --- CelesTrak TLE fetching, hardened ---
  * CelesTrak throttles aggressively per IP: bursts of requests sometimes hang

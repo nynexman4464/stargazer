@@ -106,6 +106,7 @@ export default function MoonPanel({ asOf }) {
               <Token label={fullMoonName(fullDate)} color="default" />
               {bloodMoon && <Token label="Blood Moon" color="red" />}
             </HStack>
+            <Text type="supporting">{fmtDate(fullDate)}</Text>
             {bloodMoon && (
               <Text type="supporting">
                 A total lunar eclipse that night — the moon will glow red where it's dark.
