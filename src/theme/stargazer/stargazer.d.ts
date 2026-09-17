@@ -6,6 +6,7 @@
  * Core: @astryxdesign/core@0.6.2
  */
 
+/// <reference path="./stargazer.variants.d.ts" />
 import type { DefinedTheme } from '@astryxdesign/core/theme';
 import type { IconRegistry } from '@astryxdesign/core/Icon';
 export declare const stargazerIconRegistry: IconRegistry;

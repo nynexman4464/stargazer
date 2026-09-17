@@ -60,7 +60,7 @@ export const stargazerTheme = {
     "--text-code-size": "var(--font-size-base)",
     "--text-code-weight": "var(--font-weight-normal)",
     "--text-code-leading": "1.5",
-    "--text-supporting-size": "12px",
+    "--text-supporting-size": "var(--font-size-sm)",
     "--text-supporting-weight": "var(--font-weight-normal)",
     "--text-supporting-leading": "1.5385",
     "--text-display-1-size": "var(--font-size-5xl)",
@@ -72,39 +72,32 @@ export const stargazerTheme = {
     "--text-display-3-size": "var(--font-size-3xl)",
     "--text-display-3-weight": "var(--font-weight-normal)",
     "--text-display-3-leading": "1.2308",
-    "--radius-none": "0px",
-    "--radius-inner": "0px",
-    "--radius-element": "0px",
-    "--radius-container": "0px",
-    "--radius-page": "0px",
-    "--radius-chat": "0px",
-    "--radius-full": "0px",
-    "--duration-fast-min": "80ms",
-    "--duration-fast": "100ms",
-    "--duration-fast-max": "125ms",
-    "--duration-medium-min": "200ms",
-    "--duration-medium": "250ms",
-    "--duration-medium-max": "315ms",
-    "--duration-slow-min": "480ms",
-    "--duration-slow": "600ms",
-    "--duration-slow-max": "750ms",
+    "--duration-fast-min": "95ms",
+    "--duration-fast": "125ms",
+    "--duration-fast-max": "165ms",
+    "--duration-medium-min": "225ms",
+    "--duration-medium": "300ms",
+    "--duration-medium-max": "400ms",
+    "--duration-slow-min": "525ms",
+    "--duration-slow": "700ms",
+    "--duration-slow-max": "935ms",
     "--font-family-body": "Poppins, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
     "--font-family-heading": "Poppins, -apple-system, BlinkMacSystemFont, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
     "--font-family-code": "\"JetBrains Mono\", \"SF Mono\", Monaco, Consolas, monospace",
-    "--color-syntax-keyword": "light-dark(#615a7a, #aea6ca)",
-    "--color-syntax-string": "light-dark(#586242, #a5af8b)",
-    "--color-syntax-comment": "light-dark(#5e5e5e, #ababab)",
-    "--color-syntax-number": "light-dark(#775843, #c8a48c)",
-    "--color-syntax-function": "light-dark(#39637d, #87b0cd)",
-    "--color-syntax-type": "light-dark(#615a7a, #aea6ca)",
-    "--color-syntax-variable": "light-dark(#5e5e5e, #ababab)",
-    "--color-syntax-operator": "light-dark(#5e5e5e, #ababab)",
-    "--color-syntax-constant": "light-dark(#775843, #c8a48c)",
-    "--color-syntax-tag": "light-dark(#7f5351, #d19f9d)",
-    "--color-syntax-attribute": "light-dark(#6c5c3e, #bca987)",
-    "--color-syntax-property": "light-dark(#3c6755, #87b5a1)",
-    "--color-syntax-punctuation": "light-dark(#5e5e5e, #ababab)",
-    "--color-syntax-background": "light-dark(#FFF6ED, #190f00)",
+    "--color-syntax-keyword": "light-dark(#6b187c, #efa8ff)",
+    "--color-syntax-string": "light-dark(#0b5615, #a4d6a3)",
+    "--color-syntax-comment": "light-dark(#6a6a6a, #9e9e9e)",
+    "--color-syntax-number": "light-dark(#733100, #ffb37e)",
+    "--color-syntax-function": "light-dark(#00458c, #a1caff)",
+    "--color-syntax-type": "light-dark(#6b187c, #efa8ff)",
+    "--color-syntax-variable": "light-dark(#111111, #e2e2e2)",
+    "--color-syntax-operator": "light-dark(#6a6a6a, #9e9e9e)",
+    "--color-syntax-constant": "light-dark(#733100, #ffb37e)",
+    "--color-syntax-tag": "light-dark(#8a0011, #ffaea7)",
+    "--color-syntax-attribute": "light-dark(#584400, #eec448)",
+    "--color-syntax-property": "light-dark(#005348, #90d7c8)",
+    "--color-syntax-punctuation": "light-dark(#6a6a6a, #9e9e9e)",
+    "--color-syntax-background": "light-dark(#ffffff, #111111)",
     "--spacing-0-5": "3px",
     "--spacing-1": "6px",
     "--spacing-1-5": "9px",
@@ -118,92 +111,126 @@ export const stargazerTheme = {
     "--size-element-sm": "32px",
     "--size-element-md": "40px",
     "--size-element-lg": "48px",
-    "--color-accent": "light-dark(#2d241b, #EDEFFC)",
-    "--color-accent-muted": "light-dark(#2d241b14, #EDEFFC20)",
-    "--color-neutral": "light-dark(#2d241b10, #EDEFFC1A)",
-    "--color-background-surface": "light-dark(#FFFFFF, #16182b)",
-    "--color-background-body": "light-dark(#CCCFFA, #0e0f1a)",
-    "--color-overlay": "light-dark(#2d241b80, #0a0b14CC)",
-    "--color-overlay-hover": "light-dark(#2d241b0D, #EDEFFC0D)",
-    "--color-overlay-pressed": "light-dark(#2d241b1A, #EDEFFC1A)",
-    "--color-background-muted": "light-dark(#ede0d4, #1f2238)",
-    "--color-text-primary": "light-dark(#2d241b, #EDEFFC)",
-    "--color-text-secondary": "light-dark(#675d52, #a6acd6)",
-    "--color-text-disabled": "light-dark(#d1c5b8, #4a4f6b)",
-    "--color-text-accent": "light-dark(#2d241b, #EDEFFC)",
-    "--color-on-dark": "#FFFFFF",
-    "--color-on-light": "#2d241b",
-    "--color-on-accent": "light-dark(#FFFFFF, #16182b)",
-    "--color-on-success": "light-dark(#3a5500, #1e3200)",
-    "--color-on-error": "light-dark(#8b1d24, #5c0008)",
-    "--color-on-warning": "light-dark(#614400, #3f2600)",
-    "--color-icon-accent": "light-dark(#2d241b, #EDEFFC)",
-    "--color-icon-primary": "light-dark(#2d241b, #EDEFFC)",
-    "--color-icon-secondary": "light-dark(#675d52, #a6acd6)",
-    "--color-icon-disabled": "light-dark(#d1c5b8, #4a4f6b)",
-    "--color-background-card": "light-dark(#FFFFFF, #16182b)",
-    "--color-background-popover": "light-dark(#FFFFFF, #1f2238)",
-    "--color-background-inverted": "light-dark(#2d241b, #EDEFFC)",
-    "--color-success": "light-dark(#C5E17A, #C5E17A)",
-    "--color-success-muted": "light-dark(#C5E17A, #C5E17A)",
-    "--color-error": "light-dark(#FFC5C3, #FFC5C3)",
-    "--color-error-muted": "light-dark(#FFC5C3, #FFC5C3)",
-    "--color-warning": "light-dark(#FFE08A, #FFE08A)",
-    "--color-warning-muted": "light-dark(#FFE08A, #FFE08A)",
-    "--color-border": "light-dark(#2F292E, #EDEFFC1A)",
-    "--color-border-emphasized": "light-dark(#2F292E, #3a3f5e)",
-    "--color-skeleton": "light-dark(#d1c5b8, #2a2e47)",
-    "--color-shadow": "light-dark(#2d241b1A, #0000004D)",
-    "--color-tint-hover": "light-dark(#2d241b, #EDEFFC)",
-    "--color-background-green": "light-dark(#C5E17A, #C5E17A)",
-    "--color-border-green": "light-dark(#B5D16A, #B5D16A)",
-    "--color-icon-green": "light-dark(#3a5500, #1e3200)",
-    "--color-text-green": "light-dark(#3a5500, #1e3200)",
-    "--color-background-red": "light-dark(#FFC5C3, #FFC5C3)",
-    "--color-border-red": "light-dark(#FF9E9A, #FF9E9A)",
-    "--color-icon-red": "light-dark(#8b1d24, #5c0008)",
-    "--color-text-red": "light-dark(#8b1d24, #5c0008)",
-    "--color-background-yellow": "light-dark(#FFE08A, #FFE08A)",
-    "--color-border-yellow": "light-dark(#FFCC55, #FFCC55)",
-    "--color-icon-yellow": "light-dark(#614400, #3f2600)",
-    "--color-text-yellow": "light-dark(#614400, #3f2600)",
-    "--color-background-blue": "light-dark(#B8E0FF, #B8E0FF)",
-    "--color-border-blue": "light-dark(#8ECFFF, #8ECFFF)",
-    "--color-icon-blue": "light-dark(#004e74, #002c4d)",
-    "--color-text-blue": "light-dark(#004e74, #002c4d)",
-    "--color-background-pink": "light-dark(#FFC8E0, #FFC8E0)",
-    "--color-border-pink": "light-dark(#FFA0C8, #FFA0C8)",
-    "--color-icon-pink": "light-dark(#822050, #580030)",
-    "--color-text-pink": "light-dark(#822050, #580030)",
-    "--color-background-purple": "light-dark(#DDD0FF, #DDD0FF)",
-    "--color-border-purple": "light-dark(#C0AAFF, #C0AAFF)",
-    "--color-icon-purple": "light-dark(#453080, #201058)",
-    "--color-text-purple": "light-dark(#453080, #201058)",
-    "--color-background-cyan": "light-dark(#A8F0E2, #A8F0E2)",
-    "--color-border-cyan": "light-dark(#70E8D0, #70E8D0)",
-    "--color-icon-cyan": "light-dark(#005548, #003028)",
-    "--color-text-cyan": "light-dark(#005548, #003028)",
-    "--color-background-orange": "light-dark(#FFCCA0, #FFCCA0)",
-    "--color-border-orange": "light-dark(#FFAA66, #FFAA66)",
-    "--color-icon-orange": "light-dark(#703500, #4a1800)",
-    "--color-text-orange": "light-dark(#703500, #4a1800)",
-    "--color-background-teal": "light-dark(#A8EED0, #A8EED0)",
-    "--color-border-teal": "light-dark(#78E0B0, #78E0B0)",
-    "--color-icon-teal": "light-dark(#005530, #003018)",
-    "--color-text-teal": "light-dark(#005530, #003018)",
-    "--color-background-gray": "light-dark(#ede0d4, #ede0d4)",
-    "--color-border-gray": "light-dark(#dfd2c6, #dfd2c6)",
-    "--color-icon-gray": "light-dark(#4f453b, #2d241b)",
-    "--color-text-gray": "light-dark(#4f453b, #2d241b)",
-    "--shadow-low": "0 2px 4px #2d241b0D, 0 4px 8px #2d241b1A",
-    "--shadow-med": "0 2px 4px #2d241b0D, 0 4px 12px #2d241b1A",
-    "--shadow-high": "0 4px 6px #2d241b1A, 0 12px 24px #2d241b26",
-    "--shadow-inset-hover": "inset 0px 0px 0px 2px #2d241b30",
-    "--shadow-inset-selected": "inset 0px 0px 0px 2px #2d241b50",
-    "--shadow-inset-success": "inset 0px 0px 0px 2px #3a550050",
-    "--shadow-inset-warning": "inset 0px 0px 0px 2px #61440050",
-    "--shadow-inset-error": "inset 0px 0px 0px 2px #8b1d2450"
+    "--color-background-surface": "light-dark(#ffffff, #16182b)",
+    "--color-background-body": "light-dark(#f1f1f1, #0e0f1a)",
+    "--color-background-card": "light-dark(#ffffff, #16182b)",
+    "--color-background-popover": "light-dark(#ffffff, #16182b)",
+    "--color-background-muted": "light-dark(#f1f1f1, #1f2238)",
+    "--color-accent-action": "#C5E17A",
+    "--color-accent-action-hover": "#B5D16A",
+    "--color-on-accent-action": "#1e3200",
+    "--color-secondary-action-hover": "#EDEFFC",
+    "--color-accent": "light-dark(#1b1b1b, #f1f1f1)",
+    "--color-accent-muted": "light-dark(#f1f1f1, #262626)",
+    "--color-neutral": "light-dark(#0000000F, #ffffff1A)",
+    "--color-overlay": "light-dark(#00000080, #0a0b14CC)",
+    "--color-overlay-hover": "light-dark(#0000000D, #ffffff0D)",
+    "--color-overlay-pressed": "light-dark(#0000001A, #ffffff1A)",
+    "--color-text-primary": "light-dark(#000000, #ffffff)",
+    "--color-text-secondary": "light-dark(#474747, #9e9e9e)",
+    "--color-text-disabled": "light-dark(#919191, #525252)",
+    "--color-text-accent": "light-dark(#1b1b1b, #f1f1f1)",
+    "--color-on-dark": "#ffffff",
+    "--color-on-light": "#111111",
+    "--color-on-accent": "light-dark(#ffffff, #111111)",
+    "--color-on-success": "light-dark(#ffffff, #111111)",
+    "--color-on-error": "light-dark(#ffffff, #111111)",
+    "--color-on-warning": "#111111",
+    "--color-icon-accent": "light-dark(#1b1b1b, #f1f1f1)",
+    "--color-icon-primary": "light-dark(#000000, #ffffff)",
+    "--color-icon-secondary": "light-dark(#6a6a6a, #9e9e9e)",
+    "--color-icon-disabled": "light-dark(#919191, #525252)",
+    "--color-success": "light-dark(#00490b, #a4d6a3)",
+    "--color-error": "light-dark(#76000c, #ffc4be)",
+    "--color-warning": "light-dark(#4b3900, #f8d36a)",
+    "--color-success-muted": "light-dark(#bce0bb, #90ca903D)",
+    "--color-error-muted": "light-dark(#ffc4be, #ff98903D)",
+    "--color-warning-muted": "light-dark(#fae19e, #e2b6233D)",
+    "--color-border": "light-dark(#00000014, #ffffff1A)",
+    "--color-border-emphasized": "light-dark(#d4d4d4, #525252)",
+    "--color-skeleton": "light-dark(#f1f1f1, #525252)",
+    "--color-shadow": "light-dark(#0000001A, #0000004D)",
+    "--color-tint-hover": "light-dark(black, white)",
+    "--color-background-red": "light-dark(#ffc4be, #5b2b28)",
+    "--color-border-red": "light-dark(#ffaea7, #fa6762)",
+    "--color-icon-red": "light-dark(#76000c, #ff9890)",
+    "--color-text-red": "light-dark(#76000c, #ffaea7)",
+    "--color-background-orange": "light-dark(#ffc7a1, #503424)",
+    "--color-border-orange": "light-dark(#ffc7a1, #df843f)",
+    "--color-icon-orange": "light-dark(#622700, #ff9e55)",
+    "--color-text-orange": "light-dark(#622700, #ffb37e)",
+    "--color-background-yellow": "light-dark(#fae19e, #453a1c)",
+    "--color-border-yellow": "light-dark(#e3c36c, #c29900)",
+    "--color-icon-yellow": "light-dark(#4b3900, #e2b623)",
+    "--color-text-yellow": "light-dark(#4b3900, #eec448)",
+    "--color-background-green": "light-dark(#bce0bb, #2b422b)",
+    "--color-border-green": "light-dark(#aad4a9, #6ab26b)",
+    "--color-icon-green": "light-dark(#00490b, #90ca90)",
+    "--color-text-green": "light-dark(#00490b, #90ca90)",
+    "--color-background-teal": "light-dark(#a9e2d6, #28413c)",
+    "--color-border-teal": "light-dark(#90d7c8, #4fb1a0)",
+    "--color-icon-teal": "light-dark(#00463d, #81c9bb)",
+    "--color-text-teal": "light-dark(#00463d, #90d7c8)",
+    "--color-background-cyan": "light-dark(#9ae2f4, #274046)",
+    "--color-border-cyan": "light-dark(#85d5e9, #49adc4)",
+    "--color-icon-cyan": "light-dark(#004351, #71c7dd)",
+    "--color-text-cyan": "light-dark(#004351, #85d5e9)",
+    "--color-background-blue": "light-dark(#b9d7ff, #253c5a)",
+    "--color-border-blue": "light-dark(#a1caff, #5aa0f8)",
+    "--color-icon-blue": "light-dark(#003978, #88bcff)",
+    "--color-text-blue": "light-dark(#003978, #a1caff)",
+    "--color-background-purple": "light-dark(#f7d5ff, #4a2f51)",
+    "--color-border-purple": "light-dark(#f3bfff, #d885eb)",
+    "--color-icon-purple": "light-dark(#5c0e6c, #e496f6)",
+    "--color-text-purple": "light-dark(#5c0e6c, #eaacf8)",
+    "--color-background-pink": "light-dark(#ffc0d7, #572b3d)",
+    "--color-border-pink": "light-dark(#ffc0d7, #fc78b1)",
+    "--color-icon-pink": "light-dark(#70003f, #fd92bd)",
+    "--color-text-pink": "light-dark(#70003f, #ffa9ca)",
+    "--color-background-gray": "light-dark(#e2e2e2, #303030)",
+    "--color-border-gray": "light-dark(#d4d4d4, #262626)",
+    "--color-icon-gray": "light-dark(#474747, #9e9e9e)",
+    "--color-text-gray": "light-dark(#1b1b1b, #d4d4d4)",
+    "--radius-none": "0px",
+    "--radius-inner": "0.375rem",
+    "--radius-element": "0.625rem",
+    "--radius-container": "0.75rem",
+    "--radius-page": "1.75rem",
+    "--radius-full": "9999px",
+    "--shadow-low": "0 2px 4px light-dark(oklch(0 0 0 / 5%), oklch(0 0 0 / 25%)), 0 4px 8px light-dark(oklch(0 0 0 / 10%), oklch(0 0 0 / 40%)), inset 0 0 0 1px light-dark(transparent, oklch(1 0 0 / 8%))",
+    "--shadow-med": "0 2px 4px light-dark(oklch(0 0 0 / 5%), oklch(0 0 0 / 35%)), 0 4px 12px light-dark(oklch(0 0 0 / 10%), oklch(0 0 0 / 50%)), inset 0 0 0 1px light-dark(transparent, oklch(1 0 0 / 12%))",
+    "--shadow-high": "0 4px 6px light-dark(oklch(0 0 0 / 10%), oklch(0 0 0 / 50%)), 0 12px 24px light-dark(oklch(0 0 0 / 15%), oklch(0 0 0 / 70%)), inset 0 0 0 1px light-dark(transparent, oklch(1 0 0 / 15%))",
+    "--shadow-inset-hover": "inset 0px 0px 0px 2px #0074e24D",
+    "--shadow-inset-selected": "inset 0px 0px 0px 2px #0074e280",
+    "--shadow-inset-success": "inset 0px 0px 0px 2px #2f7d334D",
+    "--shadow-inset-warning": "inset 0px 0px 0px 2px #f8d36a4D",
+    "--shadow-inset-error": "inset 0px 0px 0px 2px #de47454D"
   },
+  localTokens: {
+    "--astryx-theme-stargazer-color-status-fill-accent": "light-dark(#0074e2, #6d9cfe)",
+    "--astryx-theme-stargazer-color-status-fill-success": "light-dark(#198100, #64af4c)",
+    "--astryx-theme-stargazer-color-status-fill-warning": "#ffce2f",
+    "--astryx-theme-stargazer-color-status-fill-error": "light-dark(#c9303a, #ff705d)",
+    "--astryx-theme-stargazer-color-status-muted-accent": "light-dark(#b9d7ff, #88bcff3D)",
+    "--astryx-theme-stargazer-color-on-tint-neutral": "light-dark(#fafafa4D, #0a0a0a4D)",
+    "--astryx-theme-stargazer-color-on-tint-overlay-hover": "light-dark(#fafafa1A, #0a0a0a1A)",
+    "--astryx-theme-stargazer-color-on-tint-overlay-pressed": "light-dark(#fafafa33, #0a0a0a33)",
+    "--astryx-theme-stargazer-color-destructive-overlay-hover": "light-dark(#ff7f770D, #ee736c0D)",
+    "--astryx-theme-stargazer-color-destructive-overlay-pressed": "light-dark(#ff7f771A, #ee736c1A)"
+  },
+  __localTokenOwners: {
+    "--astryx-theme-stargazer-color-status-fill-accent": "stargazer",
+    "--astryx-theme-stargazer-color-status-fill-success": "stargazer",
+    "--astryx-theme-stargazer-color-status-fill-warning": "stargazer",
+    "--astryx-theme-stargazer-color-status-fill-error": "stargazer",
+    "--astryx-theme-stargazer-color-status-muted-accent": "stargazer",
+    "--astryx-theme-stargazer-color-on-tint-neutral": "stargazer",
+    "--astryx-theme-stargazer-color-on-tint-overlay-hover": "stargazer",
+    "--astryx-theme-stargazer-color-on-tint-overlay-pressed": "stargazer",
+    "--astryx-theme-stargazer-color-destructive-overlay-hover": "stargazer",
+    "--astryx-theme-stargazer-color-destructive-overlay-pressed": "stargazer"
+  },
+  __localTokenLineage: ["stargazer"],
   components: {
     "heading": {
       "level:1": {
@@ -312,103 +339,196 @@ export const stargazerTheme = {
       }
     },
     "button": {
-      "base": {
-        "borderRadius": "0px",
-        "borderWidth": "1px",
-        "borderStyle": "solid",
-        "borderColor": "var(--color-border)"
-      },
       "variant:primary": {
-        "backgroundColor": "var(--color-background-green)",
-        "borderWidth": "1px",
-        "borderStyle": "solid",
-        "borderColor": "var(--color-text-green)",
-        "color": "var(--color-text-green)",
+        "backgroundColor": "var(--color-accent-action)",
+        "color": "var(--color-on-accent-action)",
         ":hover": {
-          "backgroundColor": "var(--color-border-green)"
+          "backgroundColor": "var(--color-accent-action-hover)"
         }
       },
       "variant:secondary": {
-        "backgroundColor": "var(--color-text-primary)",
-        "color": "var(--color-background-body)",
-        "borderColor": "transparent"
-      },
-      "variant:ghost": {
-        "borderColor": "transparent"
+        "backgroundColor": "var(--color-on-dark)",
+        "color": "var(--color-on-light)",
+        ":hover": {
+          "backgroundColor": "var(--color-secondary-action-hover)"
+        }
       },
       "variant:destructive": {
-        "backgroundColor": "var(--color-background-red)",
-        "color": "var(--color-text-red)",
-        "borderWidth": "1px",
-        "borderStyle": "solid",
-        "borderColor": "var(--color-text-red)"
+        "backgroundColor": "var(--color-error-muted)",
+        "color": "var(--color-error)",
+        "--color-overlay-hover": "var(--astryx-theme-stargazer-color-destructive-overlay-hover)",
+        "--color-overlay-pressed": "var(--astryx-theme-stargazer-color-destructive-overlay-pressed)"
       }
     },
     "badge": {
-      "base": {
-        "borderRadius": "9999px",
-        "borderWidth": "1.5px",
-        "borderStyle": "solid",
-        "borderColor": "color-mix(in srgb, currentColor 30%, transparent)"
-      },
       "variant:info": {
-        "backgroundColor": "var(--color-background-blue)",
-        "color": "var(--color-text-blue)"
+        "backgroundColor": "var(--astryx-theme-stargazer-color-status-fill-accent)",
+        "color": "var(--color-on-accent)"
       },
       "variant:neutral": {
         "backgroundColor": "var(--color-background-gray)",
         "color": "var(--color-text-gray)"
       },
       "variant:success": {
-        "backgroundColor": "var(--color-background-green)",
-        "color": "var(--color-text-green)"
+        "backgroundColor": "var(--astryx-theme-stargazer-color-status-fill-success)",
+        "color": "var(--color-on-success)"
       },
       "variant:warning": {
+        "backgroundColor": "var(--astryx-theme-stargazer-color-status-fill-warning)",
+        "color": "var(--color-on-warning)"
+      },
+      "variant:error": {
+        "backgroundColor": "var(--astryx-theme-stargazer-color-status-fill-error)",
+        "color": "var(--color-on-error)"
+      },
+      "variant:red": {
+        "backgroundColor": "var(--color-background-red)",
+        "color": "var(--color-text-red)"
+      },
+      "variant:orange": {
+        "backgroundColor": "var(--color-background-orange)",
+        "color": "var(--color-text-orange)"
+      },
+      "variant:yellow": {
         "backgroundColor": "var(--color-background-yellow)",
         "color": "var(--color-text-yellow)"
       },
+      "variant:green": {
+        "backgroundColor": "var(--color-background-green)",
+        "color": "var(--color-text-green)"
+      },
+      "variant:teal": {
+        "backgroundColor": "var(--color-background-teal)",
+        "color": "var(--color-text-teal)"
+      },
+      "variant:cyan": {
+        "backgroundColor": "var(--color-background-cyan)",
+        "color": "var(--color-text-cyan)"
+      },
+      "variant:blue": {
+        "backgroundColor": "var(--color-background-blue)",
+        "color": "var(--color-text-blue)"
+      },
+      "variant:purple": {
+        "backgroundColor": "var(--color-background-purple)",
+        "color": "var(--color-text-purple)"
+      },
+      "variant:pink": {
+        "backgroundColor": "var(--color-background-pink)",
+        "color": "var(--color-text-pink)"
+      },
+      "variant:gray": {
+        "backgroundColor": "var(--color-background-gray)",
+        "color": "var(--color-text-gray)"
+      }
+    },
+    "status-dot": {
+      "variant:success": {
+        "backgroundColor": "var(--astryx-theme-stargazer-color-status-fill-success)"
+      },
+      "variant:warning": {
+        "backgroundColor": "var(--astryx-theme-stargazer-color-status-fill-warning)"
+      },
       "variant:error": {
-        "backgroundColor": "var(--color-background-red)",
-        "color": "var(--color-text-red)"
+        "backgroundColor": "var(--astryx-theme-stargazer-color-status-fill-error)"
+      },
+      "variant:accent": {
+        "backgroundColor": "var(--astryx-theme-stargazer-color-status-fill-accent)"
+      }
+    },
+    "avatar-status-dot": {
+      "variant:success": {
+        "backgroundColor": "var(--astryx-theme-stargazer-color-status-fill-success)"
+      },
+      "variant:error": {
+        "backgroundColor": "var(--astryx-theme-stargazer-color-status-fill-error)"
+      }
+    },
+    "segmented-control": {
+      "base": {
+        "padding": "var(--spacing-1)"
+      }
+    },
+    "segmented-control-item": {
+      "size:sm": {
+        "height": "calc(var(--size-element-sm) - 8px)"
+      },
+      "size:md": {
+        "height": "calc(var(--size-element-md) - 8px)"
+      },
+      "size:lg": {
+        "height": "calc(var(--size-element-lg) - 8px)"
+      },
+      "selected": {
+        "boxShadow": "none"
       }
     },
     "banner": {
       "base": {
-        "borderRadius": "0px"
+        "--color-neutral": "var(--astryx-theme-stargazer-color-on-tint-neutral)",
+        "--color-overlay-hover": "var(--astryx-theme-stargazer-color-on-tint-overlay-hover)",
+        "--color-overlay-pressed": "var(--astryx-theme-stargazer-color-on-tint-overlay-pressed)"
       },
       "status:info": {
-        "backgroundColor": "var(--color-background-blue)",
+        "--color-accent-muted": "var(--astryx-theme-stargazer-color-status-muted-accent)",
         "--color-text-primary": "var(--color-text-blue)",
         "--color-text-secondary": "var(--color-text-blue)",
         "--color-accent": "var(--color-text-blue)"
       },
       "status:success": {
-        "backgroundColor": "var(--color-background-green)",
         "--color-text-primary": "var(--color-text-green)",
         "--color-text-secondary": "var(--color-text-green)",
         "--color-success": "var(--color-text-green)"
       },
       "status:warning": {
-        "backgroundColor": "var(--color-background-yellow)",
         "--color-text-primary": "var(--color-text-yellow)",
         "--color-text-secondary": "var(--color-text-yellow)",
         "--color-warning": "var(--color-text-yellow)"
       },
       "status:error": {
-        "backgroundColor": "var(--color-background-red)",
         "--color-text-primary": "var(--color-text-red)",
         "--color-text-secondary": "var(--color-text-red)",
         "--color-error": "var(--color-text-red)"
       }
     },
-    "field": {
+    "step-indicator": {
+      "status:accent": {
+        "--color-accent": "var(--astryx-theme-stargazer-color-status-fill-accent)"
+      },
+      "status:success": {
+        "--color-success": "var(--astryx-theme-stargazer-color-status-fill-success)"
+      },
+      "status:warning": {
+        "--color-warning": "var(--astryx-theme-stargazer-color-status-fill-warning)"
+      },
+      "status:error": {
+        "--color-error": "var(--astryx-theme-stargazer-color-status-fill-error)"
+      }
+    },
+    "switch": {
       "base": {
-        "borderRadius": "0px"
+        "--color-background-gray": "var(--color-border-emphasized)"
+      }
+    },
+    "progress-bar": {
+      "base": {
+        "--color-background-muted": "var(--color-border-emphasized)"
+      },
+      "variant:accent": {
+        "--color-accent": "var(--astryx-theme-stargazer-color-status-fill-accent)"
+      },
+      "variant:success": {
+        "--color-success": "var(--astryx-theme-stargazer-color-status-fill-success)"
+      },
+      "variant:warning": {
+        "--color-warning": "var(--astryx-theme-stargazer-color-status-fill-warning)"
+      },
+      "variant:error": {
+        "--color-error": "var(--astryx-theme-stargazer-color-status-fill-error)"
       }
     },
     "card": {
       "base": {
-        "borderRadius": "0px",
         "padding": "var(--spacing-3)"
       }
     },
@@ -478,15 +598,11 @@ export const stargazerTheme = {
         "fallbacks": "\"SF Mono\", Monaco, Consolas, monospace"
       }
     },
-    "radius": {
-      "base": 4,
-      "multiplier": 0
-    },
     "motion": {
-      "fast": 100,
-      "medium": 250,
-      "slow": 600,
-      "ratio": 0.8
+      "fast": 125,
+      "medium": 300,
+      "slow": 700,
+      "ratio": 0.75
     }
   },
   icons: stargazerIconRegistry,
