@@ -96,7 +96,6 @@ export default function TonightHero({ pick, score, isTonight, viewDate }) {
                     </Text>
                     {score ? (
                       <ProgressBar
-                        label="Go score"
                         value={score.score}
                         hasValueLabel
                         variant={scoreVariant(score.label)}

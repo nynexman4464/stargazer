@@ -6,6 +6,7 @@ import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Icon } from '@astryxdesign/core/Icon';
+import { useMediaQuery } from '@astryxdesign/core/hooks';
 import { CalendarDays } from 'lucide-react';
 import { DAY, fmtDate, isoDay, startOfDay } from '../lib/astro.js';
 
@@ -21,6 +22,9 @@ export default function ViewingDate({ viewDate, onChange }) {
   // Bounds for the picker, fixed for the session.
   const [todayIso] = useState(() => isoDay(new Date()));
   const [maxIso] = useState(() => isoDay(new Date(Date.now() + VIEWING_MAX_DAYS * DAY)));
+  // On phones the popover gets an explicit width so the month grid can't
+  // size it past the viewport.
+  const isCompact = useMediaQuery('(max-width: 639px)');
 
   const pick = (next) => {
     onChange(next);
@@ -44,8 +48,9 @@ export default function ViewingDate({ viewDate, onChange }) {
       placement="below"
       alignment="end"
       label="Choose a viewing date"
+      width={isCompact ? 'min(94vw, 340px)' : undefined}
       content={
-        <VStack gap={3} padding={3}>
+        <VStack gap={3} padding={isCompact ? 2 : 3}>
           <HStack gap={2} wrap="wrap">
             <Button
               label="Today"

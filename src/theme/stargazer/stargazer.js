@@ -442,7 +442,22 @@ export const stargazerTheme = {
       "xl": 1280,
       "2xl": 1536
     },
-    "rules": []
+    "rules": [
+      {
+        "when": {
+          "width": {
+            "below": "sm"
+          }
+        },
+        "value": {
+          "tokens": {
+            "--text-display-1-size": "var(--font-size-4xl)",
+            "--text-display-2-size": "var(--font-size-3xl)",
+            "--text-display-3-size": "var(--font-size-2xl)"
+          }
+        }
+      }
+    ]
   },
   __axes: {
     "typography": {

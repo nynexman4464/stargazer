@@ -359,6 +359,24 @@ export const stargazerTheme = defineTheme({
     },
   },
 
+  /* On phones, step the display type scale down one notch so hero headlines
+     like "Neptune at opposition" don't dominate the viewport. */
+  adaptations: {
+    widthBreakpoints: {sm: 640, md: 768, lg: 1024, xl: 1280, '2xl': 1536},
+    rules: [
+      {
+        when: {width: {below: 'sm'}},
+        value: {
+          tokens: {
+            '--text-display-1-size': 'var(--font-size-4xl)',
+            '--text-display-2-size': 'var(--font-size-3xl)',
+            '--text-display-3-size': 'var(--font-size-2xl)',
+          },
+        },
+      },
+    ],
+  },
+
   icons: stargazerIconRegistry,
 });
 

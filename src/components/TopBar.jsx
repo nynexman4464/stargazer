@@ -1,6 +1,7 @@
 import { TopNav } from '@astryxdesign/core/TopNav';
 import { TopNavHeading } from '@astryxdesign/core/TopNav';
 import { HStack } from '@astryxdesign/core/HStack';
+import { useMediaQuery } from '@astryxdesign/core/hooks';
 import {
   DropdownMenu,
   DropdownMenuRadioGroup,
@@ -26,6 +27,10 @@ export default function TopBar({
   viewDate,
   onViewDate,
 }) {
+  // On phones the header is tight, so the location trigger collapses to an
+  // icon-only button (the location name moves into its tooltip/label).
+  const isCompact = useMediaQuery('(max-width: 639px)');
+  const locLabel = `${locName}${away ? ' · away' : ''}`;
   return (
     <TopNav
       label="Stargazer"
@@ -43,11 +48,13 @@ export default function TopBar({
           presentation="adaptive"
           placement="below"
           alignment="end"
-          hasChevron
+          hasChevron={!isCompact}
           button={{
             variant: 'secondary',
-            'aria-label': 'Viewing location',
-            label: `${locName}${away ? ' · away' : ''}`,
+            isIconOnly: isCompact,
+            'aria-label': isCompact ? `Viewing location: ${locLabel}` : 'Viewing location',
+            tooltip: isCompact ? locLabel : undefined,
+            label: locLabel,
             icon: <Icon icon={MapPin} size="sm" />,
           }}
         >

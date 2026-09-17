@@ -623,6 +623,18 @@
 }
 
 @layer astryx-theme {
+@media (width < 640px) {
+  @scope ([data-astryx-theme="stargazer"]) to ([data-astryx-theme]) {
+    :scope {
+      --text-display-1-size: var(--font-size-4xl);
+      --text-display-2-size: var(--font-size-3xl);
+      --text-display-3-size: var(--font-size-2xl);
+    }
+  }
+}
+}
+
+@layer astryx-theme {
 @scope ([data-astryx-theme="stargazer"]) to ([data-astryx-theme]) {
   [data-astryx-media="dark"] {
     color-scheme: dark;
