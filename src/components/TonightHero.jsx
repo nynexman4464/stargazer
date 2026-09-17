@@ -8,7 +8,8 @@ import { Token } from '@astryxdesign/core/Token';
 import { ProgressBar } from '@astryxdesign/core/ProgressBar';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
-import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Eye, Telescope } from 'lucide-react';
+import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star } from 'lucide-react';
+import ScoreFactors from './ScoreFactors.jsx';
 import Starfield from './Starfield.jsx';
 import { TermText } from './Term.jsx';
 import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eventImage, eclipseVisibleFrom } from '../lib/astro.js';
@@ -16,7 +17,6 @@ import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eve
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
 const TYPE_ICON = { shower: Sparkles, eclipse: Eclipse, planet: Orbit, comet: Star };
-const FACTOR_ICON = { cloud: Cloud, cloudOff: CloudOff, moon: Moon, eye: Eye, telescope: Telescope };
 
 function scoreVariant(label) {
   return label === 'Go' ? 'success' : label === 'Maybe' ? 'warning' : 'error';
@@ -125,14 +125,7 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc }) {
                       Conditions
                     </Text>
                     {score ? (
-                      <VStack gap={1}>
-                        {score.factors.map((f, i) => (
-                          <HStack key={i} gap={1} vAlign="center">
-                            <Icon icon={FACTOR_ICON[f.icon] || Cloud} size="sm" color="secondary" />
-                            <Text type="supporting"><TermText text={f.text} exclude={pick.bodies} /></Text>
-                          </HStack>
-                        ))}
-                      </VStack>
+                      <ScoreFactors factors={score.factors} exclude={pick.bodies} />
                     ) : (
                       <Text type="supporting">—</Text>
                     )}
