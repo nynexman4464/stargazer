@@ -119,6 +119,17 @@ export function loadHome() {
 export function saveHome(home) {
   if (hasStorage()) localStorage.setItem('stargazer.home', JSON.stringify(home));
 }
+/* Last away spot, so the location menu can flip back to it after a trip home. */
+export function loadLastAway() {
+  try {
+    const s = JSON.parse(localStorage.getItem('stargazer.away'));
+    if (s && typeof s.lat === 'number') return s;
+  } catch {}
+  return null;
+}
+export function saveLastAway(loc) {
+  if (hasStorage()) localStorage.setItem('stargazer.away', JSON.stringify(loc));
+}
 export function isAway(loc, home) {
   return haversine(home.lat, home.lon, loc.lat, loc.lon) > 50;
 }

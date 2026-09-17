@@ -19,6 +19,8 @@ import {
   saveLoc,
   loadHome,
   saveHome,
+  loadLastAway,
+  saveLastAway,
   isAway,
   loadJSON,
   loadTles,
@@ -31,6 +33,14 @@ const base = import.meta.env.BASE_URL;
 export default function App() {
   const [loc, setLoc] = useState(loadLoc);
   const [home, setHome] = useState(loadHome);
+  const [lastAway, setLastAway] = useState(() => {
+    const saved = loadLastAway();
+    if (saved) return saved;
+    // Seed from the current spot so travelers who are already away
+    // get an Away option in the menu on first run.
+    const cur = loadLoc();
+    return isAway(cur, loadHome()) ? cur : null;
+  });
   const [tier, setTier] = useState('all');
   const [type, setType] = useState('all');
   const [range, setRange] = useState('all');
@@ -88,17 +98,30 @@ export default function App() {
   }, [events, loc]);
 
   /* ---- location ---- */
-  const applyLoc = useCallback((next) => {
-    setLoc(next);
-    saveLoc(next);
-    setLocOpen(false);
-  }, []);
+  const applyLoc = useCallback(
+    (next) => {
+      setLoc(next);
+      saveLoc(next);
+      if (isAway(next, home)) {
+        saveLastAway(next);
+        setLastAway({ ...next });
+      }
+      setLocOpen(false);
+    },
+    [home],
+  );
 
   const backHome = useCallback(() => {
     saveLoc(home);
     setLoc({ ...home });
     setLocOpen(false);
   }, [home]);
+
+  const goAway = useCallback(() => {
+    if (!lastAway) return;
+    saveLoc(lastAway);
+    setLoc({ ...lastAway });
+  }, [lastAway]);
 
   const setHomeHere = useCallback(() => {
     const next = { ...loc };
@@ -125,7 +148,15 @@ export default function App() {
         height="auto"
         contentPadding={0}
         topNav={
-          <TopBar locName={loc.name} away={away} onOpenLocation={() => setLocOpen(true)} />
+          <TopBar
+            locName={loc.name}
+            away={away}
+            home={home}
+            awayLoc={lastAway}
+            onSelectHome={backHome}
+            onSelectAway={goAway}
+            onOpenLocation={() => setLocOpen(true)}
+          />
         }
       >
         <Layout contentWidth={960} padding={4} height="auto">
