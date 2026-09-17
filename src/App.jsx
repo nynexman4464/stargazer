@@ -128,36 +128,6 @@ export default function App() {
     };
   }, [events, loc, anchorDay]);
 
-  /* ---- cloud climatology (historical typical cloudiness) ----
-     For a fast-forwarded hero pick beyond the ~15-day forecast, there is no
-     go-score; instead we show the historical typical cloud cover for that
-     time of year, clearly labeled as an estimate, not a forecast. */
-  const [climDaily, setClimDaily] = useState(null);
-  const [climFailed, setClimFailed] = useState(false);
-  const pickBeyondForecast = !!pick && (pick.date - Date.now()) / DAY > 15;
-  useEffect(() => {
-    setClimDaily(null);
-    setClimFailed(false);
-    if (!anchorDay || !pickBeyondForecast) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const daily = await loadCloudClimatology(loc);
-        if (!cancelled) setClimDaily(daily);
-      } catch {
-        if (!cancelled) setClimFailed(true);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-    // pick identity is stable (same event object) unless the chosen event changes.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [anchorDay, loc, pick]);
-  const histCloud =
-    pickBeyondForecast && pick ? typicalCloud(climDaily, pick.date) : null;
-  const histCloudLoading = pickBeyondForecast && climDaily == null && !climFailed;
-
   /* ---- location ---- */
   const applyLoc = useCallback(
     (next) => {
@@ -225,6 +195,36 @@ export default function App() {
     nextAfterAnchor ||
     null;
   const pickIsTonight = !anchorDay && !!pick && heroCands.includes(pick);
+
+  /* ---- cloud climatology (historical typical cloudiness) ----
+     For a fast-forwarded hero pick beyond the ~15-day forecast, there is no
+     go-score; instead we show the historical typical cloud cover for that
+     time of year, clearly labeled as an estimate, not a forecast. */
+  const [climDaily, setClimDaily] = useState(null);
+  const [climFailed, setClimFailed] = useState(false);
+  const pickBeyondForecast = !!pick && (pick.date - Date.now()) / DAY > 15;
+  useEffect(() => {
+    setClimDaily(null);
+    setClimFailed(false);
+    if (!anchorDay || !pickBeyondForecast) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const daily = await loadCloudClimatology(loc);
+        if (!cancelled) setClimDaily(daily);
+      } catch {
+        if (!cancelled) setClimFailed(true);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // pick identity is stable (same event object) unless the chosen event changes.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [anchorDay, loc, pick]);
+  const histCloud =
+    pickBeyondForecast && pick ? typicalCloud(climDaily, pick.date) : null;
+  const histCloudLoading = pickBeyondForecast && climDaily == null && !climFailed;
 
   return (
     <>
