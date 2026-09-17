@@ -16,7 +16,7 @@
       "detail": "Nearest and brightest for the year at about magnitude 7.8. A binocular/telescope target in Aquarius.",
       "id": "neptune-opp-2026",
       "kind": "opposition",
-      "title": "Neptune at its closest and brightest"
+      "title": "Neptune at opposition"
     },
     {
       "bodies": [
@@ -26,7 +26,7 @@
       "detail": "Saturn's closest and brightest of 2026 — prime ring-viewing season.",
       "id": "saturn-opp-2026",
       "kind": "opposition",
-      "title": "Saturn at its closest and brightest"
+      "title": "Saturn at opposition"
     },
     {
       "bodies": [
@@ -47,7 +47,7 @@
       "detail": "Nearest and brightest for the year at about magnitude 5.6 — a binocular target, and near naked-eye limit under dark skies.",
       "id": "uranus-opp-2026",
       "kind": "opposition",
-      "title": "Uranus at its closest and brightest"
+      "title": "Uranus at opposition"
     },
     {
       "bodies": [
@@ -57,7 +57,7 @@
       "detail": "Jupiter's closest and brightest of 2027 — peak season for cloud belts and the Galilean moons.",
       "id": "jupiter-opp-2027",
       "kind": "opposition",
-      "title": "Jupiter at its closest and brightest"
+      "title": "Jupiter at opposition"
     },
     {
       "bodies": [
@@ -67,7 +67,7 @@
       "detail": "Mars's closest and brightest of 2027 — best telescopic views of the Red Planet for the year.",
       "id": "mars-opp-2027",
       "kind": "opposition",
-      "title": "Mars at its closest and brightest"
+      "title": "Mars at opposition"
     },
     {
       "bodies": [
@@ -88,7 +88,7 @@
       "detail": "Neptune's closest and brightest of 2027. A binocular/telescope target.",
       "id": "neptune-opp-2027",
       "kind": "opposition",
-      "title": "Neptune at its closest and brightest"
+      "title": "Neptune at opposition"
     },
     {
       "bodies": [
@@ -98,7 +98,7 @@
       "detail": "Saturn's closest and brightest of 2027 — prime ring-viewing season.",
       "id": "saturn-opp-2027",
       "kind": "opposition",
-      "title": "Saturn at its closest and brightest"
+      "title": "Saturn at opposition"
     },
     {
       "bodies": [
@@ -119,7 +119,7 @@
       "detail": "Uranus's closest and brightest of 2027 — a binocular target, near naked-eye limit under dark skies.",
       "id": "uranus-opp-2027",
       "kind": "opposition",
-      "title": "Uranus at its closest and brightest"
+      "title": "Uranus at opposition"
     }
   ]
 }
