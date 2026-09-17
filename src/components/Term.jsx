@@ -31,8 +31,9 @@ const TERM_PATTERN = new RegExp(
 const MAG_VALUE_PATTERN = /(\bmagnitude\s+[+-]?\d+(?:\.\d+)?)/gi;
 
 /* The shared definition-link treatment: dotted underline, inherits the
-   surrounding text size (e.g. the hero's display heading), jumps to the
-   "Sky talk" glossary on tap where there's no hover. */
+   surrounding text size (e.g. the hero's display heading). A tap/click never
+   navigates — on touch, the tap opens the definition card instead (see
+   touchTrigger="tap" below); jumping to the glossary was jarring. */
 function DefLink({ children }) {
   return (
     <Link
@@ -40,6 +41,7 @@ function DefLink({ children }) {
       type="inherit"
       hasUnderline
       style={{ textDecorationStyle: 'dotted' }}
+      onClick={(e) => e.preventDefault()}
     >
       {children}
     </Link>
@@ -56,6 +58,7 @@ export function Term({ term, children }) {
       label={`${term}: definition`}
       content={<Text type="supporting">{def}</Text>}
       hasHoverIndication={false}
+      touchTrigger="tap"
     >
       <DefLink>{children}</DefLink>
     </HoverCard>
@@ -126,6 +129,7 @@ export function Mag({ value, children }) {
         </VStack>
       }
       hasHoverIndication={false}
+      touchTrigger="tap"
     >
       <DefLink>{children ?? `magnitude ${fmtMag(m)}`}</DefLink>
     </HoverCard>
