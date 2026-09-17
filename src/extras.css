@@ -88,6 +88,85 @@ body {
   background: var(--color-background-muted);
 }
 
+/* Tappable map thumbnail: opens the fullscreen viewer. The badge signals
+   that the image enlarges. */
+.sg-map-thumb {
+  position: relative;
+  cursor: zoom-in;
+}
+.sg-map-thumb-badge {
+  position: absolute;
+  right: var(--spacing-2);
+  bottom: var(--spacing-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--spacing-8);
+  height: var(--spacing-8);
+  border-radius: var(--radius-full);
+  background: var(--color-overlay);
+}
+
+/* Fullscreen eclipse-map viewer (MapLightbox.jsx): explicit zoom buttons,
+   drag-to-pan, pinch-to-zoom and double-tap zoom for small screens. Plain
+   elements are intentional here — this is a gesture-driven viewer surface,
+   not page layout (same as the dark-sky map canvas). */
+.sg-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+}
+.sg-lightbox-backdrop {
+  position: absolute;
+  inset: 0;
+  background: var(--color-overlay);
+}
+.sg-lightbox-stage {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  touch-action: none;
+}
+.sg-lightbox-img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.sg-lightbox-topbar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--spacing-3);
+  pointer-events: none;
+}
+.sg-lightbox-topbar > * {
+  pointer-events: auto;
+}
+.sg-lightbox-pct {
+  min-width: var(--spacing-12);
+  text-align: right;
+  align-self: center;
+}
+.sg-lightbox-caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  padding: var(--spacing-3) var(--spacing-4) max(var(--spacing-4), env(safe-area-inset-bottom));
+  pointer-events: none;
+  text-align: center;
+}
+
 /* Realistic moon phase photos — Jay Tanner render set (public/img/moon).
    Circular crop, like the event thumbnails. */
 .sg-moon-photo,

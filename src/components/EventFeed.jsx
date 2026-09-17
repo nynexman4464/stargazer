@@ -17,8 +17,9 @@ import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { useMediaQuery } from '@astryxdesign/core/hooks';
-import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Telescope, Map, CalendarDays } from 'lucide-react';
+import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Telescope, Map, CalendarDays, Maximize2 } from 'lucide-react';
 import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage } from '../lib/astro.js';
+import MapLightbox from './MapLightbox.jsx';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
@@ -31,6 +32,10 @@ function scoreVariant(label) {
 
 function EventCard({ ev, score }) {
   const [mapOpen, setMapOpen] = useState(false);
+  const [lightbox, setLightbox] = useState(false);
+  const mapCaption = ev.solar
+    ? 'Dark band: where the total or annular eclipse is visible. Map: NASA.'
+    : 'White area: where the eclipse is visible. Map: NASA.';
   const dateStr =
     ev.end && ev.end - ev.date > 2 * DAY
       ? `${fmtDate(ev.date)} – ${fmtDate(ev.end)}`
@@ -76,15 +81,40 @@ function EventCard({ ev, score }) {
             </HStack>
             {mapOpen && (
               <VStack gap={1}>
-                <img src={ev.map} alt={`NASA eclipse path map for ${ev.title}`} loading="lazy" className="sg-eclipse-map" />
-                <Text type="supporting">
-                  {ev.solar
-                    ? 'Dark band: where the total or annular eclipse is visible. Map: NASA.'
-                    : 'White area: where the eclipse is visible. Map: NASA.'}
-                </Text>
+                <div
+                  className="sg-map-thumb"
+                  onClick={() => setLightbox(true)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' || e.key === ' ') setLightbox(true);
+                  }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Enlarge eclipse path map for ${ev.title}`}
+                >
+                  <img
+                    src={ev.map}
+                    alt={`NASA eclipse path map for ${ev.title}`}
+                    loading="lazy"
+                    draggable={false}
+                    className="sg-eclipse-map"
+                  />
+                  <span className="sg-map-thumb-badge" aria-hidden="true">
+                    <Icon icon={Maximize2} size="sm" color="secondary" />
+                  </span>
+                </div>
+                <Text type="supporting">{mapCaption}</Text>
               </VStack>
             )}
           </VStack>
+        )}
+        {ev.type === 'eclipse' && ev.map && (
+          <MapLightbox
+            src={ev.map}
+            alt={`NASA eclipse path map for ${ev.title}`}
+            caption={mapCaption}
+            isOpen={lightbox}
+            onClose={() => setLightbox(false)}
+          />
         )}
         {score && (
           <VStack gap={1}>
