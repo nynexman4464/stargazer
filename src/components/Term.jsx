@@ -37,7 +37,11 @@ export function Term({ term, children }) {
       label={`${term}: definition`}
       content={<Text type="supporting">{def}</Text>}
     >
-      <Link href="#sky-talk">{children}</Link>
+      {/* type="inherit" keeps the link at the surrounding text size (e.g. the
+          hero's display heading) instead of dropping to body size. */}
+      <Link href="#sky-talk" type="inherit">
+        {children}
+      </Link>
     </HoverCard>
   );
 }
