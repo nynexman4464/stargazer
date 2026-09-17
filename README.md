@@ -77,8 +77,8 @@ If the library restructures, revisit the alias.
 Event photos in `public/img/events/` are real astronomical photos. Planets and
 eclipses are NASA public-domain images (MESSENGER, Mariner 10, Hubble, Juno,
 Cassini, Voyager 2, SDO, NASA HQ/Armstrong/Glenn, courtesy NASA/JPL). The comet
-photo is Comet McNaught courtesy ESO, and the meteor-shower photo is a fireball
-over Kitt Peak courtesy NOIRLab — both used under CC BY 4.0.
+photo is 12P/Pons-Brooks by Don Heffernan, used under CC BY 2.0. The
+meteor-shower image is AI-generated.
 
 ## License
 
