@@ -561,6 +561,105 @@ export async function goScore(ev, loc, cache) {
   return { score, factors, label: score >= 78 ? 'Go' : score >= 55 ? 'Maybe' : 'Risky' };
 }
 
+/* ============================== cloud climatology ============================== */
+/* Historical "typical cloudiness" for dates beyond the ~15-day forecast.
+   Open-Meteo's archive API (ERA5 reanalysis) gives daily mean cloud cover for
+   2001–2020; we average by day-of-year with a ±7-day smoothing window, so each
+   date gets an effectively weekly-granularity historical estimate. Same data
+   provider as the app's forecasts. Cached in localStorage per location —
+   the 20-year period is fixed, so the cache never goes stale.
+   This is a historical estimate, never a forecast; callers must say so. */
+const CLIM_START = '2001-01-01';
+const CLIM_END = '2020-12-31';
+const CLIM_SMOOTH_DAYS = 7;
+const climMemCache = new Map();
+
+function climKey(loc) {
+  return `stargazer.clim.v1.${loc.lat.toFixed(2)}.${loc.lon.toFixed(2)}`;
+}
+
+function dayOfYear(y, m, d) {
+  const leap = (y % 4 === 0 && y % 100 !== 0) || y % 400 === 0;
+  const ml = [31, leap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  let doy = d;
+  for (let i = 0; i < m - 1; i++) doy += ml[i];
+  return doy; // 1..366
+}
+
+/* Smoothed day-of-year climatology: array of 366 values (index 0 = Jan 1),
+   each the mean daily cloud-cover % for that day ± CLIM_SMOOTH_DAYS across
+   all 20 years. Null where the archive had no data. */
+export async function loadCloudClimatology(loc) {
+  const key = climKey(loc);
+  if (climMemCache.has(key)) return climMemCache.get(key);
+  try {
+    const raw = hasStorage() && localStorage.getItem(key);
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      if (parsed && Array.isArray(parsed.daily) && parsed.daily.length === 366) {
+        climMemCache.set(key, parsed.daily);
+        return parsed.daily;
+      }
+    }
+  } catch {
+    /* corrupted cache — fall through to a fresh fetch */
+  }
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 25000);
+  let daily;
+  try {
+    const url =
+      `https://archive-api.open-meteo.com/v1/archive?latitude=${loc.lat.toFixed(3)}` +
+      `&longitude=${loc.lon.toFixed(3)}&start_date=${CLIM_START}&end_date=${CLIM_END}` +
+      `&daily=cloud_cover_mean&timezone=auto`;
+    const res = await fetch(url, { signal: ctrl.signal });
+    if (!res.ok) throw new Error(`climatology fetch failed: ${res.status}`);
+    const j = await res.json();
+    const times = j?.daily?.time || [];
+    const vals = j?.daily?.cloud_cover_mean || [];
+    const buckets = Array.from({ length: 367 }, () => []);
+    for (let i = 0; i < times.length; i++) {
+      const v = vals[i];
+      if (v == null) continue;
+      const [y, m, d] = times[i].split('-').map(Number);
+      buckets[dayOfYear(y, m, d)].push(v);
+    }
+    daily = [];
+    for (let doy = 1; doy <= 366; doy++) {
+      let sum = 0;
+      let n = 0;
+      for (let k = -CLIM_SMOOTH_DAYS; k <= CLIM_SMOOTH_DAYS; k++) {
+        let q = doy + k;
+        if (q < 1) q += 365;
+        if (q > 366) q -= 365;
+        for (const v of buckets[q]) {
+          sum += v;
+          n++;
+        }
+      }
+      daily.push(n ? sum / n : null);
+    }
+  } finally {
+    clearTimeout(timer);
+  }
+  try {
+    if (hasStorage()) localStorage.setItem(key, JSON.stringify({ daily }));
+  } catch {
+    /* quota — the in-memory cache still covers this session */
+  }
+  climMemCache.set(key, daily);
+  return daily;
+}
+
+/* Typical historical cloud-cover % for a date from a loaded climatology
+   (see loadCloudClimatology). Returns a rounded 0–100 number, or null. */
+export function typicalCloud(daily, date) {
+  if (!daily) return null;
+  const doy = dayOfYear(date.getFullYear(), date.getMonth() + 1, date.getDate());
+  const v = daily[doy - 1];
+  return v == null ? null : Math.round(v);
+}
+
 /* ============================== aurora ============================== */
 /* Pure verdict builder — kp, ovation probability near observer, observer latitude.
  * Keeps the plain-language copy in one testable place. */

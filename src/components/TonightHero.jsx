@@ -21,7 +21,7 @@ function scoreVariant(label) {
   return label === 'Go' ? 'success' : label === 'Maybe' ? 'warning' : 'error';
 }
 
-export default function TonightHero({ pick, score, isTonight, viewDate }) {
+export default function TonightHero({ pick, score, isTonight, viewDate, histCloud, histCloudLoading }) {
   // Everything in this card refers to the pick's own date — never mix
   // tonight's moon/conditions with a future event's. The full current-moon
   // picture lives in the Moon panel below.
@@ -119,6 +119,23 @@ export default function TonightHero({ pick, score, isTonight, viewDate }) {
                           </HStack>
                         ))}
                       </VStack>
+                    ) : beyondForecast ? (
+                      histCloud != null ? (
+                        <VStack gap={1}>
+                          <HStack gap={1} vAlign="center">
+                            <Icon icon={Cloud} size="sm" color="secondary" />
+                            <Text type="supporting">Typically {histCloud}% cloudy</Text>
+                          </HStack>
+                          <Text type="supporting">
+                            20-year average for this time of year — a historical
+                            estimate, not a forecast.
+                          </Text>
+                        </VStack>
+                      ) : histCloudLoading ? (
+                        <Text type="supporting">Checking historical skies…</Text>
+                      ) : (
+                        <Text type="supporting">—</Text>
+                      )
                     ) : (
                       <Text type="supporting">—</Text>
                     )}
