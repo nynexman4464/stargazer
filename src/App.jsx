@@ -21,6 +21,7 @@ import {
   saveHome,
   isAway,
   loadJSON,
+  loadTles,
   normalizeEvents,
   goScore,
 } from './lib/astro.js';
@@ -53,7 +54,7 @@ export default function App() {
         loadJSON(`${base}data/comets.json`),
         loadJSON(`${base}data/darksky.json`),
         loadJSON(`${base}data/_manifest.json`),
-        loadJSON(`${base}data/tles.json`),
+        loadTles(`${base}data/tles.json`),
       ]);
       setEvents(normalizeEvents(showers, eclipses, conjs, comets));
       setSpots(spotsData?.sites || []);

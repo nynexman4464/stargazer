@@ -198,6 +198,30 @@ export async function loadJSON(path) {
   }
 }
 
+/* TLE backend cache (AWS Lambda + S3, see cloudformation/tle-cache.yaml).
+ * When set, the app fetches fresh TLEs from this endpoint at boot; the
+ * bundled data/tles.json file remains the offline fallback. Empty until
+ * the stack is deployed — set it to the stack's FunctionUrl output. */
+export const TLE_ENDPOINT = '';
+
+export async function loadTles(bundledPath) {
+  if (TLE_ENDPOINT) {
+    try {
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 15000);
+      const r = await fetch(TLE_ENDPOINT, { signal: ctrl.signal });
+      clearTimeout(timer);
+      if (r.ok) {
+        const j = await r.json();
+        if (j && j.tles && j.tles['25544'] && j.tles['48274'] && j.tles['20580']) return j;
+      }
+    } catch (e) {
+      console.warn('TLE endpoint unreachable, using bundled file:', e?.message || e);
+    }
+  }
+  return loadJSON(bundledPath);
+}
+
 const ECLIPSE_TYPE_PLAIN = {
   penumbral: 'Faint',
   partial: 'Partial',
@@ -605,8 +629,8 @@ export async function loadAuroraOutlook(loc) {
  * Only when there is no cached data at all does this throw. */
 const TLE_TTL = 24 * 3600 * 1000;
 const TLE_STALE_OK = 7 * 24 * 3600 * 1000;
-// Bundled TLEs ship with the site and are refreshed daily by automation;
-// they keep flyovers working when CelesTrak is unreachable from the client.
+// Bundled TLEs ship with the site as an offline fallback; the Lambda
+// endpoint (TLE_ENDPOINT above) is the primary fresh source when configured.
 const BUNDLED_TTL = 48 * 3600 * 1000;
 const tleKey = (norad) => `sg-tle-${norad}`;
 
