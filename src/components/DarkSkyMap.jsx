@@ -8,8 +8,14 @@ import 'leaflet/dist/leaflet.css';
 const LIGHTS_URL =
   'https://gibs.earthdata.nasa.gov/wmts/epsg3857/best/VIIRS_Black_Marble/default/default/GoogleMapsCompatible_Level8/{z}/{y}/{x}.png';
 
-/* Dark basemap so the city-lights glow reads as the light-pollution layer. */
-const BASE_URL = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+/* Dark basemap so the city-lights glow reads as the light-pollution layer.
+   Esri's dark-gray canvas is free without a key (CARTO's now watermarks).
+   Note Esri tile order is z/y/x. A reference layer keeps labels on top. */
+const BASE_URL =
+  'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
+const LABELS_URL =
+  'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}';
+const ESRI_ATTR = '&copy; <a href="https://www.esri.com">Esri</a>';
 
 /* Dark-sky drive spots as dots on the map, plus a "you are here" marker. */
 export default function DarkSkyMap({ spots, loc }) {
@@ -24,9 +30,7 @@ export default function DarkSkyMap({ spots, loc }) {
       7,
     );
     L.tileLayer(BASE_URL, {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
+      attribution: ESRI_ATTR,
       maxZoom: 19,
     }).addTo(map);
     L.tileLayer(LIGHTS_URL, {
@@ -35,6 +39,7 @@ export default function DarkSkyMap({ spots, loc }) {
       opacity: 0.7,
       maxZoom: 8,
     }).addTo(map);
+    L.tileLayer(LABELS_URL, { maxZoom: 19 }).addTo(map);
     markersRef.current = L.layerGroup().addTo(map);
     mapRef.current = map;
     return () => {
