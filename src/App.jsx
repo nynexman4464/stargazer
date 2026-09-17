@@ -33,6 +33,7 @@ export default function App() {
   const [home, setHome] = useState(loadHome);
   const [tier, setTier] = useState('all');
   const [type, setType] = useState('all');
+  const [range, setRange] = useState('all');
   const [events, setEvents] = useState([]);
   const [spots, setSpots] = useState([]);
   const [scores, setScores] = useState({});
@@ -145,6 +146,8 @@ export default function App() {
                     setTier={setTier}
                     type={type}
                     setType={setType}
+                    range={range}
+                    setRange={setRange}
                   />
                 </GridSpan>
                 <GridSpan columns="full">

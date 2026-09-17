@@ -13,7 +13,7 @@ import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { useMediaQuery } from '@astryxdesign/core/hooks';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Telescope } from 'lucide-react';
-import { TIER_META, TYPE_META, fmtDate, countdown, DAY, eventImage } from '../lib/astro.js';
+import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage } from '../lib/astro.js';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
@@ -79,18 +79,20 @@ function EventCard({ ev, score }) {
   );
 }
 
-export default function EventFeed({ events, scores, loaded, tier, setTier, type, setType }) {
+export default function EventFeed({ events, scores, loaded, tier, setTier, type, setType, range, setRange }) {
   // Responsive contract: below 640px the filter rows can't fit all segments,
   // so they hug content and scroll inside the card instead of forcing the page
   // wider; the event cards stack in a single column.
   const isNarrow = useMediaQuery('(max-width: 640px)');
+  const inScope = (e) =>
+    (tier === 'all' || e.tier === tier) && inTimeRange(e, range);
   const counts = {};
   events.forEach((e) => {
-    if (tier === 'all' || e.tier === tier) counts[e.type] = (counts[e.type] || 0) + 1;
+    if (inScope(e)) counts[e.type] = (counts[e.type] || 0) + 1;
   });
   const types = Object.keys(TYPE_META).filter((t) => counts[t]);
   const list = events.filter(
-    (e) => (tier === 'all' || e.tier === tier) && (type === 'all' || e.type === type),
+    (e) => inScope(e) && (type === 'all' || e.type === type),
   );
 
   // minWidth: 0 lets this Card (a grid item) shrink below its content's
@@ -117,6 +119,17 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
               label={m.label}
               icon={<Icon icon={TIER_ICON[k]} size="sm" />}
             />
+          ))}
+        </SegmentedControl>
+        <SegmentedControl
+          value={range}
+          onChange={setRange}
+          label="Filter by time range"
+          layout={isNarrow ? undefined : 'fill'}
+          style={isNarrow ? { overflowX: 'auto' } : undefined}
+        >
+          {Object.entries(RANGE_META).map(([k, m]) => (
+            <SegmentedControlItem key={k} value={k} label={m.label} />
           ))}
         </SegmentedControl>
         <SegmentedControl

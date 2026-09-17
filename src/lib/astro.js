@@ -35,6 +35,38 @@ export const TYPE_META = {
   planet: { label: 'Planets', blurb: 'Planets at their closest and brightest, or planets appearing close together in the sky.' },
   comet: { label: 'Comets', blurb: 'Visiting ice-balls from the outer solar system. Bright ones are rare.' },
 };
+export const RANGE_META = {
+  '1m': { label: '1 mo', blurb: 'Next month' },
+  '3m': { label: '3 mo', blurb: 'Next 3 months' },
+  year: { label: 'This yr', blurb: 'Rest of this year' },
+  nextyear: { label: 'Next yr', blurb: 'Next calendar year' },
+  '5y': { label: '5 yrs', blurb: 'Next 5 years' },
+  '10y': { label: '10 yrs', blurb: 'Next 10 years' },
+  all: { label: 'All', blurb: 'Everything upcoming' },
+};
+
+/* Whether an event falls inside a time-range filter. 'year'/'nextyear' are
+ * calendar years; the rest are windows from today. Events are already
+ * future-filtered, so only the upper bound (and next year's lower bound)
+ * matters. */
+export function inTimeRange(ev, range) {
+  if (!range || range === 'all') return true;
+  const d = ev.date instanceof Date ? ev.date.getTime() : new Date(ev.date).getTime();
+  const now = new Date();
+  if (range === '1m') return d <= now.getTime() + 30 * DAY;
+  if (range === '3m') return d <= now.getTime() + 90 * DAY;
+  if (range === 'year') return d <= new Date(now.getFullYear(), 11, 31, 23, 59, 59).getTime();
+  if (range === 'nextyear') {
+    const y = now.getFullYear() + 1;
+    return d >= new Date(y, 0, 1).getTime() && d <= new Date(y, 11, 31, 23, 59, 59).getTime();
+  }
+  if (range === '5y' || range === '10y') {
+    const end = new Date(now);
+    end.setFullYear(end.getFullYear() + (range === '5y' ? 5 : 10));
+    return d <= end.getTime();
+  }
+  return true;
+}
 
 /* Illustration for an event card / hero: per-planet portraits for planet
  * Event art uses real NASA public-domain photos (see README > Imagery), not AI art.
