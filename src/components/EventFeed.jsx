@@ -65,11 +65,11 @@ function EventCard({ ev, score, loc }) {
               {dateStr} <Text type="supporting" weight="normal">{countdown(ev.date)}</Text>
             </Text>
             <Text type="large" weight="semibold">
-              <TermText text={ev.title} />
+              <TermText text={ev.title} exclude={ev.bodies} />
             </Text>
           </VStack>
         </HStack>
-        <Text type="supporting"><TermText text={ev.desc} /></Text>
+        <Text type="supporting"><TermText text={ev.desc} exclude={ev.bodies} /></Text>
         {ev.type === 'eclipse' && ev.map && (
           <VStack gap={2}>
             <HStack>
@@ -133,7 +133,7 @@ function EventCard({ ev, score, loc }) {
               {score.factors.map((f, i) => (
                 <HStack key={i} gap={1} vAlign="center">
                   <Icon icon={FACTOR_ICON[f.icon] || Cloud} size="sm" color="secondary" />
-                  <Text type="supporting"><TermText text={f.text} /></Text>
+                  <Text type="supporting"><TermText text={f.text} exclude={ev.bodies} /></Text>
                 </HStack>
               ))}
             </HStack>

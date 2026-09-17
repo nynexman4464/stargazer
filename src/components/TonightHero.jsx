@@ -76,11 +76,11 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc }) {
                   {img && <img src={img} alt="" className="sg-hero-img" />}
                   <VStack gap={0} style={{ minWidth: 0 }}>
                     <Heading level={1} type="display-2">
-                      <TermText text={pick.title} />
+                      <TermText text={pick.title} exclude={pick.bodies} />
                     </Heading>
                   </VStack>
                 </HStack>
-                <Text color="secondary"><TermText text={pick.desc} /></Text>
+                <Text color="secondary"><TermText text={pick.desc} exclude={pick.bodies} /></Text>
                 <Grid columns={{ minWidth: 220 }} gap={3}>
                   <VStack gap={1}>
                     <Text type="label" color="secondary">
@@ -129,7 +129,7 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc }) {
                         {score.factors.map((f, i) => (
                           <HStack key={i} gap={1} vAlign="center">
                             <Icon icon={FACTOR_ICON[f.icon] || Cloud} size="sm" color="secondary" />
-                            <Text type="supporting"><TermText text={f.text} /></Text>
+                            <Text type="supporting"><TermText text={f.text} exclude={pick.bodies} /></Text>
                           </HStack>
                         ))}
                       </VStack>

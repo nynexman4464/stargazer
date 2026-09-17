@@ -85,8 +85,12 @@ const fmtMag = (m) => `${m > 0 ? '+' : ''}${m}`;
    what it takes to see it. `exclude` skips reference labels containing it
    (case-insensitive) — e.g. an ISS pass shouldn't be compared to the ISS. */
 function magGuide(m, exclude) {
-  const refs = exclude
-    ? MAG_REFS.filter(([, label]) => !label.toLowerCase().includes(exclude.toLowerCase()))
+  const names = (Array.isArray(exclude) ? exclude : [exclude]).filter(Boolean);
+  const refs = names.length
+    ? MAG_REFS.filter(
+        ([, label]) =>
+          !names.some((n) => label.toLowerCase().includes(String(n).toLowerCase())),
+      )
     : MAG_REFS;
   let compare;
   if (refs.length === 0) {
@@ -145,9 +149,10 @@ export function Mag({ value, children, exclude }) {
 }
 
 /* Renders a plain string with every known jargon phrase wrapped in <Term>,
-   and every "magnitude N.N" reading wrapped in <Mag>. Original casing and
-   wording are preserved. */
-export function TermText({ text }) {
+   and every "magnitude N.N" reading wrapped in <Mag>. `exclude` (a body
+   name or list of them) keeps the comparison from naming the very object
+   being described. Original casing and wording are preserved. */
+export function TermText({ text, exclude }) {
   if (!text) return null;
   const out = [];
   let key = 0;
@@ -157,7 +162,7 @@ export function TermText({ text }) {
       if (i % 2 === 1) {
         const num = chunk.match(/[+-]?\d+(?:\.\d+)?/);
         out.push(
-          <Mag key={key++} value={num ? parseFloat(num[0]) : NaN}>
+          <Mag key={key++} value={num ? parseFloat(num[0]) : NaN} exclude={exclude}>
             {chunk}
           </Mag>,
         );
