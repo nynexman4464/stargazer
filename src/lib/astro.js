@@ -225,6 +225,14 @@ export function nextFullMoon(date) {
   return new Date(date.getTime() + dp * SYNODIC_MONTH * DAY);
 }
 
+/* Bundled realistic moon photo for a phase: Jay Tanner's 1-degree render set
+   (CC BY-SA 3.0, via Wikimedia Commons), sampled every 10 degrees into
+   public/img/moon/phase-000.jpg … phase-350.jpg. */
+export function moonPhaseImage(phase) {
+  const p = (((phase % 1) + 1) % 1) * 36;
+  const deg = (Math.round(p) % 36) * 10;
+  return `img/moon/phase-${String(deg).padStart(3, '0')}.jpg`;
+}
 /* solar position -> observer sun elevation in degrees */
 export function sunElev(date, lat, lon) {
   const JD = date.getTime() / DAY + 2440587.5;

@@ -88,6 +88,24 @@ body {
   background: var(--color-background-muted);
 }
 
+/* Realistic moon phase photos — Jay Tanner render set (public/img/moon).
+   Circular crop, like the event thumbnails. */
+.sg-moon-photo,
+.sg-moon-photo-sm {
+  object-fit: cover;
+  border-radius: 50%;
+  flex: none;
+  background: #000;
+}
+.sg-moon-photo {
+  width: calc(var(--spacing-12) * 3);
+  height: calc(var(--spacing-12) * 3);
+}
+.sg-moon-photo-sm {
+  width: calc(var(--spacing-12) * 1.25);
+  height: calc(var(--spacing-12) * 1.25);
+}
+
 /* Dark-sky drives map (Leaflet). Own stacking context so its panes stay under
    the app chrome; height fixed so the map has a box to render into. */
 .sg-darksky-map {

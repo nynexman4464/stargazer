@@ -80,7 +80,9 @@ Cassini, Voyager 2, SDO, NASA HQ/Armstrong/Glenn, courtesy NASA/JPL). The comet
 photo is 12P/Pons-Brooks by Don Heffernan, used under CC BY 2.0. The
 meteor-shower image is AI-generated. Eclipse path and visibility maps in
 `public/img/eclipse-maps/` are NASA public-domain charts (Fred Espenak,
-NASA's Goddard Space Flight Center).
+NASA's Goddard Space Flight Center). Moon phase photos in `public/img/moon/`
+are from Jay Tanner's rendered lunar phase set, used under CC BY-SA 3.0 via
+Wikimedia Commons.
 
 ## License
 

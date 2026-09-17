@@ -1,4 +1,4 @@
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card } from '@astryxdesign/core/Card';
 import { Heading } from '@astryxdesign/core/Text';
 import { Text } from '@astryxdesign/core/Text';
@@ -9,6 +9,7 @@ import {
   DAY,
   moonPhase,
   moonPhaseName,
+  moonPhaseImage,
   nextMoonPhase,
   nextFullMoon,
   fullMoonName,
@@ -19,55 +20,10 @@ import {
 
 const base = import.meta.env.BASE_URL;
 
-/* Moon disc drawn for the exact phase: the lit limb plus a terminator ellipse
-   whose width follows the phase angle. Waning phases are the waxing drawing
-   mirrored. Craters are clipped to the lit region. */
-function PhaseDisc({ phase, size = 104 }) {
-  const clipId = useId().replace(/:/g, '');
-  const p = phase <= 0.5 ? phase : 1 - phase; // waxing-equivalent
-  const waning = phase > 0.5 && phase < 1;
-  const cosT = Math.cos(2 * Math.PI * p);
-  const rx = Math.abs(50 * cosT);
-  const sweep = cosT >= 0 ? 1 : 0; // crescent: terminator bulges toward the lit limb
-  const lit = `M 50 0 A 50 50 0 0 1 50 100 A ${rx.toFixed(2)} 50 0 0 ${sweep} 50 0 Z`;
-  const disc = (
-    <>
-      <circle
-        cx="50"
-        cy="50"
-        r="49"
-        fill="rgba(255,255,255,0.07)"
-        stroke="rgba(255,255,255,0.18)"
-        strokeWidth="1.5"
-      />
-      {p > 0.004 && (
-        <g clipPath={`url(#${clipId})`}>
-          <circle cx="50" cy="50" r="49" fill="#E9E5D8" />
-          <circle cx="34" cy="38" r="7" fill="rgba(0,0,0,0.07)" />
-          <circle cx="62" cy="60" r="9" fill="rgba(0,0,0,0.06)" />
-          <circle cx="48" cy="74" r="5" fill="rgba(0,0,0,0.08)" />
-          <circle cx="68" cy="32" r="4" fill="rgba(0,0,0,0.07)" />
-          <circle cx="40" cy="58" r="3" fill="rgba(0,0,0,0.06)" />
-        </g>
-      )}
-      <clipPath id={clipId}>
-        <path d={lit} />
-      </clipPath>
-    </>
-  );
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 100 100"
-      role="img"
-      aria-label={`Moon phase illustration: ${moonPhaseName(phase)}`}
-    >
-      {waning ? <g transform="translate(100,0) scale(-1,1)">{disc}</g> : disc}
-    </svg>
-  );
-}
-
+/* The Moon, full-width: realistic phase photos (Jay Tanner render set),
+   current phase + illumination, the next phase coming up, and the next
+   full moon's traditional name — with a Blood Moon note when a total
+   lunar eclipse lines up with it. */
 export default function MoonPanel() {
   const now = new Date();
   const { phase, illum } = moonPhase(now);
@@ -105,44 +61,57 @@ export default function MoonPanel() {
     <Card padding={4}>
       <VStack gap={3}>
         <Heading level={2}>The Moon</Heading>
-        <HStack gap={4} vAlign="center">
-          <PhaseDisc phase={phase} />
-          <VStack gap={1}>
-            <Text type="label" color="secondary">
-              Right now
-            </Text>
-            <Text weight="semibold" size="lg">
-              {name}
-            </Text>
-            <Text type="supporting">{Math.round(illum * 100)}% lit</Text>
-          </VStack>
-        </HStack>
-        {upcoming && (
-          <HStack gap={3} vAlign="center">
-            <PhaseDisc phase={upcoming.phase} size={56} />
+        <HStack gap={4} vAlign="center" wrap="wrap">
+          <img
+            src={`${base}${moonPhaseImage(phase)}`}
+            alt={`The moon right now: ${name}`}
+            className="sg-moon-photo"
+          />
+          <VStack gap={3}>
             <VStack gap={1}>
               <Text type="label" color="secondary">
-                Up next
+                Right now
               </Text>
-              <Text weight="semibold">
-                {upcoming.name} — {fmtDate(upcoming.date)}
+              <Text weight="semibold" size="lg">
+                {name}
               </Text>
-              <Text type="supporting">{countdown(upcoming.date)}</Text>
+              <Text type="supporting">{Math.round(illum * 100)}% lit</Text>
             </VStack>
-          </HStack>
-        )}
-        <HStack gap={2} vAlign="center">
-          <Text type="label" color="secondary">
-            {isFullNow ? "Tonight's full moon" : 'Next full moon'}
-          </Text>
-          <Token label={fullMoonName(fullDate)} color="default" />
-          {bloodMoon && <Token label="Blood Moon" color="red" />}
+            {upcoming && (
+              <HStack gap={3} vAlign="center">
+                <img
+                  src={`${base}${moonPhaseImage(upcoming.phase)}`}
+                  alt={`Coming up: ${upcoming.name}`}
+                  loading="lazy"
+                  className="sg-moon-photo-sm"
+                />
+                <VStack gap={1}>
+                  <Text type="label" color="secondary">
+                    Up next
+                  </Text>
+                  <Text weight="semibold">
+                    {upcoming.name} — {fmtDate(upcoming.date)}
+                  </Text>
+                  <Text type="supporting">{countdown(upcoming.date)}</Text>
+                </VStack>
+              </HStack>
+            )}
+            <VStack gap={1}>
+              <HStack gap={2} vAlign="center">
+                <Text type="label" color="secondary">
+                  {isFullNow ? "Tonight's full moon" : 'Next full moon'}
+                </Text>
+                <Token label={fullMoonName(fullDate)} color="default" />
+                {bloodMoon && <Token label="Blood Moon" color="red" />}
+              </HStack>
+              {bloodMoon && (
+                <Text type="supporting">
+                  A total lunar eclipse that night — the moon will glow red where it's dark.
+                </Text>
+              )}
+            </VStack>
+          </VStack>
         </HStack>
-        {bloodMoon && (
-          <Text type="supporting">
-            A total lunar eclipse that night — the moon will glow red where it's dark.
-          </Text>
-        )}
       </VStack>
     </Card>
   );

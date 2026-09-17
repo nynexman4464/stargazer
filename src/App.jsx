@@ -169,7 +169,9 @@ export default function App() {
                 </GridSpan>
                 <AuroraPanel loc={loc} />
                 <PassesPanel loc={loc} bundledTles={tles} />
-                <MoonPanel />
+                <GridSpan columns="full">
+                  <MoonPanel />
+                </GridSpan>
                 <GridSpan columns="full">
                   <EventFeed
                     events={events}
