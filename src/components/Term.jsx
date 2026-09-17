@@ -36,10 +36,17 @@ export function Term({ term, children }) {
     <HoverCard
       label={`${term}: definition`}
       content={<Text type="supporting">{def}</Text>}
+      hasHoverIndication={false}
     >
       {/* type="inherit" keeps the link at the surrounding text size (e.g. the
-          hero's display heading) instead of dropping to body size. */}
-      <Link href="#sky-talk" type="inherit">
+          hero's display heading) instead of dropping to body size. Dotted
+          underline marks it as a definition link. */}
+      <Link
+        href="#sky-talk"
+        type="inherit"
+        hasUnderline
+        style={{ textDecorationStyle: 'dotted' }}
+      >
         {children}
       </Link>
     </HoverCard>
