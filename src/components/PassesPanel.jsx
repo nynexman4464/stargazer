@@ -23,7 +23,7 @@ import {
   countdown,
   compass,
 } from '../lib/astro.js';
-import { Term } from './Term.jsx';
+import { Mag } from './Term.jsx';
 
 /* Bright flyovers: ISS / Tiangong / Hubble tabs with visible-pass predictions.
    Each pass gets a 0-100 visibility score from peak elevation, the satellite's
@@ -168,7 +168,7 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
                       description={
                         <Text type="supporting">
                           {compass(p.startAz)} → {compass(p.endAz)} · peaks {Math.round(p.maxEl)}°
-                          at {fmtTime(p.maxT)} · <Term term="Magnitude">mag</Term> {p.mag} ({brightnessWords(p.mag)}) · {dur} min · score {p.score} — {p.label.toLowerCase()}
+                          at {fmtTime(p.maxT)} · <Mag value={p.mag}>mag {p.mag}</Mag> ({brightnessWords(p.mag)}) · {dur} min · score {p.score} — {p.label.toLowerCase()}
                         </Text>
                       }
                       endContent={

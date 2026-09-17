@@ -129,7 +129,7 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc }) {
                         {score.factors.map((f, i) => (
                           <HStack key={i} gap={1} vAlign="center">
                             <Icon icon={FACTOR_ICON[f.icon] || Cloud} size="sm" color="secondary" />
-                            <Text type="supporting">{f.text}</Text>
+                            <Text type="supporting"><TermText text={f.text} /></Text>
                           </HStack>
                         ))}
                       </VStack>

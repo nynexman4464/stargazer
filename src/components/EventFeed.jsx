@@ -69,7 +69,7 @@ function EventCard({ ev, score, loc }) {
             </Text>
           </VStack>
         </HStack>
-        <Text type="supporting">{ev.desc}</Text>
+        <Text type="supporting"><TermText text={ev.desc} /></Text>
         {ev.type === 'eclipse' && ev.map && (
           <VStack gap={2}>
             <HStack>
@@ -133,7 +133,7 @@ function EventCard({ ev, score, loc }) {
               {score.factors.map((f, i) => (
                 <HStack key={i} gap={1} vAlign="center">
                   <Icon icon={FACTOR_ICON[f.icon] || Cloud} size="sm" color="secondary" />
-                  <Text type="supporting">{f.text}</Text>
+                  <Text type="supporting"><TermText text={f.text} /></Text>
                 </HStack>
               ))}
             </HStack>

@@ -178,6 +178,23 @@ export default function AuroraPanel({ loc, viewDate }) {
                 </VStack>
               )}
               <TrendBars recent={data.recent} />
+              <VStack gap={1}>
+                <Text type="label" color="secondary">
+                  Aurora map — latest prediction
+                </Text>
+                <img
+                  src={`https://services.swpc.noaa.gov/images/animations/ovation/${loc.lat >= 0 ? 'north' : 'south'}/latest.jpg`}
+                  alt="NOAA's latest predicted aurora map: the green glow shows where aurora is likely right now"
+                  loading="lazy"
+                  className="sg-aurora-map"
+                />
+                <Text type="supporting">
+                  NOAA's latest 30-minute aurora prediction — the same public
+                  model behind their dashboard. Green glow is where aurora is
+                  likely; brighter green means a better chance. It refreshes
+                  every few minutes.
+                </Text>
+              </VStack>
             </VStack>
           )}
       </VStack>

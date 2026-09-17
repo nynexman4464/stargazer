@@ -217,3 +217,11 @@ body {
   width: calc(var(--spacing-12) * 2);
   height: calc(var(--spacing-12) * 2);
 }
+
+/* NOAA OVATION aurora prediction map: square polar view, full card width. */
+.sg-aurora-map {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-element);
+  border: 1px solid var(--color-border);
+}

@@ -1,6 +1,7 @@
 import { HoverCard } from '@astryxdesign/core/HoverCard';
 import { Link } from '@astryxdesign/core/Link';
 import { Text } from '@astryxdesign/core/Text';
+import { VStack } from '@astryxdesign/core/VStack';
 import { GLOSSARY } from '../lib/astro.js';
 
 /* Jargon phrases (lowercase) -> GLOSSARY term label. Longer phrases come
@@ -25,10 +26,28 @@ const TERM_PATTERN = new RegExp(
   `\\b(${TERM_INDEX.map(([phrase]) => escapeRegExp(phrase)).join('|')})\\b`,
   'gi',
 );
+/* "magnitude 7.8" / "magnitude +2.1" — matched before bare "magnitude" so the
+   hover can explain that specific brightness. */
+const MAG_VALUE_PATTERN = /(\bmagnitude\s+[+-]?\d+(?:\.\d+)?)/gi;
+
+/* The shared definition-link treatment: dotted underline, inherits the
+   surrounding text size (e.g. the hero's display heading), jumps to the
+   "Sky talk" glossary on tap where there's no hover. */
+function DefLink({ children }) {
+  return (
+    <Link
+      href="#sky-talk"
+      type="inherit"
+      hasUnderline
+      style={{ textDecorationStyle: 'dotted' }}
+    >
+      {children}
+    </Link>
+  );
+}
 
 /* A jargon term rendered as a link: hovering (or focusing) shows the
-   plain-language definition in a hover card; on touch devices a tap jumps
-   to the full "Sky talk" glossary instead. */
+   plain-language definition in a hover card. */
 export function Term({ term, children }) {
   const def = DEFS[term];
   if (!def) return children;
@@ -38,38 +57,111 @@ export function Term({ term, children }) {
       content={<Text type="supporting">{def}</Text>}
       hasHoverIndication={false}
     >
-      {/* type="inherit" keeps the link at the surrounding text size (e.g. the
-          hero's display heading) instead of dropping to body size. Dotted
-          underline marks it as a definition link. */}
-      <Link
-        href="#sky-talk"
-        type="inherit"
-        hasUnderline
-        style={{ textDecorationStyle: 'dotted' }}
-      >
-        {children}
-      </Link>
+      <DefLink>{children}</DefLink>
     </HoverCard>
   );
 }
 
-/* Renders a plain string with every known jargon phrase wrapped in <Term>.
-   Original casing is preserved. */
+/* Familiar brightness landmarks, as visual magnitudes (lower = brighter). */
+const MAG_REFS = [
+  [-26.7, 'the Sun'],
+  [-12.7, 'the full moon'],
+  [-4.6, 'Venus at its brightest'],
+  [-4, 'the ISS at its brightest'],
+  [-1.5, 'Sirius, the brightest star'],
+  [2.0, 'Polaris, the North Star'],
+  [5.6, 'Uranus at its best'],
+  [6, 'the faintest stars most people can see'],
+  [7.8, 'Neptune at its best'],
+  [14, 'Pluto'],
+];
+
+const fmtMag = (m) => `${m > 0 ? '+' : ''}${m}`;
+
+/* Plain-language comparison of a magnitude against familiar objects, plus
+   what it takes to see it. */
+function magGuide(m) {
+  let compare;
+  const nearest = MAG_REFS.reduce((a, b) =>
+    Math.abs(b[0] - m) < Math.abs(a[0] - m) ? b : a,
+  );
+  if (Math.abs(nearest[0] - m) <= 0.4) {
+    compare = `About as bright as ${nearest[1]} (${fmtMag(nearest[0])}).`;
+  } else {
+    const brighter = [...MAG_REFS].reverse().find(([v]) => v < m);
+    const dimmer = MAG_REFS.find(([v]) => v > m);
+    if (brighter && dimmer) {
+      compare = `Dimmer than ${brighter[1]} (${fmtMag(brighter[0])}), brighter than ${dimmer[1]} (${fmtMag(dimmer[0])}).`;
+    } else if (dimmer) {
+      compare = `Brighter than ${dimmer[1]} (${fmtMag(dimmer[0])}) — one of the brightest things in the sky.`;
+    } else {
+      compare = `Dimmer than ${brighter[1]} (${fmtMag(brighter[0])}) — very faint.`;
+    }
+  }
+  let verdict;
+  if (m <= 6) verdict = 'Visible to the naked eye under dark skies.';
+  else if (m <= 10) verdict = 'Too dim for the naked eye — binoculars will show it.';
+  else verdict = 'Telescope territory.';
+  return { compare, verdict };
+}
+
+/* A magnitude reading with a value-aware hover: what the scale means, how
+   this brightness compares to familiar objects, and what it takes to see. */
+export function Mag({ value, children }) {
+  const m = Number(value);
+  if (!Number.isFinite(m)) return children ?? null;
+  const { compare, verdict } = magGuide(m);
+  return (
+    <HoverCard
+      label={`Magnitude ${fmtMag(m)}: brightness guide`}
+      content={
+        <VStack gap={1}>
+          <Text weight="semibold">Magnitude {fmtMag(m)}</Text>
+          <Text type="supporting">
+            Brightness scale — and it runs backwards: lower (or negative)
+            means brighter.
+          </Text>
+          <Text type="supporting">{compare}</Text>
+          <Text type="supporting">{verdict}</Text>
+        </VStack>
+      }
+      hasHoverIndication={false}
+    >
+      <DefLink>{children ?? `magnitude ${fmtMag(m)}`}</DefLink>
+    </HoverCard>
+  );
+}
+
+/* Renders a plain string with every known jargon phrase wrapped in <Term>,
+   and every "magnitude N.N" reading wrapped in <Mag>. Original casing and
+   wording are preserved. */
 export function TermText({ text }) {
   if (!text) return null;
-  const parts = String(text).split(TERM_PATTERN);
-  if (parts.length === 1) return text;
-  return (
-    <>
-      {parts.map((part, i) =>
-        i % 2 === 1 ? (
-          <Term key={i} term={LOOKUP[part.toLowerCase()]}>
-            {part}
-          </Term>
-        ) : (
-          part
-        ),
-      )}
-    </>
-  );
+  const out = [];
+  let key = 0;
+  String(text)
+    .split(MAG_VALUE_PATTERN)
+    .forEach((chunk, i) => {
+      if (i % 2 === 1) {
+        const num = chunk.match(/[+-]?\d+(?:\.\d+)?/);
+        out.push(
+          <Mag key={key++} value={num ? parseFloat(num[0]) : NaN}>
+            {chunk}
+          </Mag>,
+        );
+      } else {
+        chunk.split(TERM_PATTERN).forEach((part, j) => {
+          if (j % 2 === 1) {
+            out.push(
+              <Term key={key++} term={LOOKUP[part.toLowerCase()]}>
+                {part}
+              </Term>,
+            );
+          } else if (part) {
+            out.push(part);
+          }
+        });
+      }
+    });
+  return <>{out}</>;
 }
