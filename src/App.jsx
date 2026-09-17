@@ -101,6 +101,15 @@ export default function App() {
           const t = e.date instanceof Date ? e.date.getTime() : new Date(e.date).getTime();
           return t >= start && t < end;
         });
+        // Empty window: the hero falls back to the next event on/after the
+        // viewing date, so score that instead of leaving it unscored.
+        if (targets.length === 0) {
+          const next = events.find((e) => {
+            const t = e.date instanceof Date ? e.date.getTime() : new Date(e.date).getTime();
+            return t >= start;
+          });
+          if (next) targets = [next];
+        }
       } else {
         targets = events.slice(0, 8);
       }
@@ -151,8 +160,9 @@ export default function App() {
 
   /* ---- hero pick ----
      Today: soonest events as before. Fast-forwarded: the best-scoring event
-     in the 3-day window starting on the viewing date (or null — the hero
-     then shows a "quiet skies" note). */
+     in the 3-day window starting on the viewing date — or, when that window
+     is empty, the next event on/after the viewing date (mirroring Today's
+     fallback to the next upcoming event). */
   const heroCands = (() => {
     if (!anchorDay) {
       const nowMs = Date.now();
@@ -165,12 +175,22 @@ export default function App() {
       return t >= start && t < end;
     });
   })();
+  // Next event on/after the viewing date (events are future-filtered and
+  // date-sorted). For Today this is just events[0], as before.
+  const nextAfterAnchor = (() => {
+    if (!anchorDay) return events[0];
+    const start = anchorDay.getTime();
+    return events.find((e) => {
+      const t = e.date instanceof Date ? e.date.getTime() : new Date(e.date).getTime();
+      return t >= start;
+    });
+  })();
   const pick =
     heroCands
       .filter((e) => scores[e.id])
       .sort((a, b) => scores[b.id].score - scores[a.id].score)[0] ||
     heroCands[0] ||
-    (!anchorDay ? events[0] : null) ||
+    nextAfterAnchor ||
     null;
   const pickIsTonight = !anchorDay && !!pick && heroCands.includes(pick);
 
