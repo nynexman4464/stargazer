@@ -78,7 +78,9 @@ Event photos in `public/img/events/` are real astronomical photos. Planets and
 eclipses are NASA public-domain images (MESSENGER, Mariner 10, Hubble, Juno,
 Cassini, Voyager 2, SDO, NASA HQ/Armstrong/Glenn, courtesy NASA/JPL). The comet
 photo is 12P/Pons-Brooks by Don Heffernan, used under CC BY 2.0. The
-meteor-shower image is AI-generated.
+meteor-shower image is AI-generated. Eclipse path and visibility maps in
+`public/img/eclipse-maps/` are NASA public-domain charts (Fred Espenak,
+NASA's Goddard Space Flight Center).
 
 ## License
 

@@ -80,6 +80,14 @@ body {
   height: calc(var(--spacing-12) * 1.5);
 }
 
+/* NASA eclipse path/visibility maps bundled in public/img/eclipse-maps. */
+.sg-eclipse-map {
+  width: 100%;
+  height: auto;
+  border-radius: var(--radius-element);
+  background: var(--color-background-muted);
+}
+
 .sg-hero-img {
   width: calc(var(--spacing-12) * 2);
   height: calc(var(--spacing-12) * 2);

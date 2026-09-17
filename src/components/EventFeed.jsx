@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card } from '@astryxdesign/core/Card';
 import { Heading } from '@astryxdesign/core/Text';
 import { Text } from '@astryxdesign/core/Text';
@@ -5,6 +6,7 @@ import { VStack } from '@astryxdesign/core/VStack';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Grid } from '@astryxdesign/core/Grid';
 import { Token } from '@astryxdesign/core/Token';
+import { Button } from '@astryxdesign/core/Button';
 import { SegmentedControl } from '@astryxdesign/core/SegmentedControl';
 import { SegmentedControlItem } from '@astryxdesign/core/SegmentedControl';
 import { ProgressBar } from '@astryxdesign/core/ProgressBar';
@@ -12,7 +14,7 @@ import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { useMediaQuery } from '@astryxdesign/core/hooks';
-import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Telescope } from 'lucide-react';
+import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Telescope, Map } from 'lucide-react';
 import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage } from '../lib/astro.js';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
@@ -25,6 +27,7 @@ function scoreVariant(label) {
 }
 
 function EventCard({ ev, score }) {
+  const [mapOpen, setMapOpen] = useState(false);
   const dateStr =
     ev.end && ev.end - ev.date > 2 * DAY
       ? `${fmtDate(ev.date)} – ${fmtDate(ev.end)}`
@@ -57,6 +60,29 @@ function EventCard({ ev, score }) {
           </VStack>
         </HStack>
         <Text type="supporting">{ev.desc}</Text>
+        {ev.type === 'eclipse' && ev.map && (
+          <VStack gap={2}>
+            <HStack>
+              <Button
+                variant="ghost"
+                size="sm"
+                label={mapOpen ? 'Hide path map' : 'Show path map'}
+                icon={<Icon icon={Map} size="sm" />}
+                onClick={() => setMapOpen((v) => !v)}
+              />
+            </HStack>
+            {mapOpen && (
+              <VStack gap={1}>
+                <img src={ev.map} alt={`NASA eclipse path map for ${ev.title}`} loading="lazy" className="sg-eclipse-map" />
+                <Text type="supporting">
+                  {ev.solar
+                    ? 'Dark band: where the total or annular eclipse is visible. Map: NASA.'
+                    : 'White area: where the eclipse is visible. Map: NASA.'}
+                </Text>
+              </VStack>
+            )}
+          </VStack>
+        )}
         {score && (
           <VStack gap={1}>
             <ProgressBar
