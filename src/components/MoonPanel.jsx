@@ -61,13 +61,13 @@ export default function MoonPanel() {
     <Card padding={4}>
       <VStack gap={3}>
         <Heading level={2}>The Moon</Heading>
-        <HStack gap={4} vAlign="center" wrap="wrap">
-          <img
-            src={`${base}${moonPhaseImage(phase)}`}
-            alt={`The moon right now: ${name}`}
-            className="sg-moon-photo"
-          />
-          <VStack gap={3}>
+        <HStack gap={5} vAlign="center" wrap="wrap" hAlign="between">
+          <HStack gap={4} vAlign="center">
+            <img
+              src={`${base}${moonPhaseImage(phase)}`}
+              alt={`The moon right now: ${name}`}
+              className="sg-moon-photo"
+            />
             <VStack gap={1}>
               <Text type="label" color="secondary">
                 Right now
@@ -77,39 +77,39 @@ export default function MoonPanel() {
               </Text>
               <Text type="supporting">{Math.round(illum * 100)}% lit</Text>
             </VStack>
-            {upcoming && (
-              <HStack gap={3} vAlign="center">
-                <img
-                  src={`${base}${moonPhaseImage(upcoming.phase)}`}
-                  alt={`Coming up: ${upcoming.name}`}
-                  loading="lazy"
-                  className="sg-moon-photo-sm"
-                />
-                <VStack gap={1}>
-                  <Text type="label" color="secondary">
-                    Up next
-                  </Text>
-                  <Text weight="semibold">
-                    {upcoming.name} — {fmtDate(upcoming.date)}
-                  </Text>
-                  <Text type="supporting">{countdown(upcoming.date)}</Text>
-                </VStack>
-              </HStack>
-            )}
-            <VStack gap={1}>
-              <HStack gap={2} vAlign="center">
+          </HStack>
+          {upcoming && (
+            <HStack gap={3} vAlign="center">
+              <img
+                src={`${base}${moonPhaseImage(upcoming.phase)}`}
+                alt={`Coming up: ${upcoming.name}`}
+                loading="lazy"
+                className="sg-moon-photo-sm"
+              />
+              <VStack gap={1}>
                 <Text type="label" color="secondary">
-                  {isFullNow ? "Tonight's full moon" : 'Next full moon'}
+                  Up next
                 </Text>
-                <Token label={fullMoonName(fullDate)} color="default" />
-                {bloodMoon && <Token label="Blood Moon" color="red" />}
-              </HStack>
-              {bloodMoon && (
-                <Text type="supporting">
-                  A total lunar eclipse that night — the moon will glow red where it's dark.
+                <Text weight="semibold">
+                  {upcoming.name} — {fmtDate(upcoming.date)}
                 </Text>
-              )}
-            </VStack>
+                <Text type="supporting">{countdown(upcoming.date)}</Text>
+              </VStack>
+            </HStack>
+          )}
+          <VStack gap={1}>
+            <Text type="label" color="secondary">
+              {isFullNow ? "Tonight's full moon" : 'Next full moon'}
+            </Text>
+            <HStack gap={2} vAlign="center">
+              <Token label={fullMoonName(fullDate)} color="default" />
+              {bloodMoon && <Token label="Blood Moon" color="red" />}
+            </HStack>
+            {bloodMoon && (
+              <Text type="supporting">
+                A total lunar eclipse that night — the moon will glow red where it's dark.
+              </Text>
+            )}
           </VStack>
         </HStack>
       </VStack>
