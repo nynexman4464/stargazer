@@ -105,13 +105,13 @@ function EventCard({ ev, score }) {
   );
 }
 
-export default function EventFeed({ events, scores, loaded, tier, setTier, type, setType, range, setRange }) {
+export default function EventFeed({ events, scores, loaded, tier, setTier, type, setType, range, setRange, anchor }) {
   // Responsive contract: below 640px the filter rows can't fit all segments,
   // so they hug content and scroll inside the card instead of forcing the page
   // wider; the event cards stack in a single column.
   const isNarrow = useMediaQuery('(max-width: 640px)');
   const inScope = (e) =>
-    (tier === 'all' || e.tier === tier) && inTimeRange(e, range);
+    (tier === 'all' || e.tier === tier) && inTimeRange(e, range, anchor);
   const counts = {};
   events.forEach((e) => {
     if (inScope(e)) counts[e.type] = (counts[e.type] || 0) + 1;
@@ -121,9 +121,14 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
     (e) => inScope(e) && (type === 'all' || e.type === type),
   );
   // The feed shows the first page of cards; "Load more" reveals the rest.
-  // Reset to the first page whenever the filters change.
+  // Reset to the first page whenever the filters (or viewing date) change.
   const PAGE_SIZE = 20;
   const [visible, setVisible] = useState(PAGE_SIZE);
+  const [prevAnchor, setPrevAnchor] = useState(anchor);
+  if (prevAnchor !== anchor) {
+    setPrevAnchor(anchor);
+    setVisible(PAGE_SIZE);
+  }
   const shown = list.slice(0, visible);
   const remaining = list.length - shown.length;
   const pickTier = (v) => {
@@ -145,7 +150,7 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
   return (
     <Card padding={4} style={{ minWidth: 0 }}>
       <VStack gap={3}>
-        <Heading level={2}>Upcoming events</Heading>
+        <Heading level={2}>{anchor ? `Events · from ${fmtDate(anchor)}` : 'Upcoming events'}</Heading>
         <SegmentedControl
           value={tier}
           onChange={pickTier}

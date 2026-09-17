@@ -1,5 +1,6 @@
 import { TopNav } from '@astryxdesign/core/TopNav';
 import { TopNavHeading } from '@astryxdesign/core/TopNav';
+import { HStack } from '@astryxdesign/core/HStack';
 import {
   DropdownMenu,
   DropdownMenuRadioGroup,
@@ -9,6 +10,7 @@ import {
 } from '@astryxdesign/core/DropdownMenu';
 import { Icon } from '@astryxdesign/core/Icon';
 import { Telescope, MapPin, House } from 'lucide-react';
+import ViewingDate from './ViewingDate.jsx';
 
 /* Location menu: a real dropdown (bottom sheet on touch) to flip the viewing
    location between home and the last away spot, with the full location
@@ -21,6 +23,8 @@ export default function TopBar({
   onSelectHome,
   onSelectAway,
   onOpenLocation,
+  viewDate,
+  onViewDate,
 }) {
   return (
     <TopNav
@@ -33,7 +37,9 @@ export default function TopBar({
         />
       }
       endContent={
-        <DropdownMenu
+        <HStack gap={2} vAlign="center">
+          <ViewingDate viewDate={viewDate} onChange={onViewDate} />
+          <DropdownMenu
           presentation="adaptive"
           placement="below"
           alignment="end"
@@ -68,6 +74,7 @@ export default function TopBar({
           <DropdownMenuDivider />
           <DropdownMenuItem label="Update locations…" onClick={onOpenLocation} />
         </DropdownMenu>
+        </HStack>
       }
     />
   );

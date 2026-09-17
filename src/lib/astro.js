@@ -46,22 +46,25 @@ export const RANGE_META = {
 };
 
 /* Whether an event falls inside a time-range filter. 'year'/'nextyear' are
- * calendar years; the rest are windows from today. Events are already
- * future-filtered, so only the upper bound (and next year's lower bound)
- * matters. */
-export function inTimeRange(ev, range) {
-  if (!range || range === 'all') return true;
+ * calendar years; the rest are windows from the reference point. Without an
+ * anchor the reference is now and events are already future-filtered, so only
+ * the upper bound (and next year's lower bound) matters. With a viewing-date
+ * anchor, the windows rebase onto that day and events before it are cut. */
+export function inTimeRange(ev, range, anchor) {
   const d = ev.date instanceof Date ? ev.date.getTime() : new Date(ev.date).getTime();
-  const now = new Date();
-  if (range === '1m') return d <= now.getTime() + 30 * DAY;
-  if (range === '3m') return d <= now.getTime() + 90 * DAY;
-  if (range === 'year') return d <= new Date(now.getFullYear(), 11, 31, 23, 59, 59).getTime();
+  const ref = anchor ? startOfDay(anchor) : new Date();
+  if (anchor && d < ref.getTime()) return false;
+  if (!range || range === 'all') return true;
+  const t = ref.getTime();
+  if (range === '1m') return d <= t + 30 * DAY;
+  if (range === '3m') return d <= t + 90 * DAY;
+  if (range === 'year') return d <= new Date(ref.getFullYear(), 11, 31, 23, 59, 59).getTime();
   if (range === 'nextyear') {
-    const y = now.getFullYear() + 1;
+    const y = ref.getFullYear() + 1;
     return d >= new Date(y, 0, 1).getTime() && d <= new Date(y, 11, 31, 23, 59, 59).getTime();
   }
   if (range === '5y' || range === '10y') {
-    const end = new Date(now);
+    const end = new Date(ref);
     end.setFullYear(end.getFullYear() + (range === '5y' ? 5 : 10));
     return d <= end.getTime();
   }
@@ -298,6 +301,12 @@ export function isoDay(d) {
   return (
     d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')
   );
+}
+/* Local-midnight start of the given day. */
+export function startOfDay(d) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  return x;
 }
 export function cap(s) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -831,11 +840,11 @@ export async function fetchTLE(norad, bundled) {
 
 /* satrec: built by the caller via satellite.js twoline2satrec (kept injectable for tests).
  * mag: the satellite's typical peak visual magnitude, stamped onto each pass. */
-export function computePasses(satrec, lat, lon, hours, mag) {
+export function computePasses(satrec, lat, lon, hours, mag, from) {
   // NOTE: satellite.js v5+ ecfToLookAngles takes observer as geodetic (radians), not ECF
   const observerGd = { latitude: lat * RAD, longitude: lon * RAD, height: 0.05 };
   const step = 30 * 1000;
-  const now = Date.now();
+  const now = from ? new Date(from).getTime() : Date.now();
   const end = now + hours * 3600000;
   const passes = [];
   let cur = null;

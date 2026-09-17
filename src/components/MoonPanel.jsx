@@ -24,16 +24,17 @@ const base = import.meta.env.BASE_URL;
    current phase + illumination, the next phase coming up, and the next
    full moon's traditional name — with a Blood Moon note when a total
    lunar eclipse lines up with it. */
-export default function MoonPanel() {
-  const now = new Date();
-  const { phase, illum } = moonPhase(now);
+export default function MoonPanel({ asOf }) {
+  // Fast-forwarded: show the moon "that night" — the viewing date at 9pm local.
+  const ref = asOf
+    ? new Date(asOf.getFullYear(), asOf.getMonth(), asOf.getDate(), 21)
+    : new Date();
+  const { phase, illum } = moonPhase(ref);
   const name = moonPhaseName(phase);
-  const upcoming = nextMoonPhase(now);
+  const upcoming = nextMoonPhase(ref);
   const isFullNow = phase > 0.46 && phase < 0.54;
   // The full moon we're featuring: tonight's if it's full now, else the next one.
-  const [fullTs] = useState(() =>
-    (isFullNow ? now : nextFullMoon(now)).getTime(),
-  );
+  const fullTs = (isFullNow ? ref : nextFullMoon(ref)).getTime();
   const fullDate = new Date(fullTs);
   const [bloodMoon, setBloodMoon] = useState(false);
 
@@ -65,12 +66,12 @@ export default function MoonPanel() {
           <HStack gap={4} vAlign="center">
             <img
               src={`${base}${moonPhaseImage(phase)}`}
-              alt={`The moon right now: ${name}`}
+              alt={`The moon ${asOf ? 'that night' : 'right now'}: ${name}`}
               className="sg-moon-photo"
             />
             <VStack gap={1}>
               <Text type="label" color="secondary">
-                Right now
+                {asOf ? `That night · ${fmtDate(asOf)}` : 'Right now'}
               </Text>
               <Text weight="semibold" size="lg">
                 {name}

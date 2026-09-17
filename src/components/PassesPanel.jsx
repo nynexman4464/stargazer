@@ -28,11 +28,13 @@ import {
    Each pass gets a 0-100 visibility score from peak elevation, the satellite's
    typical visual magnitude, and forecast cloud cover at pass time. Tabs show
    the best score at a glance. */
-export default function PassesPanel({ loc, bundledTles }) {
+export default function PassesPanel({ loc, bundledTles, fromDate }) {
   const [norad, setNorad] = useState(SATS[0].norad);
   const [allPasses, setAllPasses] = useState(null); // null = loading, else { [norad]: scored passes }
   const [failedSats, setFailedSats] = useState([]);
   const wxCache = useRef({});
+  // Fast-forwarded: propagate orbits from the viewing date instead of now.
+  const fromMs = fromDate ? fromDate.getTime() : null;
 
   useEffect(() => {
     // Wait for the bundled TLEs (loaded by the app boot) so the first
@@ -56,7 +58,7 @@ export default function PassesPanel({ loc, bundledTles }) {
             const [l1, l2] = await fetchTLE(s.norad, bundledTles);
             if (cancelled) return;
             const satrec = twoline2satrec(l1, l2);
-            const passes = computePasses(satrec, loc.lat, loc.lon, 72, s.mag);
+            const passes = computePasses(satrec, loc.lat, loc.lon, 72, s.mag, fromMs);
             const scored = await Promise.all(
               passes.map(async (p) => {
                 const sc = await passScore(p, s.mag, loc, wxCache.current);
@@ -76,7 +78,7 @@ export default function PassesPanel({ loc, bundledTles }) {
       cancelled = true;
       clearTimeout(t);
     };
-  }, [loc, bundledTles]);
+  }, [loc, bundledTles, fromMs]);
 
   const satName = SATS.find((s) => s.norad === norad)?.name || '';
   const passes = allPasses?.[norad] ?? null;
@@ -96,7 +98,11 @@ export default function PassesPanel({ loc, bundledTles }) {
       <VStack gap={3}>
         <VStack gap={1}>
           <Heading level={2}>Bright flyovers</Heading>
-          <Text type="supporting">ISS · Tiangong · Hubble — next 3 days. Tab badge is the visibility score (0–100): height, brightness, clouds.</Text>
+          <Text type="supporting">
+            ISS · Tiangong · Hubble —{' '}
+            {fromDate ? `3 days from ${fmtDate(fromDate)}` : 'next 3 days'}. Tab badge is the
+            visibility score (0–100): height, brightness, clouds.
+          </Text>
         </VStack>
         <VStack gap={3}>
           <TabList
@@ -136,7 +142,9 @@ export default function PassesPanel({ loc, bundledTles }) {
             ) : passes.length === 0 ? (
               <EmptyState
                 title={`No good visible passes`}
-                description={`${satName} won't make a good visible pass in the next 3 days from ${loc.name}.`}
+                description={`${satName} won't make a good visible pass ${
+                  fromDate ? `in the 3 days from ${fmtDate(fromDate)}` : 'in the next 3 days'
+                } from ${loc.name}.`}
                 icon={<Icon icon={Satellite} size="lg" color="secondary" />}
                 isCompact
               />

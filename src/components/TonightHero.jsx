@@ -10,7 +10,7 @@ import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon } from 'lucide-react';
 import Starfield from './Starfield.jsx';
-import { TIER_META, TYPE_META, fmtDate, countdown, moonIllum, moonName, eventImage } from '../lib/astro.js';
+import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eventImage } from '../lib/astro.js';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
@@ -21,26 +21,41 @@ function scoreVariant(label) {
   return label === 'Go' ? 'success' : label === 'Maybe' ? 'warning' : 'error';
 }
 
-export default function TonightHero({ pick, score, isTonight }) {
+export default function TonightHero({ pick, score, isTonight, viewDate }) {
   // Everything in this card refers to the pick's own date — never mix
   // tonight's moon/conditions with a future event's. The full current-moon
   // picture lives in the Moon panel below.
   const moon = pick ? moonIllum(pick.date) : 0;
   const img = pick ? eventImage(pick) : null;
+  const kicker = viewDate ? `Viewing · ${fmtDate(viewDate)}` : isTonight ? "Tonight's sky" : 'Coming up';
+  const beyondForecast = !!pick && (pick.date - Date.now()) / DAY > 15;
   return (
     <Card className="sg-hero" padding={4}>
       <VStack gap={3}>
         <Text type="label" color="accent">
-          {isTonight ? "Tonight's sky" : 'Coming up'}
+          {kicker}
         </Text>
         <Starfield />
         <VStack gap={3} className="sg-hero-content">
             {!pick ? (
-              <VStack gap={2}>
-                <Skeleton height={24} width="60%" />
-                <Skeleton height={16} width="90%" />
-                <Skeleton height={16} width="75%" />
-              </VStack>
+              viewDate ? (
+                <VStack gap={2}>
+                  <Heading level={1} type="display-2">
+                    Quiet skies
+                  </Heading>
+                  <Text color="secondary">
+                    Nothing in the catalog for {fmtDate(viewDate)} through{' '}
+                    {fmtDate(new Date(viewDate.getTime() + 2 * DAY))}. The feed
+                    below still lists everything coming up — or pick another date.
+                  </Text>
+                </VStack>
+              ) : (
+                <VStack gap={2}>
+                  <Skeleton height={24} width="60%" />
+                  <Skeleton height={16} width="90%" />
+                  <Skeleton height={16} width="75%" />
+                </VStack>
+              )
             ) : (
               <>
                 <HStack gap={2}>
@@ -86,6 +101,8 @@ export default function TonightHero({ pick, score, isTonight }) {
                         hasValueLabel
                         variant={scoreVariant(score.label)}
                       />
+                    ) : beyondForecast ? (
+                      <Text type="supporting">Too far out — forecasts only reach about two weeks.</Text>
                     ) : (
                       <Text type="supporting">Scoring the sky…</Text>
                     )}

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AppShell } from '@astryxdesign/core/AppShell';
 import { Layout } from '@astryxdesign/core/Layout';
 import { LayoutContent } from '@astryxdesign/core/Layout';
@@ -27,6 +27,7 @@ import {
   loadTles,
   normalizeEvents,
   goScore,
+  startOfDay,
 } from './lib/astro.js';
 
 const base = import.meta.env.BASE_URL;
@@ -52,6 +53,10 @@ export default function App() {
   const [tles, setTles] = useState(null);
   const [loaded, setLoaded] = useState(false);
   const [locOpen, setLocOpen] = useState(false);
+  /* Viewing date ("fast forward"): null = today. A picked date re-anchors
+     the hero, event feed, moon panel, and flyovers onto that day. */
+  const [viewDate, setViewDate] = useState(null);
+  const anchorDay = useMemo(() => (viewDate ? startOfDay(viewDate) : null), [viewDate]);
   const weatherCache = useRef({});
 
   const away = isAway(loc, home);
@@ -76,7 +81,10 @@ export default function App() {
     })();
   }, []);
 
-  /* ---- go-scores for the next few events (async, non-blocking) ---- */
+  /* ---- go-scores (async, non-blocking) ----
+     Today: the nearest events, as before. Fast-forwarded: the events in the
+     hero's 3-day viewing window. Beyond ~15 days there's no forecast, so
+     those are skipped (goScore returns null there anyway). */
   useEffect(() => {
     weatherCache.current = {};
     setScores({});
@@ -85,7 +93,18 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      for (const e of events.slice(0, 8)) {
+      let targets;
+      if (anchorDay) {
+        const start = anchorDay.getTime();
+        const end = start + 3 * DAY;
+        targets = events.filter((e) => {
+          const t = e.date instanceof Date ? e.date.getTime() : new Date(e.date).getTime();
+          return t >= start && t < end;
+        });
+      } else {
+        targets = events.slice(0, 8);
+      }
+      for (const e of targets.slice(0, 8)) {
         if (cancelled) return;
         if ((e.date - Date.now()) / DAY >= 15) continue;
         const sc = await goScore(e, loc, weatherCache.current);
@@ -96,7 +115,7 @@ export default function App() {
     return () => {
       cancelled = true;
     };
-  }, [events, loc]);
+  }, [events, loc, anchorDay]);
 
   /* ---- location ---- */
   const applyLoc = useCallback(
@@ -130,18 +149,30 @@ export default function App() {
     setHome(next);
   }, [loc]);
 
-  /* ---- tonight's pick ---- */
-  const soon = events.filter(
-    (e) => e.date - Date.now() < 60 * 3600000 && e.date - Date.now() > -6 * 3600000,
-  );
+  /* ---- hero pick ----
+     Today: soonest events as before. Fast-forwarded: the best-scoring event
+     in the 3-day window starting on the viewing date (or null — the hero
+     then shows a "quiet skies" note). */
+  const heroCands = (() => {
+    if (!anchorDay) {
+      const nowMs = Date.now();
+      return events.filter((e) => e.date - nowMs < 60 * 3600000 && e.date - nowMs > -6 * 3600000);
+    }
+    const start = anchorDay.getTime();
+    const end = start + 3 * DAY;
+    return events.filter((e) => {
+      const t = e.date instanceof Date ? e.date.getTime() : new Date(e.date).getTime();
+      return t >= start && t < end;
+    });
+  })();
   const pick =
-    soon
+    heroCands
       .filter((e) => scores[e.id])
       .sort((a, b) => scores[b.id].score - scores[a.id].score)[0] ||
-    soon[0] ||
-    events[0] ||
+    heroCands[0] ||
+    (!anchorDay ? events[0] : null) ||
     null;
-  const pickIsTonight = !!pick && soon.includes(pick);
+  const pickIsTonight = !anchorDay && !!pick && heroCands.includes(pick);
 
   return (
     <>
@@ -157,6 +188,8 @@ export default function App() {
             onSelectHome={backHome}
             onSelectAway={goAway}
             onOpenLocation={() => setLocOpen(true)}
+            viewDate={viewDate}
+            onViewDate={setViewDate}
           />
         }
       >
@@ -165,12 +198,17 @@ export default function App() {
             <VStack gap={4}>
               <Grid columns={{ minWidth: 320, max: 2 }} gap={4} width="100%">
                 <GridSpan columns="full">
-                  <TonightHero pick={pick} score={pick ? scores[pick.id] : null} isTonight={pickIsTonight} />
+                  <TonightHero
+                    pick={pick}
+                    score={pick ? scores[pick.id] : null}
+                    isTonight={pickIsTonight}
+                    viewDate={viewDate}
+                  />
                 </GridSpan>
                 <AuroraPanel loc={loc} />
-                <PassesPanel loc={loc} bundledTles={tles} />
+                <PassesPanel loc={loc} bundledTles={tles} fromDate={anchorDay} />
                 <GridSpan columns="full">
-                  <MoonPanel />
+                  <MoonPanel asOf={anchorDay} />
                 </GridSpan>
                 <GridSpan columns="full">
                   <EventFeed
@@ -183,6 +221,7 @@ export default function App() {
                     setType={setType}
                     range={range}
                     setRange={setRange}
+                    anchor={anchorDay}
                   />
                 </GridSpan>
                 <GridSpan columns="full">
