@@ -72,6 +72,12 @@ top-level await breaks Vite's production bundle. `vite.config.js` aliases
 modules (`twoline2satrec`, `propagate`, `gstime`, `eciToEcf`, `ecfToLookAngles`).
 If the library restructures, revisit the alias.
 
+## Imagery
+
+Planet, moon, and sun photos in `public/img/events/` are real NASA images
+(MESSENGER, Mariner 10, Hubble, Juno, Cassini, Voyager 2, SDO, and KSC photography),
+public domain courtesy NASA/JPL.
+
 ## License
 
 BSD-3-Clause — see [LICENSE](LICENSE).

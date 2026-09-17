@@ -37,6 +37,7 @@ export const TYPE_META = {
 };
 
 /* Illustration for an event card / hero: per-planet portraits for planet
+ * Event art uses real NASA public-domain photos (see README > Imagery), not AI art.
  * events (first planet named in the title), sun/moon for eclipses, a meteor
  * for showers, a comet for comets. Returns a public/ path or null. */
 const EVENT_PLANETS = ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
