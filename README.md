@@ -74,9 +74,10 @@ If the library restructures, revisit the alias.
 
 ## Imagery
 
-Planet, moon, and sun photos in `public/img/events/` are real NASA images
-(MESSENGER, Mariner 10, Hubble, Juno, Cassini, Voyager 2, SDO, and KSC photography),
-public domain courtesy NASA/JPL.
+Event photos in `public/img/events/` are real NASA images, public domain
+courtesy NASA/JPL: planets from MESSENGER, Mariner 10, Hubble, Juno, Cassini,
+Voyager 2, and SDO; Comet NEOWISE and Perseid meteors from NASA HQ photography;
+solar and lunar eclipse shots from NASA Armstrong and Glenn.
 
 ## License
 
