@@ -120,6 +120,25 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
   const list = events.filter(
     (e) => inScope(e) && (type === 'all' || e.type === type),
   );
+  // The feed shows the first page of cards; "Load more" reveals the rest.
+  // Reset to the first page whenever the filters change.
+  const PAGE_SIZE = 20;
+  const [visible, setVisible] = useState(PAGE_SIZE);
+  const shown = list.slice(0, visible);
+  const remaining = list.length - shown.length;
+  const pickTier = (v) => {
+    setTier(v);
+    setType('all');
+    setVisible(PAGE_SIZE);
+  };
+  const pickType = (v) => {
+    setType(v);
+    setVisible(PAGE_SIZE);
+  };
+  const pickRange = (v) => {
+    setRange(v);
+    setVisible(PAGE_SIZE);
+  };
 
   // minWidth: 0 lets this Card (a grid item) shrink below its content's
   // intrinsic width on narrow screens; the filter rows scroll instead.
@@ -129,10 +148,7 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
         <Heading level={2}>Upcoming events</Heading>
         <SegmentedControl
           value={tier}
-          onChange={(v) => {
-            setTier(v);
-            setType('all');
-          }}
+          onChange={pickTier}
           label="Filter by trip tier"
           layout={isNarrow ? undefined : 'fill'}
           style={isNarrow ? { overflowX: 'auto' } : undefined}
@@ -149,7 +165,7 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
         </SegmentedControl>
         <SegmentedControl
           value={range}
-          onChange={setRange}
+          onChange={pickRange}
           label="Filter by time range"
           layout={isNarrow ? undefined : 'fill'}
           style={isNarrow ? { overflowX: 'auto' } : undefined}
@@ -160,7 +176,7 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
         </SegmentedControl>
         <SegmentedControl
           value={type}
-          onChange={setType}
+          onChange={pickType}
           label="Filter by event type"
           layout={isNarrow ? undefined : 'fill'}
           style={isNarrow ? { overflowX: 'auto' } : undefined}
@@ -192,11 +208,21 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
             icon={<Icon icon={Telescope} size="lg" color="secondary" />}
           />
         ) : (
-          <Grid columns={isNarrow ? 1 : { minWidth: 300 }} gap={3}>
-            {list.map((e) => (
-              <EventCard key={e.id} ev={e} score={scores[e.id]} />
-            ))}
-          </Grid>
+          <VStack gap={3}>
+            <Grid columns={isNarrow ? 1 : { minWidth: 300 }} gap={3}>
+              {shown.map((e) => (
+                <EventCard key={e.id} ev={e} score={scores[e.id]} />
+              ))}
+            </Grid>
+            {remaining > 0 && (
+              <HStack justify="center">
+                <Button
+                  label={`Load more (${remaining} remaining)`}
+                  onClick={() => setVisible((v) => v + PAGE_SIZE)}
+                />
+              </HStack>
+            )}
+          </VStack>
         )}
       </VStack>
     </Card>
