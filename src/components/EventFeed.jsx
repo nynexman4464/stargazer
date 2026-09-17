@@ -7,14 +7,17 @@ import { HStack } from '@astryxdesign/core/HStack';
 import { Grid } from '@astryxdesign/core/Grid';
 import { Token } from '@astryxdesign/core/Token';
 import { Button } from '@astryxdesign/core/Button';
-import { SegmentedControl } from '@astryxdesign/core/SegmentedControl';
-import { SegmentedControlItem } from '@astryxdesign/core/SegmentedControl';
+import {
+  DropdownMenu,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+} from '@astryxdesign/core/DropdownMenu';
 import { ProgressBar } from '@astryxdesign/core/ProgressBar';
 import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { useMediaQuery } from '@astryxdesign/core/hooks';
-import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Telescope, Map } from 'lucide-react';
+import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Telescope, Map, CalendarDays } from 'lucide-react';
 import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage } from '../lib/astro.js';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
@@ -106,9 +109,8 @@ function EventCard({ ev, score }) {
 }
 
 export default function EventFeed({ events, scores, loaded, tier, setTier, type, setType, range, setRange, anchor }) {
-  // Responsive contract: below 640px the filter rows can't fit all segments,
-  // so they hug content and scroll inside the card instead of forcing the page
-  // wider; the event cards stack in a single column.
+  // Responsive contract: below 640px the filter bar wraps onto multiple lines
+  // and the event cards stack in a single column.
   const isNarrow = useMediaQuery('(max-width: 640px)');
   const inScope = (e) =>
     (tier === 'all' || e.tier === tier) && inTimeRange(e, range, anchor);
@@ -144,58 +146,104 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
     setRange(v);
     setVisible(PAGE_SIZE);
   };
+  const resetFilters = () => {
+    setTier('all');
+    setType('all');
+    setRange('all');
+    setVisible(PAGE_SIZE);
+  };
+  const isFiltered = tier !== 'all' || type !== 'all' || range !== 'all';
+
+  // Filter bar: one compact row of dropdown clauses (tier / when / type) plus
+  // the result count and a reset, instead of three full-width segmented rows.
+  const filterBar = (
+    <HStack gap={2} vAlign="center" wrap="wrap">
+      <DropdownMenu
+        presentation="adaptive"
+        hasChevron
+        button={{
+          variant: 'secondary',
+          size: 'sm',
+          label: tier === 'all' ? 'All tiers' : TIER_META[tier].label,
+          icon: <Icon icon={TIER_ICON[tier] || Telescope} size="sm" />,
+          'aria-label': 'Filter by trip tier',
+        }}
+      >
+        <DropdownMenuRadioGroup label="Trip tier" value={tier} onChange={pickTier}>
+          <DropdownMenuRadioItem value="all" label="All tiers" icon={Telescope} />
+          {Object.entries(TIER_META).map(([k, m]) => (
+            <DropdownMenuRadioItem
+              key={k}
+              value={k}
+              label={m.label}
+              description={m.blurb}
+              icon={TIER_ICON[k]}
+            />
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenu>
+      <DropdownMenu
+        presentation="adaptive"
+        hasChevron
+        button={{
+          variant: 'secondary',
+          size: 'sm',
+          label: range === 'all' ? 'All time' : RANGE_META[range].label,
+          icon: <Icon icon={CalendarDays} size="sm" />,
+          'aria-label': 'Filter by time range',
+        }}
+      >
+        <DropdownMenuRadioGroup label="Time range" value={range} onChange={pickRange}>
+          {Object.entries(RANGE_META).map(([k, m]) => (
+            <DropdownMenuRadioItem
+              key={k}
+              value={k}
+              label={k === 'all' ? 'All time' : m.label}
+              description={m.blurb}
+            />
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenu>
+      <DropdownMenu
+        presentation="adaptive"
+        hasChevron
+        button={{
+          variant: 'secondary',
+          size: 'sm',
+          label: type === 'all' ? 'All types' : TYPE_META[type].label,
+          icon: <Icon icon={TYPE_ICON[type] || Sparkles} size="sm" />,
+          'aria-label': 'Filter by event type',
+        }}
+      >
+        <DropdownMenuRadioGroup label="Event type" value={type} onChange={pickType}>
+          <DropdownMenuRadioItem value="all" label="All types" icon={Sparkles} />
+          {types.map((t) => (
+            <DropdownMenuRadioItem
+              key={t}
+              value={t}
+              label={TYPE_META[t].label}
+              description={`${counts[t]} event${counts[t] === 1 ? '' : 's'}`}
+              icon={TYPE_ICON[t]}
+            />
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenu>
+      <Text type="supporting">
+        {list.length} event{list.length === 1 ? '' : 's'}
+      </Text>
+      {isFiltered && (
+        <Button variant="ghost" size="sm" label="Reset" onClick={resetFilters} />
+      )}
+    </HStack>
+  );
 
   // minWidth: 0 lets this Card (a grid item) shrink below its content's
-  // intrinsic width on narrow screens; the filter rows scroll instead.
+  // intrinsic width on narrow screens.
   return (
     <Card padding={4} style={{ minWidth: 0 }}>
       <VStack gap={3}>
         <Heading level={2}>{anchor ? `Events · from ${fmtDate(anchor)}` : 'Upcoming events'}</Heading>
-        <SegmentedControl
-          value={tier}
-          onChange={pickTier}
-          label="Filter by trip tier"
-          layout={isNarrow ? undefined : 'fill'}
-          style={isNarrow ? { overflowX: 'auto' } : undefined}
-        >
-          <SegmentedControlItem value="all" label="All" />
-          {Object.entries(TIER_META).map(([k, m]) => (
-            <SegmentedControlItem
-              key={k}
-              value={k}
-              label={m.label}
-              icon={<Icon icon={TIER_ICON[k]} size="sm" />}
-            />
-          ))}
-        </SegmentedControl>
-        <SegmentedControl
-          value={range}
-          onChange={pickRange}
-          label="Filter by time range"
-          layout={isNarrow ? undefined : 'fill'}
-          style={isNarrow ? { overflowX: 'auto' } : undefined}
-        >
-          {Object.entries(RANGE_META).map(([k, m]) => (
-            <SegmentedControlItem key={k} value={k} label={m.label} />
-          ))}
-        </SegmentedControl>
-        <SegmentedControl
-          value={type}
-          onChange={pickType}
-          label="Filter by event type"
-          layout={isNarrow ? undefined : 'fill'}
-          style={isNarrow ? { overflowX: 'auto' } : undefined}
-        >
-          <SegmentedControlItem value="all" label="All" />
-          {types.map((t) => (
-            <SegmentedControlItem
-              key={t}
-              value={t}
-              label={`${TYPE_META[t].label} · ${counts[t]}`}
-              icon={<Icon icon={TYPE_ICON[t]} size="sm" />}
-            />
-          ))}
-        </SegmentedControl>
+        {filterBar}
         {!loaded ? (
           <Grid columns={isNarrow ? 1 : { minWidth: 300 }} gap={3}>
             {[0, 1, 2].map((i) => (
