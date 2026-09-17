@@ -74,10 +74,11 @@ If the library restructures, revisit the alias.
 
 ## Imagery
 
-Event photos in `public/img/events/` are real NASA images, public domain
-courtesy NASA/JPL: planets from MESSENGER, Mariner 10, Hubble, Juno, Cassini,
-Voyager 2, and SDO; Comet NEOWISE and Perseid meteors from NASA HQ photography;
-solar and lunar eclipse shots from NASA Armstrong and Glenn.
+Event photos in `public/img/events/` are real astronomical photos. Planets and
+eclipses are NASA public-domain images (MESSENGER, Mariner 10, Hubble, Juno,
+Cassini, Voyager 2, SDO, NASA HQ/Armstrong/Glenn, courtesy NASA/JPL). The comet
+photo is Comet McNaught courtesy ESO, and the meteor-shower photo is a fireball
+over Kitt Peak courtesy NOIRLab — both used under CC BY 4.0.
 
 ## License
 
