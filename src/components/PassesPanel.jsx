@@ -17,6 +17,7 @@ import {
   fetchTLE,
   computePasses,
   passScore,
+  brightnessWords,
   fmtTime,
   fmtDate,
   countdown,
@@ -55,7 +56,7 @@ export default function PassesPanel({ loc, bundledTles }) {
             const [l1, l2] = await fetchTLE(s.norad, bundledTles);
             if (cancelled) return;
             const satrec = twoline2satrec(l1, l2);
-            const passes = computePasses(satrec, loc.lat, loc.lon, 72);
+            const passes = computePasses(satrec, loc.lat, loc.lon, 72, s.mag);
             const scored = await Promise.all(
               passes.map(async (p) => {
                 const sc = await passScore(p, s.mag, loc, wxCache.current);
@@ -158,7 +159,7 @@ export default function PassesPanel({ loc, bundledTles }) {
                       description={
                         <Text type="supporting">
                           {compass(p.startAz)} → {compass(p.endAz)} · peaks {Math.round(p.maxEl)}°
-                          at {fmtTime(p.maxT)} · {dur} min · score {p.score} — {p.label.toLowerCase()}
+                          at {fmtTime(p.maxT)} · mag {p.mag} ({brightnessWords(p.mag)}) · {dur} min · score {p.score} — {p.label.toLowerCase()}
                         </Text>
                       }
                       endContent={

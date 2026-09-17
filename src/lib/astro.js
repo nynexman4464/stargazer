@@ -19,7 +19,7 @@ export const HOME_BORTLE = {
 export const SATS = [
   // mag: typical peak visual magnitude (lower = brighter). ISS can flare to
   // -5.9; Tiangong runs about -2 to -3; Hubble (~mag 1.5-3) is usually a
-  // binocular target. Used only for visibility scoring, not displayed.
+  // binocular target. Used for visibility scoring and shown on each pass.
   { norad: 25544, name: 'ISS', mag: -4 },
   { norad: 48274, name: 'Tiangong', mag: -2.5 },
   { norad: 20580, name: 'Hubble', mag: 2 },
@@ -706,8 +706,9 @@ export async function fetchTLE(norad, bundled) {
   throw lastErr || new Error('TLE unavailable');
 }
 
-/* satrec: built by the caller via satellite.js twoline2satrec (kept injectable for tests) */
-export function computePasses(satrec, lat, lon, hours) {
+/* satrec: built by the caller via satellite.js twoline2satrec (kept injectable for tests).
+ * mag: the satellite's typical peak visual magnitude, stamped onto each pass. */
+export function computePasses(satrec, lat, lon, hours, mag) {
   // NOTE: satellite.js v5+ ecfToLookAngles takes observer as geodetic (radians), not ECF
   const observerGd = { latitude: lat * RAD, longitude: lon * RAD, height: 0.05 };
   const step = 30 * 1000;
@@ -735,7 +736,7 @@ export function computePasses(satrec, lat, lon, hours) {
     const sunlit = !(s < 0 && r2 - s * s < 6371 * 6371);
     const visible = el > 12 && dark && sunlit;
     if (visible) {
-      if (!cur) cur = { start: d, maxEl: el, maxT: d, end: d, startAz: az, endAz: az };
+      if (!cur) cur = { start: d, maxEl: el, maxT: d, end: d, startAz: az, endAz: az, mag };
       else {
         cur.end = d;
         cur.endAz = az;
@@ -755,4 +756,12 @@ export function computePasses(satrec, lat, lon, hours) {
 
 export function passQuality(maxEl) {
   return maxEl > 60 ? 'Overhead — excellent' : maxEl > 35 ? 'High — great' : 'Low — decent';
+}
+
+/* Plain-language brightness for a visual magnitude (lower = brighter). */
+export function brightnessWords(mag) {
+  if (mag <= -3) return 'very bright';
+  if (mag < 0) return 'bright';
+  if (mag < 3) return 'dim';
+  return 'faint';
 }
