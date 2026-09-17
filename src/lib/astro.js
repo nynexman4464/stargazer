@@ -153,6 +153,78 @@ export function moonName(illum) {
   return 'full moon';
 }
 
+/* Moon phase as a 0–1 cycle (0 = new, 0.25 = first quarter, 0.5 = full, 0.75 = last quarter). */
+export const SYNODIC_MONTH = 29.53058867;
+const NEW_MOON_REF = Date.UTC(2000, 0, 6, 18, 14) / DAY; // a known new moon, in days
+export function moonPhase(date) {
+  let p = ((date.getTime() / DAY - NEW_MOON_REF) / SYNODIC_MONTH) % 1;
+  if (p < 0) p += 1;
+  return {
+    phase: p,
+    illum: (1 - Math.cos(2 * Math.PI * p)) / 2,
+    age: p * SYNODIC_MONTH,
+  };
+}
+const PHASE_NAMES = [
+  'New Moon',
+  'Waxing Crescent',
+  'First Quarter',
+  'Waxing Gibbous',
+  'Full Moon',
+  'Waning Gibbous',
+  'Last Quarter',
+  'Waning Crescent',
+];
+export function moonPhaseName(phase) {
+  return PHASE_NAMES[Math.floor((((phase + 1 / 16) % 1) * 8)) % 8];
+}
+/* Next upcoming new / first-quarter / full / last-quarter moon. */
+const MAJOR_PHASES = [
+  { p: 0, name: 'New Moon' },
+  { p: 0.25, name: 'First Quarter' },
+  { p: 0.5, name: 'Full Moon' },
+  { p: 0.75, name: 'Last Quarter' },
+];
+export function nextMoonPhase(date) {
+  const { phase } = moonPhase(date);
+  let best = null;
+  for (const m of MAJOR_PHASES) {
+    let dp = (m.p - phase) % 1;
+    if (dp < 0) dp += 1;
+    if (dp < 1e-4) continue; // we're in it right now — look ahead instead
+    const days = dp * SYNODIC_MONTH;
+    if (!best || days < best.inDays) {
+      best = { name: m.name, phase: m.p, inDays: days, date: new Date(date.getTime() + days * DAY) };
+    }
+  }
+  return best;
+}
+/* Traditional full-moon names. September/October honor the Harvest Moon rule:
+   the full moon nearest the autumn equinox gets the name. */
+const FULL_MOON_NAMES = [
+  'Wolf Moon', 'Snow Moon', 'Worm Moon', 'Pink Moon', 'Flower Moon', 'Strawberry Moon',
+  'Buck Moon', 'Sturgeon Moon', null, null, 'Beaver Moon', 'Cold Moon',
+];
+export function fullMoonName(fullMoonDate) {
+  const m = fullMoonDate.getMonth();
+  if (m !== 8 && m !== 9) return FULL_MOON_NAMES[m];
+  const equinox = Date.UTC(fullMoonDate.getFullYear(), 8, 22, 12);
+  const cands = [-1, 0, 1].map((k) => fullMoonDate.getTime() + k * SYNODIC_MONTH * DAY);
+  const nearest = cands.reduce((a, b) =>
+    Math.abs(a - equinox) < Math.abs(b - equinox) ? a : b,
+  );
+  const isHarvest = Math.abs(nearest - fullMoonDate.getTime()) < DAY;
+  if (m === 8) return isHarvest ? 'Harvest Moon' : 'Corn Moon';
+  return isHarvest ? 'Harvest Moon' : "Hunter's Moon";
+}
+/* Next full moon on/after the given date. */
+export function nextFullMoon(date) {
+  const { phase } = moonPhase(date);
+  let dp = (0.5 - phase) % 1;
+  if (dp < 0) dp += 1;
+  return new Date(date.getTime() + dp * SYNODIC_MONTH * DAY);
+}
+
 /* solar position -> observer sun elevation in degrees */
 export function sunElev(date, lat, lon) {
   const JD = date.getTime() / DAY + 2440587.5;

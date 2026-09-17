@@ -13,6 +13,7 @@ import PassesPanel from './components/PassesPanel.jsx';
 import EventFeed from './components/EventFeed.jsx';
 import DarkSkySpots from './components/DarkSkySpots.jsx';
 import Glossary from './components/Glossary.jsx';
+import MoonPanel from './components/MoonPanel.jsx';
 import {
   DAY,
   loadLoc,
@@ -168,6 +169,7 @@ export default function App() {
                 </GridSpan>
                 <AuroraPanel loc={loc} />
                 <PassesPanel loc={loc} bundledTles={tles} />
+                <MoonPanel />
                 <GridSpan columns="full">
                   <EventFeed
                     events={events}
