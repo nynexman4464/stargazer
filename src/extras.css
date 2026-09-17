@@ -69,7 +69,9 @@ body {
 .sg-event-thumb,
 .sg-hero-img {
   object-fit: cover;
-  border-radius: var(--radius-element);
+  /* Circular crop: keeps the focus on the subject (planet, sun, moon)
+     instead of the square artwork's painted backdrop. */
+  border-radius: 50%;
   flex: none;
 }
 
@@ -79,6 +81,6 @@ body {
 }
 
 .sg-hero-img {
-  width: calc(var(--spacing-12) * 2.5);
-  height: calc(var(--spacing-12) * 2.5);
+  width: calc(var(--spacing-12) * 2);
+  height: calc(var(--spacing-12) * 2);
 }

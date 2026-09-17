@@ -53,10 +53,14 @@ export default function TonightHero({ pick, score, isTonight }) {
                     icon={<Icon icon={TYPE_ICON[pick.type]} size="sm" />}
                   />
                 </HStack>
-                {img && <img src={img} alt="" className="sg-hero-img" />}
-                <Heading level={1} type="display-2">
-                  {pick.title}
-                </Heading>
+                <HStack gap={3} vAlign="center">
+                  {img && <img src={img} alt="" className="sg-hero-img" />}
+                  <VStack gap={0} style={{ minWidth: 0 }}>
+                    <Heading level={1} type="display-2">
+                      {pick.title}
+                    </Heading>
+                  </VStack>
+                </HStack>
                 <Text color="secondary">{pick.desc}</Text>
                 <Grid columns={{ minWidth: 220 }} gap={3}>
                   <VStack gap={1}>
