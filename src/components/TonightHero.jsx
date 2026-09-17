@@ -10,6 +10,7 @@ import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon } from 'lucide-react';
 import Starfield from './Starfield.jsx';
+import { TermText } from './Term.jsx';
 import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eventImage, eclipseVisibleFrom } from '../lib/astro.js';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
@@ -75,7 +76,7 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc }) {
                   {img && <img src={img} alt="" className="sg-hero-img" />}
                   <VStack gap={0} style={{ minWidth: 0 }}>
                     <Heading level={1} type="display-2">
-                      {pick.title}
+                      <TermText text={pick.title} />
                     </Heading>
                   </VStack>
                 </HStack>

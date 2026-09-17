@@ -20,6 +20,7 @@ import { useMediaQuery } from '@astryxdesign/core/hooks';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Cloud, CloudOff, Moon, Telescope, Map, CalendarDays, Maximize2 } from 'lucide-react';
 import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage, eclipseVisibleFrom } from '../lib/astro.js';
 import MapLightbox from './MapLightbox.jsx';
+import { TermText } from './Term.jsx';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
@@ -64,7 +65,7 @@ function EventCard({ ev, score, loc }) {
               {dateStr} <Text type="supporting" weight="normal">{countdown(ev.date)}</Text>
             </Text>
             <Text type="large" weight="semibold">
-              {ev.title}
+              <TermText text={ev.title} />
             </Text>
           </VStack>
         </HStack>

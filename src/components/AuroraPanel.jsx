@@ -9,6 +9,7 @@ import { Tooltip } from '@astryxdesign/core/Tooltip';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { loadAuroraData, loadAuroraOutlook, loadAuroraForecastNight } from '../lib/astro.js';
 import { fmtDate, isoDay } from '../lib/astro.js';
+import { Term } from './Term.jsx';
 
 const BAND_DOT = { storm: 'error', possible: 'warning', quiet: 'success', south: 'neutral' };
 
@@ -91,7 +92,7 @@ export default function AuroraPanel({ loc, viewDate }) {
               <VStack gap={1}>
                 <Text weight="semibold">No aurora predictions that far out.</Text>
                 <Text type="supporting">
-                  NOAA's Kp forecast only reaches about three days ahead.
+                  NOAA's <Term term="Kp index">Kp</Term> forecast only reaches about three days ahead.
                 </Text>
               </VStack>
             ) : !forecast ? (
@@ -170,7 +171,7 @@ export default function AuroraPanel({ loc, viewDate }) {
                     <HStack key={o.label} gap={2} vAlign="center">
                       <StatusDot variant={BAND_DOT[o.band]} label={o.label} />
                       <Text>
-                        <strong>{o.label}</strong> — Kp up to {o.kp.toFixed(1)}. {o.verdict}
+                        <strong>{o.label}</strong> — <Term term="Kp index">Kp</Term> up to {o.kp.toFixed(1)}. {o.verdict}
                       </Text>
                     </HStack>
                   ))}

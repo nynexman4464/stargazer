@@ -8,7 +8,7 @@ import { GLOSSARY } from '../lib/astro.js';
 /* Sky talk — the jargon, translated. */
 export default function Glossary() {
   return (
-    <Card padding={4}>
+    <Card padding={4} id="sky-talk">
       <VStack gap={3}>
         <VStack gap={1}>
           <Heading level={2}>Sky talk</Heading>

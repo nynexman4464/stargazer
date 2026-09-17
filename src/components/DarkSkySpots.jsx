@@ -8,6 +8,7 @@ import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { List, ListItem } from '@astryxdesign/core/List';
 import { haversine } from '../lib/astro.js';
 import DarkSkyMap from './DarkSkyMap.jsx';
+import { Term } from './Term.jsx';
 
 const BORTLE_EXPLAINER =
   'Bortle scale: 1 = pristine dark sky, 9 = inner city. Lower is darker.';
@@ -25,7 +26,7 @@ export default function DarkSkySpots({ spots, loc, away }) {
         <VStack gap={1}>
           <Heading level={2}>Dark-sky drives</Heading>
           <Text type="supporting">
-            Bortle ratings are published values where they exist, estimates otherwise — hover a
+            <Term term="Bortle scale">Bortle</Term> ratings are published values where they exist, estimates otherwise — hover a
             rating for its source.
           </Text>
           {away && (
