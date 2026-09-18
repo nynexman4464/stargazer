@@ -28,7 +28,7 @@ const TERM_PATTERN = new RegExp(
 );
 /* "magnitude 7.8" / "magnitude +2.1" — matched before bare "magnitude" so the
    hover can explain that specific brightness. */
-const MAG_VALUE_PATTERN = /(\bmagnitude\s+[+-]?\d+(?:\.\d+)?)/gi;
+const MAG_VALUE_PATTERN = /(\bmagnitude\s+~?[+-]?\d+(?:\.\d+)?)/gi;
 
 /* The shared definition-link treatment: dotted underline, inherits the
    surrounding text size (e.g. the hero's display heading). A tap/click never
