@@ -126,9 +126,6 @@ function EventCard({ ev, score, loc }) {
               hasValueLabel
               variant={scoreVariant(score.label)}
             />
-            {score.estimated && (
-              <Text type="supporting">Historical estimate, not a forecast.</Text>
-            )}
             <ScoreFactors factors={score.factors} exclude={ev.bodies} />
           </VStack>
         )}

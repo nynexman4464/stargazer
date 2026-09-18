@@ -104,11 +104,6 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc }) {
                           hasValueLabel
                           variant={scoreVariant(score.label)}
                         />
-                        {score.estimated && (
-                          <Text type="supporting">
-                            Historical estimate, not a forecast.
-                          </Text>
-                        )}
                       </VStack>
                     ) : notVisible ? (
                       <Text type="supporting">
