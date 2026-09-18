@@ -619,7 +619,7 @@ export function estimatedGoScore(ev, climDaily, loc) {
   const cloud = typicalCloud(climDaily, ev.date);
   if (cloud === null) return null;
   return {
-    ...scoreCore(ev, cloud, `typically ${cloud}% cloudy`),
+    ...scoreCore(ev, cloud, `historically ${cloud}% cloudy`),
     estimated: true,
   };
 }
