@@ -1,5 +1,5 @@
 {
-  "_note": "new_england = visible from Boston/New England per timeanddate's Boston eclipse listings, cross-checked against NASA path/region data. Lunar eclipses are visible everywhere on Earth's night side; per-event global maps live in NASA's lunar eclipse catalog (see _source). Magnitude figures are Boston-local where stated. vis = generous lat/lon bounding box of the full partial-visibility zone for total solar eclipses (used to hide go-scores where the eclipse isn't visible at all; boxes intentionally generous so a score is never hidden without evidence). 2027-08-02 partial zone per Wikipedia (eastern Maine to South/SE Asia); 2028-07-22 per Wikipedia (SE Asia, Australia, Oceania); 2030-11-25 per Wikipedia + space.com (central/southern Africa, Antarctica, Australia, Indonesia, NZ).",
+  "_note": "new_england = visible from Boston/New England per timeanddate's Boston eclipse listings, cross-checked against NASA path/region data. Lunar eclipses are visible everywhere on Earth's night side; per-event global maps live in NASA's lunar eclipse catalog (see _source). Magnitude figures are Boston-local where stated. vis = generous lat/lon bounding box of the full partial-visibility zone for total solar eclipses (used to hide go-scores where the eclipse isn't visible at all; boxes intentionally generous so a score is never hidden without evidence). 2027-08-02 partial zone per Wikipedia (eastern Maine to South/SE Asia); 2028-07-22 per Wikipedia (SE Asia, Australia, Oceania); 2030-11-25 per Wikipedia + space.com (central/southern Africa, Antarctica, Australia, Indonesia, NZ). ne_note is viewer-agnostic: it describes the eclipse, never the viewer's location. Whether a total solar eclipse is visible from the user's location is computed at render time from the vis bounding box (see eclipseVisibleFrom).",
   "_source": [
     "NASA Goddard solar eclipse catalog (eclipse.gsfc.nasa.gov/solar.html) and 2021–2040 path table (SEgoogle2021.html)",
     "NASA-derived solar eclipse list (List of solar eclipses in the 21st century)",
@@ -10,7 +10,7 @@
     {
       "date": "2027-02-20",
       "id": "lunar-2027-02-20",
-      "ne_note": "Visible from New England (timeanddate Boston listing).",
+      "ne_note": "",
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
@@ -19,7 +19,7 @@
     {
       "date": "2027-07-18",
       "id": "lunar-2027-07-18",
-      "ne_note": "Not visible from New England; in any case extremely shallow — the moon barely grazes Earth’s shadow — and effectively imperceptible.",
+      "ne_note": "Extremely shallow — the moon barely grazes Earth’s shadow — and effectively imperceptible.",
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
@@ -28,7 +28,7 @@
     {
       "date": "2027-08-17",
       "id": "lunar-2027-08-17",
-      "ne_note": "Visible from New England (timeanddate Boston listing).",
+      "ne_note": "",
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
@@ -37,7 +37,7 @@
     {
       "date": "2028-01-12",
       "id": "lunar-2028-01-12",
-      "ne_note": "Visible from New England (timeanddate Boston listing).",
+      "ne_note": "",
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
@@ -46,7 +46,7 @@
     {
       "date": "2028-07-06",
       "id": "lunar-2028-07-06",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
@@ -55,7 +55,7 @@
     {
       "date": "2028-12-31",
       "id": "lunar-2028-12-31",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
@@ -64,7 +64,7 @@
     {
       "date": "2029-06-26",
       "id": "lunar-2029-06-26",
-      "ne_note": "Visible from New England (timeanddate Boston listing).",
+      "ne_note": "",
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
@@ -73,7 +73,7 @@
     {
       "date": "2029-12-20",
       "id": "lunar-2029-12-20",
-      "ne_note": "Visible from New England (timeanddate Boston listing).",
+      "ne_note": "",
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
@@ -82,7 +82,7 @@
     {
       "date": "2030-06-15",
       "id": "lunar-2030-06-15",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
@@ -91,7 +91,7 @@
     {
       "date": "2030-12-09",
       "id": "lunar-2030-12-09",
-      "ne_note": "Visible from New England (timeanddate Boston listing).",
+      "ne_note": "",
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
@@ -100,7 +100,7 @@
     {
       "date": "2031-05-07",
       "id": "lunar-2031-05-07",
-      "ne_note": "Visible from New England (timeanddate Boston listing).",
+      "ne_note": "",
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
@@ -109,7 +109,7 @@
     {
       "date": "2031-06-05",
       "id": "lunar-2031-06-05",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
@@ -118,7 +118,7 @@
     {
       "date": "2031-10-30",
       "id": "lunar-2031-10-30",
-      "ne_note": "Visible from New England (timeanddate Boston listing).",
+      "ne_note": "",
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
@@ -127,7 +127,7 @@
     {
       "date": "2032-04-25",
       "id": "lunar-2032-04-25",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
@@ -136,7 +136,7 @@
     {
       "date": "2032-10-18",
       "id": "lunar-2032-10-18",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
@@ -147,7 +147,7 @@
     {
       "date": "2027-02-06",
       "id": "solar-2027-02-06",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Annular: Chile, Argentina, South Atlantic. Partial: South America, Antarctica, western and southern Africa.",
       "type": "annular",
@@ -156,7 +156,7 @@
     {
       "date": "2027-08-02",
       "id": "solar-2027-08-02",
-      "ne_note": "Not visible from New England. The big one of the decade for eclipse chasers — southern Spain and North Africa.",
+      "ne_note": "The big one of the decade for eclipse chasers — southern Spain and North Africa.",
       "new_england": false,
       "regions": "Total: Spain, Morocco, Algeria, Tunisia, Libya, Egypt, Saudi Arabia, Yemen, Somalia.",
       "type": "total",
@@ -175,7 +175,7 @@
     {
       "date": "2028-01-26",
       "id": "solar-2028-01-26",
-      "ne_note": "Partially visible from New England — but a tiny bite: Boston maximum magnitude ~0.086, 9:28–10:58 AM EST (max 10:12 AM).",
+      "ne_note": "Only a tiny bite from the northeastern US: maximum magnitude ~0.086, 9:28–10:58 AM EST (max 10:12 AM).",
       "new_england": true,
       "regions": "Annular: Ecuador, Peru, Colombia, Brazil, French Guiana, Portugal, Spain. Partial includes eastern North America.",
       "type": "annular",
@@ -184,7 +184,7 @@
     {
       "date": "2028-07-22",
       "id": "solar-2028-07-22",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Total: Australia and New Zealand.",
       "type": "total",
@@ -203,7 +203,7 @@
     {
       "date": "2029-01-14",
       "id": "solar-2029-01-14",
-      "ne_note": "Visible from New England — partial on the US East Coast, maximum magnitude ~0.506. The best solar eclipse for New England through 2032.",
+      "ne_note": "Partial on the US East Coast, maximum magnitude ~0.506. The best solar eclipse for the northeastern US through 2032.",
       "new_england": true,
       "regions": "Partial: North and Central America.",
       "type": "partial",
@@ -212,7 +212,7 @@
     {
       "date": "2029-06-12",
       "id": "solar-2029-06-12",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Partial: northern and central Europe, northern Russia, Greenland, Alaska, northwestern Canada.",
       "type": "partial",
@@ -221,7 +221,7 @@
     {
       "date": "2029-07-11",
       "id": "solar-2029-07-11",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Partial: southern Chile and Argentina.",
       "type": "partial",
@@ -230,7 +230,7 @@
     {
       "date": "2029-12-05",
       "id": "solar-2029-12-05",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Partial: extreme southern Argentina and Chile, Antarctica.",
       "type": "partial",
@@ -239,7 +239,7 @@
     {
       "date": "2030-06-01",
       "id": "solar-2030-06-01",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Annular: North Africa through southern and eastern Europe, Russia, Kazakhstan, China, Japan.",
       "type": "annular",
@@ -248,7 +248,7 @@
     {
       "date": "2030-11-25",
       "id": "solar-2030-11-25",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Total: Namibia, Botswana, South Africa, Lesotho, Australia.",
       "type": "total",
@@ -267,7 +267,7 @@
     {
       "date": "2031-05-21",
       "id": "solar-2031-05-21",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Annular: Angola, Zambia, DR Congo, Tanzania, India, Sri Lanka, Thailand, Malaysia, Indonesia.",
       "type": "annular",
@@ -276,7 +276,7 @@
     {
       "date": "2031-11-14",
       "id": "solar-2031-11-14",
-      "ne_note": "Not visible from New England (partial zone covers only southern North America and Central America).",
+      "ne_note": "Partial zone covers only southern North America and Central America.",
       "new_england": false,
       "regions": "Hybrid (annular/total over the Pacific, Panama region). Partial: southern North America, Central America, Caribbean, northwestern South America.",
       "type": "hybrid",
@@ -285,7 +285,7 @@
     {
       "date": "2032-05-09",
       "id": "solar-2032-05-09",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Annular (non-central, no land in the annular path). Partial: southern South America and southern Africa.",
       "type": "annular",
@@ -294,7 +294,7 @@
     {
       "date": "2032-11-03",
       "id": "solar-2032-11-03",
-      "ne_note": "Not visible from New England.",
+      "ne_note": "",
       "new_england": false,
       "regions": "Partial: Asia and eastern Europe.",
       "type": "partial",
