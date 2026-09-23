@@ -21,6 +21,7 @@ import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Telescope, Map, Cale
 import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage, eclipseVisibleFrom } from '../lib/astro.js';
 import MapLightbox from './MapLightbox.jsx';
 import ScoreFactors from './ScoreFactors.jsx';
+import PlanetsSection from './PlanetsSection.jsx';
 import { TermText } from './Term.jsx';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
@@ -274,6 +275,7 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
       <VStack gap={3}>
         <Heading level={2}>{anchor ? `Events · from ${fmtDate(anchor)}` : 'Upcoming events'}</Heading>
         {filterBar}
+        {(type === 'all' || type === 'planet') && <PlanetsSection loc={loc} asOf={anchor} />}
         {!loaded ? (
           <Grid columns={isNarrow ? 1 : { minWidth: 300 }} gap={3}>
             {[0, 1, 2].map((i) => (

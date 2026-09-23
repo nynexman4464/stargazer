@@ -14,7 +14,6 @@ import EventFeed from './components/EventFeed.jsx';
 import DarkSkySpots from './components/DarkSkySpots.jsx';
 import Glossary from './components/Glossary.jsx';
 import MoonPanel from './components/MoonPanel.jsx';
-import PlanetsPanel from './components/PlanetsPanel.jsx';
 import {
   DAY,
   loadLoc,
@@ -254,9 +253,6 @@ export default function App() {
                 <PassesPanel loc={loc} bundledTles={tles} fromDate={anchorDay} />
                 <GridSpan columns="full">
                   <MoonPanel asOf={anchorDay} />
-                </GridSpan>
-                <GridSpan columns="full">
-                  <PlanetsPanel loc={loc} asOf={anchorDay} />
                 </GridSpan>
                 <GridSpan columns="full">
                   <EventFeed
