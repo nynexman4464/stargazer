@@ -14,6 +14,49 @@ import { Icon } from '@astryxdesign/core/Icon';
 import { Search, LocateFixed, House, Undo2 } from 'lucide-react';
 import { HOME_BORTLE, DEFAULT_LOC, haversine } from '../lib/astro.js';
 
+/* US state/territory abbreviations, so a trailing hint like "ca" or "tx" can
+   match the right state ("Fresno ca" -> Fresno, California). Two-letter hints
+   also match country codes ("Vermilion ca" -> Vermilion, Alberta, Canada). */
+const US_STATE_ABBR = {
+  al: 'Alabama', ak: 'Alaska', az: 'Arizona', ar: 'Arkansas', ca: 'California',
+  co: 'Colorado', ct: 'Connecticut', de: 'Delaware', dc: 'District of Columbia',
+  fl: 'Florida', ga: 'Georgia', hi: 'Hawaii', id: 'Idaho', il: 'Illinois',
+  in: 'Indiana', ia: 'Iowa', ks: 'Kansas', ky: 'Kentucky', la: 'Louisiana',
+  me: 'Maine', md: 'Maryland', ma: 'Massachusetts', mi: 'Michigan',
+  mn: 'Minnesota', ms: 'Mississippi', mo: 'Missouri', mt: 'Montana',
+  ne: 'Nebraska', nv: 'Nevada', nh: 'New Hampshire', nj: 'New Jersey',
+  nm: 'New Mexico', ny: 'New York', nc: 'North Carolina', nd: 'North Dakota',
+  oh: 'Ohio', ok: 'Oklahoma', or: 'Oregon', pa: 'Pennsylvania',
+  ri: 'Rhode Island', sc: 'South Carolina', sd: 'South Dakota', tn: 'Tennessee',
+  tx: 'Texas', ut: 'Utah', vt: 'Vermont', va: 'Virginia', wa: 'Washington',
+  wv: 'West Virginia', wi: 'Wisconsin', wy: 'Wyoming',
+};
+
+/* How well does a trailing region hint (e.g. "ca", "alb", "canada") match one
+   geocoding result? 0 = no match, higher = better. */
+function hintScore(hint, r) {
+  const h = hint.toLowerCase();
+  const admin1 = (r.admin1 || '').toLowerCase();
+  const country = (r.country || '').toLowerCase();
+  const cc = (r.country_code || '').toLowerCase();
+  if (h.length <= 2) {
+    const state = US_STATE_ABBR[h];
+    if (state && admin1 === state.toLowerCase()) return 2;
+    if (cc === h) return 1;
+    return 0;
+  }
+  if (admin1.includes(h) || country.includes(h)) return 1;
+  return 0;
+}
+
+async function geocode(name) {
+  const r = await fetch(
+    `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(name)}&count=12&language=en&format=json`,
+  );
+  const j = await r.json();
+  return j.results || [];
+}
+
 /* Location picker: search cities, use geolocation, manage home vs viewing spot.
    Follows the Astryx DialogFormDialog recipe: Layout with header/content/footer
    slots, purpose="form" (it contains an input), and List/Item rows for results. */
@@ -49,11 +92,26 @@ export default function LocationDialog({
     setSearching(true);
     timer.current = setTimeout(async () => {
       try {
-        const r = await fetch(
-          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query.trim())}&count=5&language=en&format=json`,
-        );
-        const j = await r.json();
-        setResults(j.results || []);
+        // The geocoder matches `name` against place names only, so a trailing
+        // region hint ("Vermilion ca", "Vermilion alb") returns nothing. When
+        // the full query misses, peel trailing words off as region hints and
+        // filter the shorter name's results against them.
+        const q = query.trim();
+        let found = await geocode(q);
+        if (found.length === 0) {
+          const tokens = q.split(/\s+/);
+          for (let i = tokens.length - 1; i >= 1 && found.length === 0; i--) {
+            const name = tokens.slice(0, i).join(' ');
+            const hints = tokens.slice(i);
+            const candidates = await geocode(name);
+            found = candidates
+              .map((r) => ({ r, s: Math.min(...hints.map((h) => hintScore(h, r))) }))
+              .filter((x) => x.s > 0)
+              .sort((a, b) => b.s - a.s)
+              .map((x) => x.r);
+          }
+        }
+        setResults(found);
       } catch {
         setResults([]);
       } finally {
