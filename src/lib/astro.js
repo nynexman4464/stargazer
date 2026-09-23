@@ -573,36 +573,50 @@ export function magBand(mag) {
 
 function scoreCore(ev, cloud, cloudText) {
   const illum = moonIllum(ev.date);
-  let score = 55;
+  const BASE_SCORE = 55;
+  let score = BASE_SCORE;
   const factors = [];
+  /* Every factor records its point delta so the UI can render the full
+     breakdown table (base score, weather +/-, ...). */
+  const push = (icon, text, delta) => {
+    factors.push({ icon, text, delta: delta || 0 });
+    score += delta || 0;
+  };
   if (cloud === null) {
-    factors.push({ icon: 'cloudOff', text: cloudText });
+    push('cloudOff', cloudText, 0);
   } else {
-    factors.push({ icon: 'cloud', text: cloudText });
-    if (cloud < 15) score += 28;
-    else if (cloud < 40) score += 14;
-    else if (cloud < 70) score -= 8;
-    else score -= 28;
+    let d = 0;
+    if (cloud < 15) d = 28;
+    else if (cloud < 40) d = 14;
+    else if (cloud < 70) d = -8;
+    else d = -28;
+    push('cloud', cloudText, d);
   }
   const moonSensitive = ev.type === 'shower' || ev.type === 'comet';
   if (moonSensitive) {
-    factors.push({ icon: 'moon', text: `${Math.round(illum * 100)}% ${moonName(illum)}` });
-    if (illum > 0.75) score -= 20;
-    else if (illum > 0.5) score -= 10;
-    else if (illum < 0.25) score += 6;
+    let d = 0;
+    if (illum > 0.75) d = -20;
+    else if (illum > 0.5) d = -10;
+    else if (illum < 0.25) d = 6;
+    push('moon', `${Math.round(illum * 100)}% ${moonName(illum)}`, d);
   }
   /* Brightness: a target you can't see with the naked eye from a lit backyard
      is a lesser candidate. ev.mag is the limiting magnitude (dimmest body
      that matters). */
   if (Number.isFinite(ev.mag)) {
     const mb = magBand(ev.mag);
-    score += mb.delta;
-    factors.push(mb.factor);
+    push(mb.factor.icon, mb.factor.text, mb.delta);
   }
-  if (ev.tier === 'drive') score += 6;
-  if (ev.tier === 'expedition') score += 10;
-  score = Math.max(5, Math.min(99, Math.round(score)));
-  return { score, factors, label: score >= 78 ? 'Go' : score >= 55 ? 'Maybe' : 'Risky' };
+  if (ev.tier === 'drive') push('car', 'Dark-sky drive — worth an hour in the car', 6);
+  if (ev.tier === 'expedition') push('plane', 'Expedition — once in a decade, worth traveling for', 10);
+  const raw = Math.round(score);
+  score = Math.max(5, Math.min(99, raw));
+  return {
+    score,
+    base: BASE_SCORE,
+    factors,
+    label: score >= 78 ? 'Go' : score >= 55 ? 'Maybe' : 'Risky',
+  };
 }
 
 /* Expedition-tier events are total solar eclipses: only worth a go-score when

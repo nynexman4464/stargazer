@@ -71,8 +71,8 @@ export default function MoonPanel({ asOf, loc }) {
     (async () => {
       if (!loc) return;
       const [t, n] = await Promise.all([
-        moonConditions(ref, loc, wxCache.current),
-        upcoming ? moonConditions(upcoming.date, loc, wxCache.current) : null,
+        moonConditions(new Date(refMs), loc, wxCache.current),
+        upcomingMs ? moonConditions(new Date(upcomingMs), loc, wxCache.current) : null,
       ]);
       if (!cancelled) {
         setTonightCond(t);

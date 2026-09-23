@@ -94,28 +94,30 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc, pla
                       Moon that night: {Math.round(moon * 100)}% {moonName(moon)}
                     </Text>
                   </VStack>
-                  <VStack gap={1}>
-                    {score ? (
-                      <GoScore score={score} exclude={pick.bodies} />
-                    ) : notVisible ? (
-                      <Text type="supporting">
-                        Not visible from {loc?.name || 'your location'} — worth traveling for.
-                      </Text>
-                    ) : beyondForecast ? (
-                      <Text type="supporting">Too far out — forecasts only reach about two weeks.</Text>
-                    ) : (
-                      <Text type="supporting">Scoring the sky…</Text>
+                  <VStack gap={3}>
+                    <VStack gap={1}>
+                      {score ? (
+                        <GoScore score={score} exclude={pick.bodies} />
+                      ) : notVisible ? (
+                        <Text type="supporting">
+                          Not visible from {loc?.name || 'your location'} — worth traveling for.
+                        </Text>
+                      ) : beyondForecast ? (
+                        <Text type="supporting">Too far out — forecasts only reach about two weeks.</Text>
+                      ) : (
+                        <Text type="supporting">Scoring the sky…</Text>
+                      )}
+                    </VStack>
+                    {visFactors && (
+                      <VStack gap={1}>
+                        <Text type="label" color="secondary">
+                          Visibility {visWhen}
+                        </Text>
+                        <ScoreFactors factors={visFactors} exclude={pick.bodies} />
+                      </VStack>
                     )}
                   </VStack>
                 </Grid>
-                {visFactors && (
-                  <VStack gap={1}>
-                    <Text type="label" color="secondary">
-                      Visibility {visWhen}
-                    </Text>
-                    <ScoreFactors factors={visFactors} exclude={pick.bodies} />
-                  </VStack>
-                )}
               </>
             )}
           </VStack>
