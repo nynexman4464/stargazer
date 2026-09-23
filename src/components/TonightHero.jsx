@@ -82,7 +82,7 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc, pla
                   </VStack>
                 </HStack>
                 <Text color="secondary"><TermText text={pick.desc} exclude={pick.bodies} /></Text>
-                <Grid columns={{ minWidth: 220 }} gap={3}>
+                <Grid columns={{ minWidth: 220, max: 2 }} gap={3}>
                   <VStack gap={1}>
                     <Text type="label" color="secondary">
                       When
