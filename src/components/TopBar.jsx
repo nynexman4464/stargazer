@@ -16,10 +16,10 @@ import { bortleForLoc, bortleLabel } from '../lib/astro.js';
 
 /* Location menu: a real dropdown (bottom sheet on touch) to flip the viewing
    location between home and the last away spot, with the full location
-   dialog one tap away under "Update locations…". Shows the Bortle rating
-   next to the location whenever we actually know it. */
+   dialog one tap away under "Update locations…". The Bortle rating lives on
+   the home/away rows in the menu, not on the trigger, to keep the header
+   compact. */
 export default function TopBar({
-  loc,
   locName,
   away,
   home,
@@ -33,13 +33,11 @@ export default function TopBar({
   // On phones the header is tight, so the location trigger collapses to an
   // icon-only button (the location name moves into its tooltip/label).
   const isCompact = useMediaQuery('(max-width: 639px)');
-  const bortle = bortleForLoc(loc);
   const homeBortle = bortleForLoc(home);
   const awayBortle = bortleForLoc(awayLoc);
-  const bortleText = bortleLabel(bortle);
   const homeBortleText = bortleLabel(homeBortle);
   const awayBortleText = bortleLabel(awayBortle);
-  const locLabel = `${locName}${away ? ' · away' : ''}${bortleText ? ` · ${bortleText}` : ''}`;
+  const locLabel = `${locName}${away ? ' · away' : ''}`;
   return (
     <TopNav
       label="Stargazer"

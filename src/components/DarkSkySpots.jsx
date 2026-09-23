@@ -17,8 +17,11 @@ const BORTLE_EXPLAINER =
 export default function DarkSkySpots({ spots, loc, away, onPickLocation }) {
   const withDist = spots
     .map((s) => ({ ...s, dist: haversine(loc.lat, loc.lon, s.lat, s.lon) }))
-    .sort((a, b) => a.dist - b.dist)
-    .slice(0, 6);
+    .sort((a, b) => a.dist - b.dist);
+  // The drives list only covers the US; when nothing is within ~1000 mi the
+  // list (and its dots) give way to a note — the map still works anywhere.
+  const hasLocal = withDist.length > 0 && withDist[0].dist <= 1000;
+  const shown = hasLocal ? withDist.slice(0, 6) : [];
 
   return (
     <Card padding={4}>
@@ -29,7 +32,7 @@ export default function DarkSkySpots({ spots, loc, away, onPickLocation }) {
             <Term term="Bortle scale">Bortle</Term> ratings are published values where they exist, estimates otherwise — hover a
             rating for its source.
           </Text>
-          {away && (
+          {away && hasLocal && (
             <Text type="supporting">
               You're away from home — these are the nearest certified dark-sky places in the
               country, shown by distance from where you are now.
@@ -38,11 +41,11 @@ export default function DarkSkySpots({ spots, loc, away, onPickLocation }) {
         </VStack>
         {spots.length > 0 && (
           <VStack gap={1}>
-            <DarkSkyMap spots={withDist} loc={loc} onPickLocation={onPickLocation} />
+            <DarkSkyMap spots={shown} loc={loc} onPickLocation={onPickLocation} />
             <Text type="supporting">
-              Glow is city lights (NASA Black Marble) — the darker the area, the darker the
-              sky. Blue dots are the drives below; the gold dot is you. Tap a dot, or any
-              point on the map, to set it as your viewing location.
+              {hasLocal
+                ? 'Glow is city lights (NASA Black Marble) — the darker the area, the darker the sky. Blue dots are the drives below; the gold dot is you. Tap a dot, or any point on the map, to set it as your viewing location.'
+                : 'Glow is city lights (NASA Black Marble) — the darker the area, the darker the sky. The gold dot is you. Tap any point on the map to set it as your viewing location.'}
             </Text>
           </VStack>
         )}
@@ -51,9 +54,15 @@ export default function DarkSkySpots({ spots, loc, away, onPickLocation }) {
             <Skeleton height={64} />
             <Skeleton height={64} />
           </VStack>
+        ) : !hasLocal ? (
+          <Text type="supporting">
+            Our dark-sky drives list only covers the United States so far, so there's
+            nothing near you in it. The map above still works anywhere — tap a point to
+            set it as your viewing location.
+          </Text>
         ) : (
           <List hasDividers density="balanced">
-            {withDist.map((s) => (
+            {shown.map((s) => (
               <ListItem
                 key={s.name}
                 label={<Text weight="semibold">{s.name}</Text>}

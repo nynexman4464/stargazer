@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import { estimateBortle } from '../lib/astro.js';
 
 /* NASA Black Marble (VIIRS city lights) as the light-pollution overlay.
    Public, no key. GoogleMapsCompatible_Level8 tops out at zoom 8 — Leaflet
@@ -103,11 +104,11 @@ export default function DarkSkyMap({ spots, loc, onPickLocation }) {
         fillColor: '#a78bfa',
         fillOpacity: 1,
       }).addTo(map);
+      const est = estimateBortle(lat, lng);
+      const sub = `${lat.toFixed(3)}, ${lng.toFixed(3)}${est ? ` · Est. Bortle ${est.value}` : ''}`;
       pin
         .bindPopup(
-          popupShell(name, `${lat.toFixed(3)}, ${lng.toFixed(3)}`, () =>
-            pickRef.current?.({ name, lat, lon: lng }),
-          ),
+          popupShell(name, sub, () => pickRef.current?.({ name, lat, lon: lng })),
         )
         .openPopup();
       pinRef.current = pin;

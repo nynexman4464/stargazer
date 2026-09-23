@@ -91,6 +91,31 @@ export function bortleForLoc(loc) {
   }
   return estimateBortle(loc.lat, loc.lon);
 }
+
+/* A searched or map-picked place that lands on (or right next to) a certified
+   dark-sky destination inherits that destination's published Bortle rating
+   instead of the satellite-grid estimate, so "Glacier National Park" and the
+   map's Glacier dot agree. haversine() returns miles. Sites come from
+   public/data/darksky.json. */
+export function matchDarkSkySite(lat, lon, name, sites) {
+  if (typeof lat !== 'number' || typeof lon !== 'number' || !Array.isArray(sites)) return null;
+  const n = (name || '').toLowerCase();
+  let best = null;
+  let bestD = Infinity;
+  for (const s of sites) {
+    if (typeof s.lat !== 'number' || typeof s.lon !== 'number' || !s.bortle) continue;
+    const d = haversine(lat, lon, s.lat, s.lon);
+    const sn = s.name.toLowerCase();
+    const nameHit = n.length > 3 && (n.includes(sn) || sn.includes(n));
+    if ((nameHit && d <= 60) || d <= 15) {
+      if (d < bestD) {
+        bestD = d;
+        best = s;
+      }
+    }
+  }
+  return best;
+}
 export const SATS = [
   // mag: typical peak visual magnitude (lower = brighter). ISS can flare to
   // -5.9; Tiangong runs about -2 to -3; Hubble (~mag 1.5-3) is usually a

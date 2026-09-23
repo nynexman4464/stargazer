@@ -35,6 +35,7 @@ import {
   loadCloudClimatology,
   startOfDay,
   planetVisibility,
+  matchDarkSkySite,
 } from './lib/astro.js';
 
 const base = import.meta.env.BASE_URL;
@@ -175,15 +176,24 @@ export default function App() {
   /* ---- location ---- */
   const applyLoc = useCallback(
     (next) => {
-      setLoc(next);
-      saveLoc(next);
-      if (isAway(next, home)) {
-        saveLastAway(next);
-        setLastAway({ ...next });
+      let loc = next;
+      // A searched or map-picked place near a certified dark-sky destination
+      // inherits its published Bortle rating instead of the grid estimate.
+      if (!next.bortle && typeof next.lat === 'number' && spots.length) {
+        const site = matchDarkSkySite(next.lat, next.lon, next.name, spots);
+        if (site) {
+          loc = { ...next, bortle: site.bortle, bortleSource: site.bortle_source };
+        }
+      }
+      setLoc(loc);
+      saveLoc(loc);
+      if (isAway(loc, home)) {
+        saveLastAway(loc);
+        setLastAway({ ...loc });
       }
       setLocOpen(false);
     },
-    [home],
+    [home, spots],
   );
 
   const backHome = useCallback(() => {
@@ -247,7 +257,6 @@ export default function App() {
         contentPadding={0}
         topNav={
           <TopBar
-            loc={loc}
             locName={loc.name}
             away={away}
             home={home}
