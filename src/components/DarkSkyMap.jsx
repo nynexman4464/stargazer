@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { estimateBortle } from '../lib/astro.js';
+import { estimateBortle, matchDarkSkySite } from '../lib/astro.js';
 
 /* NASA Black Marble (VIIRS city lights) as the light-pollution overlay.
    Public, no key. GoogleMapsCompatible_Level8 tops out at zoom 8 — Leaflet
@@ -66,6 +66,10 @@ export default function DarkSkyMap({ spots, loc, onPickLocation }) {
   const pinRef = useRef(null);
   const pickRef = useRef(onPickLocation);
   pickRef.current = onPickLocation;
+  // Spots change as data loads; the map-click handler is registered once, so
+  // it reads them through a ref (same pattern as onPickLocation).
+  const spotsRef = useRef(spots);
+  spotsRef.current = spots;
   const clickSeq = useRef(0);
 
   useEffect(() => {
@@ -104,8 +108,12 @@ export default function DarkSkyMap({ spots, loc, onPickLocation }) {
         fillColor: '#a78bfa',
         fillOpacity: 1,
       }).addTo(map);
-      const est = estimateBortle(lat, lng);
-      const sub = `${lat.toFixed(3)}, ${lng.toFixed(3)}${est ? ` · Est. Bortle ${est.value}` : ''}`;
+      // Show the same rating the point would get if set as the location: a
+      // nearby certified site's value wins over the raw grid estimate.
+      const site = matchDarkSkySite(lat, lng, name, spotsRef.current);
+      const est = site ? null : estimateBortle(lat, lng);
+      const bortleBit = site ? `Bortle ${site.bortle}` : est ? `Est. Bortle ${est.value}` : '';
+      const sub = `${lat.toFixed(3)}, ${lng.toFixed(3)}${bortleBit ? ` · ${bortleBit}` : ''}`;
       pin
         .bindPopup(
           popupShell(name, sub, () => pickRef.current?.({ name, lat, lon: lng })),
