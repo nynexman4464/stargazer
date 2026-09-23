@@ -97,6 +97,7 @@ export const GLOSSARY = [
   ['Eclipse kinds', 'The labels the app uses. Faint: the moon only skims Earth\u2019s outer shadow \u2014 just a subtle smudge of shading, the least dramatic kind. Partial: part of the moon or sun goes dark, like a bite taken out. Total: the whole moon turns red, or the sun is completely covered. Ring-of-fire: the moon lines up with the sun but is too far away to cover it fully, leaving a bright ring.'],
   ['Radiant', 'The patch of sky meteors appear to fly out from during a shower. Named after its constellation — Perseids radiate from Perseus.'],
   ['Go score', 'Our 0\u2013100 \u201cshould you go outside\u201d rating, built from cloud cover, moonlight, and how special the event is.'],
+  ['Visibility score', 'The 0\u2013100 number on each planet row: how well that planet shows from your spot that night. Built from how high it climbs while the sky is dark, how bright it is, moonlight, and the cloud forecast. 78+ is Go, 55+ is Maybe.'],
   ['Kp index', '0-to-9 scale of geomagnetic storm strength. Higher numbers mean the aurora reaches further from the poles.'],
 ];
 
@@ -534,6 +535,38 @@ export async function passScore(pass, mag, loc, cache) {
 
 /* Shared scoring core: cloud % (forecast or historical), exact moon math, and
    tier bonus. cloudText is the human-readable cloud factor line. */
+/* Brightness bands shared by event go-scores and planet visibility: dimmer
+   targets score lower. Bands assume suburban skies — about mag 4 is the
+   naked-eye limit from a place like Medford. */
+export function magBand(mag) {
+  const magLabel = `magnitude ${mag}`;
+  if (mag <= 4) {
+    return {
+      delta: 4,
+      factor: { icon: 'eye', text: `${magLabel} — bright, an easy naked-eye target` },
+    };
+  }
+  if (mag <= 6) {
+    return {
+      delta: -4,
+      factor: {
+        icon: 'eye',
+        text: `${magLabel} — too faint for the naked eye from town; needs dark skies or binoculars`,
+      },
+    };
+  }
+  if (mag <= 10) {
+    return {
+      delta: -10,
+      factor: { icon: 'telescope', text: `${magLabel} — needs binoculars or a telescope` },
+    };
+  }
+  return {
+    delta: -18,
+    factor: { icon: 'telescope', text: `${magLabel} — telescope only` },
+  };
+}
+
 function scoreCore(ev, cloud, cloudText) {
   const illum = moonIllum(ev.date);
   let score = 55;
@@ -556,24 +589,11 @@ function scoreCore(ev, cloud, cloudText) {
   }
   /* Brightness: a target you can't see with the naked eye from a lit backyard
      is a lesser candidate. ev.mag is the limiting magnitude (dimmest body
-     that matters). Bands assume suburban skies — about mag 4 is the
-     naked-eye limit from a place like Medford. */
+     that matters). */
   if (Number.isFinite(ev.mag)) {
-    const m = ev.mag;
-    const magLabel = `magnitude ${m}`;
-    if (m <= 4) {
-      score += 4;
-      factors.push({ icon: 'eye', text: `${magLabel} — bright, an easy naked-eye target` });
-    } else if (m <= 6) {
-      score -= 4;
-      factors.push({ icon: 'eye', text: `${magLabel} — too faint for the naked eye from town; needs dark skies or binoculars` });
-    } else if (m <= 10) {
-      score -= 10;
-      factors.push({ icon: 'telescope', text: `${magLabel} — needs binoculars or a telescope` });
-    } else {
-      score -= 18;
-      factors.push({ icon: 'telescope', text: `${magLabel} — telescope only` });
-    }
+    const mb = magBand(ev.mag);
+    score += mb.delta;
+    factors.push(mb.factor);
   }
   if (ev.tier === 'drive') score += 6;
   if (ev.tier === 'expedition') score += 10;
@@ -1108,4 +1128,301 @@ export function brightnessWords(mag) {
   if (mag < 0) return 'bright';
   if (mag < 3) return 'dim';
   return 'faint';
+}
+
+/* ============================== planet visibility ============================== */
+/* Planet positions after Paul Schlyter's "How to compute planetary positions"
+   (after van Flandern & Pulkkinen): about 1 arcminute for the planets,
+   1-2 for the Moon — plenty for "where to look" guidance and visibility
+   scoring. https://stjarnhimlen.se/comp/ppcomp.html
+   d = days since 2000 Jan 0.0 (= 1999 Dec 31 00:00 UT). */
+
+/* Orbital elements as [N0,N1, i0,i1, w0,w1, a0,a1, e0,e1, M0,M1]:
+   node, inclination, perihelion argument, semi-major axis, eccentricity,
+   mean anomaly — each a value at 2000 Jan 0.0 plus a per-day rate. */
+const ORBITAL_ELEMENTS = {
+  sun: [0, 0, 0, 0, 282.9404, 4.70935e-5, 1.0, 0, 0.016709, -1.151e-9, 356.047, 0.9856002585],
+  moon: [125.1228, -0.0529538083, 5.1454, 0, 318.0634, 0.1643573223, 60.2666, 0, 0.0549, 0, 115.3654, 13.0649929509],
+  mercury: [48.3313, 3.24587e-5, 7.0047, 5.0e-8, 29.1241, 1.01444e-5, 0.387098, 0, 0.205635, 5.59e-10, 168.6562, 4.0923344368],
+  venus: [76.6799, 2.4659e-5, 3.3946, 2.75e-8, 54.891, 1.38374e-5, 0.72333, 0, 0.006773, -1.302e-9, 48.0052, 1.6021302244],
+  mars: [49.5574, 2.11081e-5, 1.8497, -1.78e-8, 286.5016, 2.92961e-5, 1.523688, 0, 0.093405, 2.516e-9, 18.6021, 0.5240207766],
+  jupiter: [100.4542, 2.76854e-5, 1.303, -1.557e-7, 273.8777, 1.64505e-5, 5.20256, 0, 0.048498, 4.469e-9, 19.895, 0.0830853001],
+  saturn: [113.6634, 2.3898e-5, 2.4886, -1.081e-7, 339.3939, 2.97661e-5, 9.55475, 0, 0.055546, -9.499e-9, 316.967, 0.0334442282],
+  uranus: [74.0005, 1.3978e-5, 0.7733, 1.9e-8, 96.6612, 3.0565e-5, 19.18171, -1.55e-8, 0.047318, 7.45e-9, 142.5905, 0.011725806],
+  neptune: [131.7806, 3.0173e-5, 1.77, -2.55e-7, 272.8461, -6.027e-6, 30.05826, 3.313e-8, 0.008606, 2.15e-9, 260.2471, 0.005995147],
+};
+export const PLANET_NAMES = ['mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune'];
+
+/* Normalize degrees to [0, 360). */
+function rev(x) {
+  return (((x % 360) + 360) % 360);
+}
+
+export function dayNumber(date) {
+  return date.getTime() / DAY - 10956;
+}
+
+function keplerE(Mdeg, e) {
+  const M = Mdeg * RAD;
+  let E = M + e * Math.sin(M) * (1 + e * Math.cos(M));
+  for (let k = 0; k < 8; k++) {
+    E -= (E - e * Math.sin(E) - M) / (1 - e * Math.cos(E));
+  }
+  return E;
+}
+
+/* Heliocentric ecliptic position (AU for planets/sun, Earth radii for the Moon). */
+function helioEcliptic(el, d) {
+  const N = rev(el[0] + el[1] * d) * RAD;
+  const i = (el[2] + el[3] * d) * RAD;
+  const w = rev(el[4] + el[5] * d) * RAD;
+  const a = el[6] + el[7] * d;
+  const e = el[8] + el[9] * d;
+  const M = rev(el[10] + el[11] * d);
+  const E = keplerE(M, e);
+  const xv = a * (Math.cos(E) - e);
+  const yv = a * Math.sqrt(1 - e * e) * Math.sin(E);
+  const v = Math.atan2(yv, xv);
+  const r = Math.hypot(xv, yv);
+  const vw = v + w;
+  return {
+    xh: r * (Math.cos(N) * Math.cos(vw) - Math.sin(N) * Math.sin(vw) * Math.cos(i)),
+    yh: r * (Math.sin(N) * Math.cos(vw) + Math.cos(N) * Math.sin(vw) * Math.cos(i)),
+    zh: r * Math.sin(vw) * Math.sin(i),
+    r, vDeg: v / RAD, wDeg: w / RAD, M, Ndeg: N / RAD,
+  };
+}
+
+function perturbTerms(lon, lat, terms) {
+  const s = (x) => Math.sin(x * RAD);
+  const c = (x) => Math.cos(x * RAD);
+  for (const [kind, coeff, arg, isLat] of terms) {
+    const v = coeff * (kind === 's' ? s(arg) : c(arg));
+    if (isLat) lat += v;
+    else lon += v;
+  }
+  return [lon, lat];
+}
+
+function bodyEquatorial(name, d) {
+  const el = ORBITAL_ELEMENTS[name];
+  const ecl = (23.4393 - 3.563e-7 * d) * RAD;
+  const sun = helioEcliptic(ORBITAL_ELEMENTS.sun, d);
+  const b = helioEcliptic(el, d);
+  let lon = rev(Math.atan2(b.yh, b.xh) / RAD);
+  let lat = Math.atan2(b.zh, Math.hypot(b.xh, b.yh)) / RAD;
+  if (name === 'moon') {
+    const Ms = sun.M, Mm = b.M, Nm = b.Ndeg, ws = sun.wDeg, wm = b.wDeg;
+    const Ls = Ms + ws, Lm = Mm + wm + Nm;
+    const D = Lm - Ls, F = Lm - Nm;
+    [lon] = perturbTerms(lon, 0, [
+      ['s', -1.274, Mm - 2 * D], ['s', 0.658, 2 * D], ['s', -0.186, Ms],
+      ['s', -0.059, 2 * Mm - 2 * D], ['s', -0.057, Mm - 2 * D + Ms],
+      ['s', 0.053, Mm + 2 * D], ['s', 0.046, 2 * D - Ms], ['s', 0.041, Mm - Ms],
+      ['s', -0.035, D], ['s', -0.031, Mm + Ms], ['s', -0.015, 2 * F - 2 * D],
+      ['s', 0.011, Mm - 4 * D],
+    ]);
+    [, lat] = perturbTerms(0, lat, [
+      ['s', -0.173, F - 2 * D, true], ['s', -0.055, Mm - F - 2 * D, true],
+      ['s', -0.046, Mm + F - 2 * D, true], ['s', 0.033, F + 2 * D, true],
+      ['s', 0.017, 2 * Mm + F, true],
+    ]);
+  } else if (name === 'jupiter' || name === 'saturn' || name === 'uranus') {
+    const Mj = rev(ORBITAL_ELEMENTS.jupiter[10] + ORBITAL_ELEMENTS.jupiter[11] * d);
+    const Ms = rev(ORBITAL_ELEMENTS.saturn[10] + ORBITAL_ELEMENTS.saturn[11] * d);
+    if (name === 'jupiter') {
+      [lon] = perturbTerms(lon, 0, [
+        ['s', -0.332, 2 * Mj - 5 * Ms - 67.6], ['s', -0.056, 2 * Mj - 2 * Ms + 21],
+        ['s', 0.042, 3 * Mj - 5 * Ms + 21], ['s', -0.036, Mj - 2 * Ms],
+        ['c', 0.022, Mj - Ms], ['s', 0.023, 2 * Mj - 3 * Ms + 52],
+        ['s', -0.016, Mj - 5 * Ms - 69],
+      ]);
+    } else if (name === 'saturn') {
+      [lon, lat] = perturbTerms(lon, lat, [
+        ['s', 0.812, 2 * Mj - 5 * Ms - 67.6], ['c', -0.229, 2 * Mj - 4 * Ms - 2],
+        ['s', 0.119, Mj - 2 * Ms - 3], ['s', 0.046, 2 * Mj - 6 * Ms - 69],
+        ['s', 0.014, Mj - 3 * Ms + 32], ['c', -0.02, 2 * Mj - 4 * Ms - 2, true],
+        ['s', 0.018, 2 * Mj - 6 * Ms - 49, true],
+      ]);
+    } else {
+      const Mu = rev(ORBITAL_ELEMENTS.uranus[10] + ORBITAL_ELEMENTS.uranus[11] * d);
+      [lon] = perturbTerms(lon, 0, [
+        ['s', 0.04, Ms - 2 * Mu + 6], ['s', 0.035, Ms - 3 * Mu + 33],
+        ['s', -0.015, Mj - Mu + 20],
+      ]);
+    }
+  }
+  const lr = lon * RAD, br = lat * RAD;
+  const xh = b.r * Math.cos(lr) * Math.cos(br);
+  const yh = b.r * Math.sin(lr) * Math.cos(br);
+  const zh = b.r * Math.sin(br);
+  const lonsun = rev(sun.vDeg + sun.wDeg);
+  const xs = sun.r * Math.cos(lonsun * RAD), ys = sun.r * Math.sin(lonsun * RAD);
+  let xg, yg, zg;
+  if (name === 'moon') {
+    xg = xh; yg = yh; zg = zh;
+  } else {
+    xg = xh + xs; yg = yh + ys; zg = zh;
+  }
+  const xe = xg, ye = yg * Math.cos(ecl) - zg * Math.sin(ecl), ze = yg * Math.sin(ecl) + zg * Math.cos(ecl);
+  const R = Math.hypot(xg, yg, zg);
+  const ra = rev(Math.atan2(ye, xe) / RAD);
+  const dec = Math.atan2(ze, Math.hypot(xe, ye)) / RAD;
+  /* Sun separation and phase angle (deg). Skipped for the Moon (its distance
+     is in Earth radii, not AU, and nothing consumes its elongation). */
+  let elong = null, FV = null;
+  if (name !== 'moon') {
+    const s = sun.r, r = b.r;
+    const clamp = (x) => Math.max(-1, Math.min(1, x));
+    elong = Math.acos(clamp((s * s + R * R - r * r) / (2 * s * R))) / RAD;
+    FV = Math.acos(clamp((r * r + R * R - s * s) / (2 * r * R))) / RAD;
+  }
+  return { ra, dec, r: b.r, R, elong, FV, lon, lat };
+}
+
+/* Visual magnitude from helio/geocentric distances (AU) and phase angle (deg). */
+function planetMagnitude(name, r, R, FV, d, lon, lat) {
+  const base = 5 * Math.log10(r * R);
+  switch (name) {
+    case 'mercury': return -0.36 + base + 0.027 * FV + 2.2e-13 * FV ** 6;
+    case 'venus': return -4.34 + base + 0.013 * FV + 4.2e-7 * FV ** 3;
+    case 'mars': return -1.51 + base + 0.016 * FV;
+    case 'jupiter': return -9.25 + base + 0.014 * FV;
+    case 'saturn': {
+      const ir = 28.06 * RAD, Nr = (169.51 + 3.82e-5 * d) * RAD;
+      const B = Math.asin(
+        Math.sin(lat * RAD) * Math.cos(ir) - Math.cos(lat * RAD) * Math.sin(ir) * Math.sin(lon * RAD - Nr),
+      );
+      const ring = -2.6 * Math.sin(Math.abs(B)) + 1.2 * Math.sin(B) ** 2;
+      return -9.0 + base + 0.044 * FV + ring;
+    }
+    case 'uranus': return -7.15 + base + 0.001 * FV;
+    case 'neptune': return -6.9 + base + 0.001 * FV;
+    default: return NaN;
+  }
+}
+
+export function planetEphemeris(date) {
+  const d = dayNumber(date);
+  return PLANET_NAMES.map((name) => {
+    const e = bodyEquatorial(name, d);
+    return { name, ra: e.ra, dec: e.dec, elong: e.elong, mag: planetMagnitude(name, e.r, e.R, e.FV, d, e.lon, e.lat) };
+  });
+}
+
+export function moonEquatorial(date) {
+  const m = bodyEquatorial('moon', dayNumber(date));
+  return { ra: m.ra, dec: m.dec };
+}
+
+function lstDeg(date, lon) {
+  const n = date.getTime() / DAY + 2440587.5 - 2451545.0;
+  const gmst = (((18.697374558 + 24.06570982441908 * n) % 24) + 24) % 24;
+  return gmst * 15 + lon;
+}
+
+export function altAz(raDeg, decDeg, date, lat, lon) {
+  const ha = (lstDeg(date, lon) - raDeg) * RAD;
+  const dec = decDeg * RAD, la = lat * RAD;
+  const x = Math.cos(ha) * Math.cos(dec);
+  const y = Math.sin(ha) * Math.cos(dec);
+  const z = Math.sin(dec);
+  const xhor = x * Math.sin(la) - z * Math.cos(la);
+  const yhor = y;
+  const zhor = x * Math.cos(la) + z * Math.sin(la);
+  return {
+    alt: Math.asin(Math.max(-1, Math.min(1, zhor))) / RAD,
+    az: rev(Math.atan2(yhor, xhor) / RAD + 180),
+  };
+}
+
+export function angularSep(ra1, dec1, ra2, dec2) {
+  const s = Math.sin(dec1 * RAD) * Math.sin(dec2 * RAD)
+    + Math.cos(dec1 * RAD) * Math.cos(dec2 * RAD) * Math.cos((ra1 - ra2) * RAD);
+  return Math.acos(Math.max(-1, Math.min(1, s))) / RAD;
+}
+
+/* Nightly planet visibility: for each planet, the best dark-sky viewing
+   geometry on the observer-local night of `date` (6 PM to 6 AM local), plus
+   a 0-100 visibility score on the same Go/Maybe/Risky bands as go-scores.
+   Positions are exact math for any date; only the cloud term depends on the
+   forecast (omitted when none is available). */
+export async function planetVisibility(date, loc, wxCache = {}) {
+  let off = await utcOffsetSeconds(loc);
+  if (off == null) off = -date.getTimezoneOffset() * 60;
+  const shift = off * 1000;
+  const dl = new Date(date.getTime() + shift);
+  const midnightL = Date.UTC(dl.getUTCFullYear(), dl.getUTCMonth(), dl.getUTCDate());
+  const t0 = midnightL + 18 * 3600e3 - shift;
+  const t1 = midnightL + 30 * 3600e3 - shift;
+  const eph = planetEphemeris(new Date((t0 + t1) / 2));
+  const rows = eph.map((p) => ({
+    name: p.name, mag: Math.round(p.mag * 10) / 10, best: null, maxAlt: -90,
+  }));
+  for (let t = t0; t <= t1; t += 20 * 60e3) {
+    const dt = new Date(t);
+    const dark = sunElev(dt, loc.lat, loc.lon) < -6;
+    eph.forEach((p, i) => {
+      const aa = altAz(p.ra, p.dec, dt, loc.lat, loc.lon);
+      const r = rows[i];
+      if (aa.alt > r.maxAlt) r.maxAlt = aa.alt;
+      if (dark && aa.alt > 0 && (!r.best || aa.alt > r.best.alt)) {
+        r.best = { time: dt, alt: aa.alt, az: aa.az };
+      }
+    });
+  }
+  const cloud = await cloudCover(date, loc, wxCache);
+  return rows
+    .map((r, i) => ({ ...r, ...scorePlanet(r, eph[i], cloud, loc) }))
+    .sort((a, b) => b.score - a.score);
+}
+
+function scorePlanet(row, eph, cloud, loc) {
+  let score = 50;
+  let altNote;
+  if (!row.best) {
+    score -= 45;
+    altNote = row.maxAlt > 0 ? "only up while the sun's up" : 'below the horizon tonight';
+  } else {
+    const a = Math.round(row.best.alt);
+    if (a < 10) { score -= 18; altNote = `peaks ${a}° — very low`; }
+    else if (a < 20) { score -= 6; altNote = `peaks ${a}° — low`; }
+    else if (a < 35) { score += 8; altNote = `peaks ${a}°`; }
+    else if (a < 55) { score += 15; altNote = `peaks ${a}° — nice and high`; }
+    else { score += 22; altNote = `peaks ${a}° — nearly overhead`; }
+  }
+  /* Brightness (same bands as event go-scores). */
+  score += magBand(row.mag).delta;
+  /* Moonlight at the planet's best hour. */
+  let moonNote = null;
+  if (row.best) {
+    const moon = moonEquatorial(row.best.time);
+    const maa = altAz(moon.ra, moon.dec, row.best.time, loc.lat, loc.lon);
+    const illum = moonIllum(row.best.time);
+    const pct = Math.round(illum * 100);
+    if (maa.alt < 0) moonNote = "moon's down at the best hour";
+    else {
+      const sep = Math.round(angularSep(moon.ra, moon.dec, eph.ra, eph.dec));
+      if (illum > 0.5 && sep < 25) { score -= 12; moonNote = `${pct}% moon only ${sep}° away — washes out the sky`; }
+      else if (illum > 0.5 && sep < 60) { score -= 5; moonNote = `bright ${pct}% moon ${sep}° away`; }
+      else if (illum > 0.25) { score -= 2; moonNote = `${pct}% ${moonName(illum)} ${sep}° away`; }
+      else moonNote = `${pct}% ${moonName(illum)} — dark skies`;
+    }
+  }
+  /* Clouds (same bands as go-scores). */
+  let cloudNote;
+  if (cloud === null) cloudNote = 'forecast unavailable';
+  else {
+    cloudNote = `${cloud}% clouds`;
+    if (cloud < 15) score += 28;
+    else if (cloud < 40) score += 14;
+    else if (cloud < 70) score -= 8;
+    else score -= 28;
+  }
+  score = Math.max(5, Math.min(99, Math.round(score)));
+  return {
+    score,
+    label: score >= 78 ? 'Go' : score >= 55 ? 'Maybe' : 'Risky',
+    altNote, moonNote, cloudNote,
+  };
 }
