@@ -3,8 +3,12 @@ import { AppShell } from '@astryxdesign/core/AppShell';
 import { Layout } from '@astryxdesign/core/Layout';
 import { LayoutContent } from '@astryxdesign/core/Layout';
 import { VStack } from '@astryxdesign/core/VStack';
+import { HStack } from '@astryxdesign/core/HStack';
 import { Grid, GridSpan } from '@astryxdesign/core/Grid';
 import { Text } from '@astryxdesign/core/Text';
+import { Link } from '@astryxdesign/core/Link';
+import { Icon } from '@astryxdesign/core/Icon';
+import { Code } from 'lucide-react';
 import TopBar from './components/TopBar.jsx';
 import LocationDialog from './components/LocationDialog.jsx';
 import TonightHero from './components/TonightHero.jsx';
@@ -309,6 +313,15 @@ export default function App() {
                     {sources}
                   </Text>
                 )}
+                <HStack gap={1} vAlign="center" hAlign="center">
+                  <Icon icon={Code} size="sm" color="secondary" />
+                  <Link
+                    href="https://github.com/nynexman4464/stargazer"
+                    target="_blank"
+                  >
+                    Stargazer on GitHub
+                  </Link>
+                </HStack>
               </VStack>
             </VStack>
           </LayoutContent>
