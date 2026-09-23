@@ -12,7 +12,7 @@ import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star } from 'lucide-react'
 import ScoreFactors from './ScoreFactors.jsx';
 import Starfield from './Starfield.jsx';
 import { TermText } from './Term.jsx';
-import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eventImage, eclipseVisibleFrom } from '../lib/astro.js';
+import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eventImage, eclipseVisibleFrom, planetVisibilityFactors } from '../lib/astro.js';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
@@ -22,9 +22,14 @@ function scoreVariant(label) {
   return label === 'Go' ? 'success' : label === 'Maybe' ? 'warning' : 'error';
 }
 
-export default function TonightHero({ pick, score, isTonight, viewDate, loc }) {
+export default function TonightHero({ pick, score, isTonight, viewDate, loc, planetRows, visWhen }) {
   const notVisible =
     pick && pick.tier === 'expedition' && !eclipseVisibleFrom(pick, loc);
+  // Tonight's (viewing date's) visibility for the pick's planets — the go
+  // score above is for the event night, this is for the night in progress.
+  const visFactors = pick && pick.type === 'planet'
+    ? planetVisibilityFactors(planetRows, pick.bodies, visWhen)
+    : null;
   // Everything in this card refers to the pick's own date — never mix
   // tonight's moon/conditions with a future event's. The full current-moon
   // picture lives in the Moon panel below.
@@ -126,6 +131,14 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc }) {
                     )}
                   </VStack>
                 </Grid>
+                {visFactors && (
+                  <VStack gap={1}>
+                    <Text type="label" color="secondary">
+                      Visibility {visWhen}
+                    </Text>
+                    <ScoreFactors factors={visFactors} exclude={pick.bodies} />
+                  </VStack>
+                )}
               </>
             )}
           </VStack>

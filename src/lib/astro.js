@@ -1386,6 +1386,30 @@ async function maxCloudWindow(t0, t1, loc, off, cache) {
   return found ? max : null;
 }
 
+/* Factor rows for a planet event's bodies, sharing one planetVisibility
+   computation across the event cards and the hero:
+   "Neptune visibility 85 (Great) tonight — best 2:40 AM, look S, 57° up ·
+   magnitude 7.8". The trailing "magnitude N.N" is auto-wrapped into a Mag
+   hover by TermText. */
+export function planetVisibilityFactors(planetRows, bodies, visWhen) {
+  if (!planetRows) return null;
+  const byName = Object.fromEntries(planetRows.map((r) => [r.name, r]));
+  const cap1 = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  const out = (bodies || [])
+    .map((b) => b.toLowerCase())
+    .filter((n) => byName[n])
+    .map((n) => {
+      const r = byName[n];
+      const detail = r.best
+        ? `best ${fmtTime(r.best.time)}, look ${compass(r.best.az)}, ${Math.round(r.best.alt)}° up`
+        : r.altNote;
+      return {
+        icon: r.mag <= 6 ? 'eye' : 'telescope',
+        text: `${cap1(n)} visibility ${r.score} (${r.label}) ${visWhen} — ${detail} · magnitude ${r.mag}`,
+      };
+    });
+  return out.length ? out : null;
+}
 /* Nightly planet visibility: for each planet, the best dark-sky viewing
    geometry on the observer-local night of `date` (6 PM to 6 AM local), plus
    a 0-100 visibility score (78+ Great, 55+ Fair, below that Poor).

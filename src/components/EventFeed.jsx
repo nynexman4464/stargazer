@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import { Card } from '@astryxdesign/core/Card';
 import { Heading } from '@astryxdesign/core/Text';
 import { Text } from '@astryxdesign/core/Text';
@@ -18,7 +18,7 @@ import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { useMediaQuery } from '@astryxdesign/core/hooks';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Telescope, Map, CalendarDays, Maximize2 } from 'lucide-react';
-import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, fmtTime, countdown, compass, DAY, eventImage, eclipseVisibleFrom, planetVisibility } from '../lib/astro.js';
+import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage, eclipseVisibleFrom, planetVisibilityFactors } from '../lib/astro.js';
 import MapLightbox from './MapLightbox.jsx';
 import ScoreFactors from './ScoreFactors.jsx';
 import { TermText } from './Term.jsx';
@@ -31,32 +31,15 @@ function scoreVariant(label) {
   return label === 'Go' ? 'success' : label === 'Maybe' ? 'warning' : 'error';
 }
 
-const cap = (s) => s.charAt(0).toUpperCase() + s.slice(1);
-
 function EventCard({ ev, score, loc, planetRows, visWhen }) {
   const [mapOpen, setMapOpen] = useState(false);
   const [lightbox, setLightbox] = useState(false);
   const notVisible = ev.tier === 'expedition' && !eclipseVisibleFrom(ev, loc);
   /* Tonight's (viewing date's) visibility for this card's planets, integrated
-     as factor rows: best time, where to look, and the 0-100 visibility score. */
-  let visFactors = null;
-  if (ev.type === 'planet' && planetRows) {
-    const byName = Object.fromEntries(planetRows.map((r) => [r.name, r]));
-    visFactors = (ev.bodies || [])
-      .map((b) => b.toLowerCase())
-      .filter((n) => byName[n])
-      .map((n) => {
-        const r = byName[n];
-        const detail = r.best
-          ? `best ${fmtTime(r.best.time)}, look ${compass(r.best.az)}, ${Math.round(r.best.alt)}° up`
-          : r.altNote;
-        return {
-          icon: r.mag <= 6 ? 'eye' : 'telescope',
-          text: `${cap(n)} visibility ${r.score} (${r.label}) ${visWhen} — ${detail}`,
-        };
-      });
-    if (visFactors.length === 0) visFactors = null;
-  }
+     as factor rows: best time, where to look, the 0-100 score, and magnitude. */
+  const visFactors = ev.type === 'planet'
+    ? planetVisibilityFactors(planetRows, ev.bodies, visWhen)
+    : null;
   const mapCaption = ev.solar
     ? 'Dark band: where the total or annular eclipse is visible. Map: NASA.'
     : 'White area: where the eclipse is visible. Map: NASA.';
@@ -161,7 +144,7 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
   );
 }
 
-export default function EventFeed({ events, scores, loaded, tier, setTier, type, setType, range, setRange, anchor, loc }) {
+export default function EventFeed({ events, scores, loaded, tier, setTier, type, setType, range, setRange, anchor, loc, planetRows, visWhen }) {
   // Responsive contract: below 640px the filter bar wraps onto multiple lines
   // and the event cards stack in a single column.
   const isNarrow = useMediaQuery('(max-width: 640px)');
@@ -206,25 +189,6 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
     setVisible(PAGE_SIZE);
   };
   const isFiltered = tier !== 'all' || type !== 'all' || range !== 'all';
-
-  /* One nightly planet-visibility computation for the viewing date, shared by
-     every planet event card below (each card picks out its own planets). */
-  const [planetRows, setPlanetRows] = useState(null);
-  const planetWx = useRef({});
-  useEffect(() => {
-    let cancelled = false;
-    setPlanetRows(null);
-    planetWx.current = {};
-    const t = setTimeout(async () => {
-      const r = await planetVisibility(anchor || new Date(), loc, planetWx.current);
-      if (!cancelled) setPlanetRows(r);
-    }, 30);
-    return () => {
-      cancelled = true;
-      clearTimeout(t);
-    };
-  }, [loc, anchor]);
-  const visWhen = anchor ? 'that night' : 'tonight';
 
   // Filter bar: one compact row of dropdown clauses (tier / when / type) plus
   // the result count and a reset, instead of three full-width segmented rows.

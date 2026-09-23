@@ -30,6 +30,7 @@ import {
   estimatedGoScore,
   loadCloudClimatology,
   startOfDay,
+  planetVisibility,
 } from './lib/astro.js';
 
 const base = import.meta.env.BASE_URL;
@@ -60,6 +61,24 @@ export default function App() {
   const [viewDate, setViewDate] = useState(null);
   const anchorDay = useMemo(() => (viewDate ? startOfDay(viewDate) : null), [viewDate]);
   const weatherCache = useRef({});
+  /* One nightly planet-visibility computation for the viewing date, shared
+     by the hero and every planet event card (each picks out its own planets). */
+  const [planetRows, setPlanetRows] = useState(null);
+  const planetWx = useRef({});
+  const visWhen = anchorDay ? 'that night' : 'tonight';
+  useEffect(() => {
+    let cancelled = false;
+    setPlanetRows(null);
+    planetWx.current = {};
+    const t = setTimeout(async () => {
+      const r = await planetVisibility(anchorDay || new Date(), loc, planetWx.current);
+      if (!cancelled) setPlanetRows(r);
+    }, 30);
+    return () => {
+      cancelled = true;
+      clearTimeout(t);
+    };
+  }, [loc, anchorDay]);
 
   const away = isAway(loc, home);
 
@@ -247,6 +266,8 @@ export default function App() {
                     isTonight={pickIsTonight}
                     viewDate={viewDate}
                     loc={loc}
+                    planetRows={planetRows}
+                    visWhen={visWhen}
                   />
                 </GridSpan>
                 <AuroraPanel loc={loc} viewDate={viewDate} />
@@ -267,6 +288,8 @@ export default function App() {
                     setRange={setRange}
                     anchor={anchorDay}
                     loc={loc}
+                    planetRows={planetRows}
+                    visWhen={visWhen}
                   />
                 </GridSpan>
                 <GridSpan columns="full">
