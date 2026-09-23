@@ -12,7 +12,6 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
 } from '@astryxdesign/core/DropdownMenu';
-import { ProgressBar } from '@astryxdesign/core/ProgressBar';
 import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
@@ -21,15 +20,12 @@ import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Telescope, Map, Cale
 import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage, eclipseVisibleFrom, planetVisibilityFactors } from '../lib/astro.js';
 import MapLightbox from './MapLightbox.jsx';
 import ScoreFactors from './ScoreFactors.jsx';
+import GoScore from './GoScore.jsx';
 import { TermText } from './Term.jsx';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
 const TYPE_ICON = { shower: Sparkles, eclipse: Eclipse, planet: Orbit, comet: Star };
-
-function scoreVariant(label) {
-  return label === 'Go' ? 'success' : label === 'Maybe' ? 'warning' : 'error';
-}
 
 function EventCard({ ev, score, loc, planetRows, visWhen }) {
   const [mapOpen, setMapOpen] = useState(false);
@@ -123,17 +119,7 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
             onClose={() => setLightbox(false)}
           />
         )}
-        {score && (
-          <VStack gap={1}>
-            <ProgressBar
-              label={score.estimated ? 'Est. go score' : 'Go score'}
-              value={score.score}
-              hasValueLabel
-              variant={scoreVariant(score.label)}
-            />
-            <ScoreFactors factors={score.factors} exclude={ev.bodies} />
-          </VStack>
-        )}
+        {score && <GoScore score={score} exclude={ev.bodies} />}
         {visFactors && <ScoreFactors factors={visFactors} exclude={ev.bodies} />}
         {!score && notVisible && (
           <Text type="supporting">

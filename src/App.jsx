@@ -273,7 +273,7 @@ export default function App() {
                 <AuroraPanel loc={loc} viewDate={viewDate} />
                 <PassesPanel loc={loc} bundledTles={tles} fromDate={anchorDay} />
                 <GridSpan columns="full">
-                  <MoonPanel asOf={anchorDay} />
+                  <MoonPanel asOf={anchorDay} loc={loc} />
                 </GridSpan>
                 <GridSpan columns="full">
                   <EventFeed

@@ -5,11 +5,11 @@ import { VStack } from '@astryxdesign/core/VStack';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Grid } from '@astryxdesign/core/Grid';
 import { Token } from '@astryxdesign/core/Token';
-import { ProgressBar } from '@astryxdesign/core/ProgressBar';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star } from 'lucide-react';
 import ScoreFactors from './ScoreFactors.jsx';
+import GoScore from './GoScore.jsx';
 import Starfield from './Starfield.jsx';
 import { TermText } from './Term.jsx';
 import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eventImage, eclipseVisibleFrom, planetVisibilityFactors } from '../lib/astro.js';
@@ -17,10 +17,6 @@ import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eve
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
 const TYPE_ICON = { shower: Sparkles, eclipse: Eclipse, planet: Orbit, comet: Star };
-
-function scoreVariant(label) {
-  return label === 'Go' ? 'success' : label === 'Maybe' ? 'warning' : 'error';
-}
 
 export default function TonightHero({ pick, score, isTonight, viewDate, loc, planetRows, visWhen }) {
   const notVisible =
@@ -98,39 +94,18 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc, pla
                       Moon that night: {Math.round(moon * 100)}% {moonName(moon)}
                     </Text>
                   </VStack>
-                  <VStack gap={3}>
-                    <VStack gap={1}>
-                      <Text type="label" color="secondary">
-                        {score?.estimated ? 'Est. go score' : 'Go score'}
+                  <VStack gap={1}>
+                    {score ? (
+                      <GoScore score={score} exclude={pick.bodies} />
+                    ) : notVisible ? (
+                      <Text type="supporting">
+                        Not visible from {loc?.name || 'your location'} — worth traveling for.
                       </Text>
-                      {score ? (
-                        <VStack gap={1}>
-                          <ProgressBar
-                            value={score.score}
-                            hasValueLabel
-                            variant={scoreVariant(score.label)}
-                          />
-                        </VStack>
-                      ) : notVisible ? (
-                        <Text type="supporting">
-                          Not visible from {loc?.name || 'your location'} — worth traveling for.
-                        </Text>
-                      ) : beyondForecast ? (
-                        <Text type="supporting">Too far out — forecasts only reach about two weeks.</Text>
-                      ) : (
-                        <Text type="supporting">Scoring the sky…</Text>
-                      )}
-                    </VStack>
-                    <VStack gap={1}>
-                      <Text type="label" color="secondary">
-                        Conditions
-                      </Text>
-                      {score ? (
-                        <ScoreFactors factors={score.factors} exclude={pick.bodies} />
-                      ) : (
-                        <Text type="supporting">—</Text>
-                      )}
-                    </VStack>
+                    ) : beyondForecast ? (
+                      <Text type="supporting">Too far out — forecasts only reach about two weeks.</Text>
+                    ) : (
+                      <Text type="supporting">Scoring the sky…</Text>
+                    )}
                   </VStack>
                 </Grid>
                 {visFactors && (
