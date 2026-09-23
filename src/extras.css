@@ -212,6 +212,47 @@ body {
 .sg-darksky-map .leaflet-tooltip-top:before {
   border-top-color: #4a5178;
 }
+/* Leaflet popups: same treatment as the tooltips above — hardcoded so they
+   stay readable over the map tiles regardless of theme token resolution. */
+.sg-darksky-map .leaflet-popup-content-wrapper {
+  background: #14172e;
+  border: 1px solid #4a5178;
+  border-radius: var(--radius-element);
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+.sg-darksky-map .leaflet-popup-content {
+  margin: 12px 14px;
+  line-height: 1.4;
+}
+.sg-darksky-map .leaflet-popup-tip {
+  background: #14172e;
+  border: 1px solid #4a5178;
+}
+.sg-darksky-map a.leaflet-popup-close-button {
+  color: #9aa0c3;
+}
+.sg-map-popup-title {
+  font-weight: 600;
+}
+.sg-map-popup-sub {
+  opacity: 0.7;
+  font-size: 12px;
+  margin-top: 2px;
+}
+.sg-map-popup-btn {
+  margin-top: 8px;
+  background: #2c3157;
+  color: #edeffc;
+  border: 1px solid #4a5178;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.sg-map-popup-btn:hover {
+  background: #3b4168;
+}
 
 .sg-hero-img {
   width: calc(var(--spacing-12) * 2);

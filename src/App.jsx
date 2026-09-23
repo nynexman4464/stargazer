@@ -247,6 +247,7 @@ export default function App() {
         contentPadding={0}
         topNav={
           <TopBar
+            loc={loc}
             locName={loc.name}
             away={away}
             home={home}
@@ -297,7 +298,7 @@ export default function App() {
                   />
                 </GridSpan>
                 <GridSpan columns="full">
-                  <DarkSkySpots spots={spots} loc={loc} away={away} />
+                  <DarkSkySpots spots={spots} loc={loc} away={away} onPickLocation={applyLoc} />
                 </GridSpan>
                 <GridSpan columns="full">
                   <Glossary />

@@ -14,7 +14,7 @@ const BORTLE_EXPLAINER =
   'Bortle scale: 1 = pristine dark sky, 9 = inner city. Lower is darker.';
 
 /* Nationwide certified dark-sky places, nearest first, with sourced Bortle ratings. */
-export default function DarkSkySpots({ spots, loc, away }) {
+export default function DarkSkySpots({ spots, loc, away, onPickLocation }) {
   const withDist = spots
     .map((s) => ({ ...s, dist: haversine(loc.lat, loc.lon, s.lat, s.lon) }))
     .sort((a, b) => a.dist - b.dist)
@@ -38,10 +38,11 @@ export default function DarkSkySpots({ spots, loc, away }) {
         </VStack>
         {spots.length > 0 && (
           <VStack gap={1}>
-            <DarkSkyMap spots={withDist} loc={loc} />
+            <DarkSkyMap spots={withDist} loc={loc} onPickLocation={onPickLocation} />
             <Text type="supporting">
               Glow is city lights (NASA Black Marble) — the darker the area, the darker the
-              sky. Blue dots are the drives below; the gold dot is you.
+              sky. Blue dots are the drives below; the gold dot is you. Tap a dot, or any
+              point on the map, to set it as your viewing location.
             </Text>
           </VStack>
         )}

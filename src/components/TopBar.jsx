@@ -12,11 +12,14 @@ import {
 import { Icon } from '@astryxdesign/core/Icon';
 import { Telescope, MapPin, House } from 'lucide-react';
 import ViewingDate from './ViewingDate.jsx';
+import { bortleForLoc } from '../lib/astro.js';
 
 /* Location menu: a real dropdown (bottom sheet on touch) to flip the viewing
    location between home and the last away spot, with the full location
-   dialog one tap away under "Update locations…". */
+   dialog one tap away under "Update locations…". Shows the Bortle rating
+   next to the location whenever we actually know it. */
 export default function TopBar({
+  loc,
   locName,
   away,
   home,
@@ -30,7 +33,10 @@ export default function TopBar({
   // On phones the header is tight, so the location trigger collapses to an
   // icon-only button (the location name moves into its tooltip/label).
   const isCompact = useMediaQuery('(max-width: 639px)');
-  const locLabel = `${locName}${away ? ' · away' : ''}`;
+  const bortle = bortleForLoc(loc);
+  const homeBortle = bortleForLoc(home);
+  const awayBortle = bortleForLoc(awayLoc);
+  const locLabel = `${locName}${away ? ' · away' : ''}${bortle ? ` · Bortle ${bortle.value}` : ''}`;
   return (
     <TopNav
       label="Stargazer"
@@ -67,14 +73,14 @@ export default function TopBar({
             <DropdownMenuRadioItem
               value="home"
               label="Home"
-              description={home.name}
+              description={`${home.name}${homeBortle ? ` · Bortle ${homeBortle.value}` : ''}`}
               icon={House}
             />
             {awayLoc && (
               <DropdownMenuRadioItem
                 value="away"
                 label={awayLoc.name}
-                description="Away"
+                description={`Away${awayBortle ? ` · Bortle ${awayBortle.value}` : ''}`}
                 icon={MapPin}
               />
             )}

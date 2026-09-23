@@ -16,6 +16,28 @@ export const HOME_BORTLE = {
   source:
     'Inferred from Sky & Telescope zenith SQM readings in adjacent Arlington and Cambridge; no Medford measurement published.',
 };
+
+/* Bortle rating for a viewing location, only when we actually know it:
+   - a dark-sky destination picked from the map carries its published rating
+   - Medford (the default home) is Bortle 8, inferred from nearby SQM readings
+   Anywhere else returns null: no free source gives Bortle for arbitrary
+   coordinates, so we show nothing rather than invent a number. */
+export function bortleForLoc(loc) {
+  if (!loc) return null;
+  if (loc.bortle) {
+    return {
+      value: loc.bortle,
+      source: loc.bortleSource || 'Published Bortle rating for this dark-sky destination.',
+    };
+  }
+  if (
+    typeof loc.lat === 'number' &&
+    haversine(loc.lat, loc.lon, DEFAULT_LOC.lat, DEFAULT_LOC.lon) < 10
+  ) {
+    return HOME_BORTLE;
+  }
+  return null;
+}
 export const SATS = [
   // mag: typical peak visual magnitude (lower = brighter). ISS can flare to
   // -5.9; Tiangong runs about -2 to -3; Hubble (~mag 1.5-3) is usually a
