@@ -98,37 +98,39 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc, pla
                       Moon that night: {Math.round(moon * 100)}% {moonName(moon)}
                     </Text>
                   </VStack>
-                  <VStack gap={1}>
-                    <Text type="label" color="secondary">
-                      {score?.estimated ? 'Est. go score' : 'Go score'}
-                    </Text>
-                    {score ? (
-                      <VStack gap={1}>
-                        <ProgressBar
-                          value={score.score}
-                          hasValueLabel
-                          variant={scoreVariant(score.label)}
-                        />
-                      </VStack>
-                    ) : notVisible ? (
-                      <Text type="supporting">
-                        Not visible from {loc?.name || 'your location'} — worth traveling for.
+                  <VStack gap={3}>
+                    <VStack gap={1}>
+                      <Text type="label" color="secondary">
+                        {score?.estimated ? 'Est. go score' : 'Go score'}
                       </Text>
-                    ) : beyondForecast ? (
-                      <Text type="supporting">Too far out — forecasts only reach about two weeks.</Text>
-                    ) : (
-                      <Text type="supporting">Scoring the sky…</Text>
-                    )}
-                  </VStack>
-                  <VStack gap={1}>
-                    <Text type="label" color="secondary">
-                      Conditions
-                    </Text>
-                    {score ? (
-                      <ScoreFactors factors={score.factors} exclude={pick.bodies} />
-                    ) : (
-                      <Text type="supporting">—</Text>
-                    )}
+                      {score ? (
+                        <VStack gap={1}>
+                          <ProgressBar
+                            value={score.score}
+                            hasValueLabel
+                            variant={scoreVariant(score.label)}
+                          />
+                        </VStack>
+                      ) : notVisible ? (
+                        <Text type="supporting">
+                          Not visible from {loc?.name || 'your location'} — worth traveling for.
+                        </Text>
+                      ) : beyondForecast ? (
+                        <Text type="supporting">Too far out — forecasts only reach about two weeks.</Text>
+                      ) : (
+                        <Text type="supporting">Scoring the sky…</Text>
+                      )}
+                    </VStack>
+                    <VStack gap={1}>
+                      <Text type="label" color="secondary">
+                        Conditions
+                      </Text>
+                      {score ? (
+                        <ScoreFactors factors={score.factors} exclude={pick.bodies} />
+                      ) : (
+                        <Text type="supporting">—</Text>
+                      )}
+                    </VStack>
                   </VStack>
                 </Grid>
                 {visFactors && (

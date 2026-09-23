@@ -76,6 +76,7 @@ export default function ViewingDate({ viewDate, onChange }) {
     >
       <Button
         variant="secondary"
+        size="sm"
         label={viewDate ? fmtDate(viewDate) : 'Today'}
         icon={<Icon icon={CalendarDays} size="sm" />}
         aria-label="Viewing date"

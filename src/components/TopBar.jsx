@@ -51,6 +51,7 @@ export default function TopBar({
           hasChevron={!isCompact}
           button={{
             variant: 'secondary',
+            size: 'sm',
             isIconOnly: isCompact,
             'aria-label': isCompact ? `Viewing location: ${locLabel}` : 'Viewing location',
             tooltip: isCompact ? locLabel : undefined,
