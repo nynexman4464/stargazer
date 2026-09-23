@@ -141,8 +141,11 @@ export const stargazerTheme = defineTheme({
     '--color-accent-action': '#C5E17A',
     '--color-accent-action-hover': '#B5D16A',
     '--color-on-accent-action': '#1e3200',
-    // White secondary button.
-    '--color-secondary-action-hover': '#EDEFFC',
+    // Muted indigo secondary button — sits in the theme's purple ramp
+    // instead of glaring white.
+    '--color-secondary-action': '#2C3157',
+    '--color-secondary-action-hover': '#3B4168',
+    '--color-on-secondary-action': '#EDEFFC',
 
     '--color-accent': [neutral.light[10], neutral.dark[95]],
     '--color-accent-muted': [neutral.light[95], neutral.dark[15]],
@@ -328,7 +331,7 @@ export const stargazerTheme = defineTheme({
     },
 
     button: {
-      // Primary keeps Stargazer's lime accent; secondary stays white.
+      // Primary keeps Stargazer's lime accent; secondary is a muted indigo.
       // (Previously these were wired through Y2K's remapped "green" tokens;
       // now they use dedicated tokens so Neutral's real greens stay green.)
       'variant:primary': {
@@ -339,8 +342,8 @@ export const stargazerTheme = defineTheme({
         },
       },
       'variant:secondary': {
-        backgroundColor: 'var(--color-on-dark)',
-        color: 'var(--color-on-light)',
+        backgroundColor: 'var(--color-secondary-action)',
+        color: 'var(--color-on-secondary-action)',
         ':hover': {
           backgroundColor: 'var(--color-secondary-action-hover)',
         },

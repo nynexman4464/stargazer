@@ -119,7 +119,9 @@ export const stargazerTheme = {
     "--color-accent-action": "#C5E17A",
     "--color-accent-action-hover": "#B5D16A",
     "--color-on-accent-action": "#1e3200",
-    "--color-secondary-action-hover": "#EDEFFC",
+    "--color-secondary-action": "#2C3157",
+    "--color-secondary-action-hover": "#3B4168",
+    "--color-on-secondary-action": "#EDEFFC",
     "--color-accent": "light-dark(#1b1b1b, #f1f1f1)",
     "--color-accent-muted": "light-dark(#f1f1f1, #262626)",
     "--color-neutral": "light-dark(#0000000F, #ffffff1A)",
@@ -347,8 +349,8 @@ export const stargazerTheme = {
         }
       },
       "variant:secondary": {
-        "backgroundColor": "var(--color-on-dark)",
-        "color": "var(--color-on-light)",
+        "backgroundColor": "var(--color-secondary-action)",
+        "color": "var(--color-on-secondary-action)",
         ":hover": {
           "backgroundColor": "var(--color-secondary-action-hover)"
         }
