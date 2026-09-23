@@ -97,7 +97,7 @@ export const GLOSSARY = [
   ['Eclipse kinds', 'The labels the app uses. Faint: the moon only skims Earth\u2019s outer shadow \u2014 just a subtle smudge of shading, the least dramatic kind. Partial: part of the moon or sun goes dark, like a bite taken out. Total: the whole moon turns red, or the sun is completely covered. Ring-of-fire: the moon lines up with the sun but is too far away to cover it fully, leaving a bright ring.'],
   ['Radiant', 'The patch of sky meteors appear to fly out from during a shower. Named after its constellation — Perseids radiate from Perseus.'],
   ['Go score', 'Our 0\u2013100 \u201cshould you go outside\u201d rating, built from cloud cover, moonlight, and how special the event is.'],
-  ['Visibility score', 'The 0\u2013100 number on each planet row: how well that planet shows from your spot that night. Built from how high it climbs while the sky is dark, how bright it is, moonlight, and the cloud forecast. 78+ is Go, 55+ is Maybe.'],
+  ['Visibility score', 'The 0\u2013100 number on each planet row: how well that planet shows from your spot that night. Built from how high it climbs while the sky is dark, how bright it is, moonlight, and the cloud forecast. 78+ is Great, 55+ is Fair, below that is Poor.'],
   ['Kp index', '0-to-9 scale of geomagnetic storm strength. Higher numbers mean the aurora reaches further from the poles.'],
 ];
 
@@ -1342,24 +1342,66 @@ export function angularSep(ra1, dec1, ra2, dec2) {
   return Math.acos(Math.max(-1, Math.min(1, s))) / RAD;
 }
 
+/* The observer-local "night of `date`": 6 PM to 6 AM as UTC millisecond
+   bounds. When `date` is today and it's still before 6 AM, the night in
+   progress started yesterday evening, so anchor to the previous day. */
+function nightWindow(date, off) {
+  const shift = off * 1000;
+  const dl = new Date(date.getTime() + shift);
+  const nowL = new Date(Date.now() + shift);
+  let midnightL = Date.UTC(dl.getUTCFullYear(), dl.getUTCMonth(), dl.getUTCDate());
+  const isToday =
+    dl.getUTCFullYear() === nowL.getUTCFullYear() &&
+    dl.getUTCMonth() === nowL.getUTCMonth() &&
+    dl.getUTCDate() === nowL.getUTCDate();
+  if (isToday && dl.getUTCHours() < 6) midnightL -= DAY;
+  return { t0: midnightL + 18 * 3600e3 - shift, t1: midnightL + 30 * 3600e3 - shift };
+}
+
+/* Worst forecast cloud cover over a time window, from Open-Meteo hourly data
+   (fetches each calendar day the window touches). */
+async function maxCloudWindow(t0, t1, loc, off, cache) {
+  const shift = off * 1000;
+  const keys = new Set();
+  for (let t = t0; t <= t1; t += 12 * 3600e3) {
+    const d = new Date(t + shift);
+    keys.add(
+      d.getUTCFullYear() + '-' + String(d.getUTCMonth() + 1).padStart(2, '0') + '-' + String(d.getUTCDate()).padStart(2, '0')
+    );
+  }
+  let max = 0, found = false;
+  for (const k of keys) {
+    const day = await hourlyCloud(k, loc, cache);
+    if (!day) continue;
+    for (let i = 0; i < day.times.length; i++) {
+      // Open-Meteo hourly times are location wall-clock; parsing them as UTC
+      // puts them on the same wall-clock scale as the shifted window bounds.
+      const utc = Date.parse(day.times[i] + 'Z') - shift;
+      if (utc >= t0 && utc <= t1) {
+        found = true;
+        if (day.vals[i] > max) max = day.vals[i];
+      }
+    }
+  }
+  return found ? max : null;
+}
+
 /* Nightly planet visibility: for each planet, the best dark-sky viewing
    geometry on the observer-local night of `date` (6 PM to 6 AM local), plus
-   a 0-100 visibility score on the same Go/Maybe/Risky bands as go-scores.
+   a 0-100 visibility score (78+ Great, 55+ Fair, below that Poor).
    Positions are exact math for any date; only the cloud term depends on the
    forecast (omitted when none is available). */
 export async function planetVisibility(date, loc, wxCache = {}) {
   let off = await utcOffsetSeconds(loc);
   if (off == null) off = -date.getTimezoneOffset() * 60;
-  const shift = off * 1000;
-  const dl = new Date(date.getTime() + shift);
-  const midnightL = Date.UTC(dl.getUTCFullYear(), dl.getUTCMonth(), dl.getUTCDate());
-  const t0 = midnightL + 18 * 3600e3 - shift;
-  const t1 = midnightL + 30 * 3600e3 - shift;
+  const { t0, t1 } = nightWindow(date, off);
   const eph = planetEphemeris(new Date((t0 + t1) / 2));
   const rows = eph.map((p) => ({
     name: p.name, mag: Math.round(p.mag * 10) / 10, best: null, maxAlt: -90,
   }));
-  for (let t = t0; t <= t1; t += 20 * 60e3) {
+  // Only the rest of the night counts: past hours are gone.
+  const scanStart = Math.max(t0, Date.now());
+  for (let t = scanStart; t <= t1; t += 20 * 60e3) {
     const dt = new Date(t);
     const dark = sunElev(dt, loc.lat, loc.lon) < -6;
     eph.forEach((p, i) => {
@@ -1371,10 +1413,16 @@ export async function planetVisibility(date, loc, wxCache = {}) {
       }
     });
   }
-  const cloud = await cloudCover(date, loc, wxCache);
-  return rows
-    .map((r, i) => ({ ...r, ...scorePlanet(r, eph[i], cloud, loc) }))
-    .sort((a, b) => b.score - a.score);
+  // Clouds at each planet's best hour (what you'd actually look through);
+  // worst-of-night only as a fallback when it never comes up.
+  const out = [];
+  for (let i = 0; i < rows.length; i++) {
+    const cloud = rows[i].best
+      ? await cloudCoverAt(rows[i].best.time, loc, wxCache)
+      : await maxCloudWindow(t0, t1, loc, off, wxCache);
+    out.push({ ...rows[i], ...scorePlanet(rows[i], eph[i], cloud, loc) });
+  }
+  return out.sort((a, b) => b.score - a.score);
 }
 
 function scorePlanet(row, eph, cloud, loc) {
@@ -1422,7 +1470,7 @@ function scorePlanet(row, eph, cloud, loc) {
   score = Math.max(5, Math.min(99, Math.round(score)));
   return {
     score,
-    label: score >= 78 ? 'Go' : score >= 55 ? 'Maybe' : 'Risky',
+    label: score >= 78 ? 'Great' : score >= 55 ? 'Fair' : 'Poor',
     altNote, moonNote, cloudNote,
   };
 }
