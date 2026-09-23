@@ -298,6 +298,10 @@ export function countdown(to) {
   const m = Math.max(1, Math.floor(ms / 60000));
   return `in ${m}m`;
 }
+/* True when `to` is within the next 24 hours (or already started). */
+export function isImminent(to) {
+  return to - Date.now() < 24 * 3600 * 1000;
+}
 export function isoDay(d) {
   return (
     d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0')

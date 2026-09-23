@@ -4,14 +4,16 @@ import { Card } from '@astryxdesign/core/Card';
 import { Heading } from '@astryxdesign/core/Text';
 import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
+import { HStack } from '@astryxdesign/core/HStack';
 import { TabList, Tab } from '@astryxdesign/core/TabList';
 import { Badge } from '@astryxdesign/core/Badge';
+import { Token } from '@astryxdesign/core/Token';
 import { List } from '@astryxdesign/core/List';
 import { ListItem } from '@astryxdesign/core/List';
 import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
-import { Satellite } from 'lucide-react';
+import { Satellite, Clock } from 'lucide-react';
 import {
   SATS,
   fetchTLE,
@@ -21,6 +23,7 @@ import {
   fmtTime,
   fmtDate,
   countdown,
+  isImminent,
   compass,
 } from '../lib/astro.js';
 import { Mag } from './Term.jsx';
@@ -154,16 +157,31 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
                 {passes.map((p, i) => {
                   const dur = Math.round((p.end - p.start) / 60000);
                   const label = `${fmtDate(p.start)} · ${fmtTime(p.start)}`;
+                  const cd = countdown(p.start);
+                  const live = cd === 'now';
+                  // Imminent passes (under 24h out, or in progress) get the
+                  // countdown as a token so they stand out; farther passes
+                  // keep it as plain inline text.
+                  const soon = live || isImminent(p.start);
                   return (
                     <ListItem
                       key={i}
                       label={
-                        <Text weight="semibold">
-                          {label}{' '}
-                          <Text type="supporting" weight="normal">
-                            {countdown(p.start) === 'now' ? 'visible now!' : countdown(p.start)}
-                          </Text>
-                        </Text>
+                        <HStack gap={2} vAlign="center">
+                          <Text weight="semibold">{label}</Text>
+                          {soon ? (
+                            <Token
+                              size="sm"
+                              color={live ? 'green' : 'default'}
+                              label={live ? 'visible now!' : cd}
+                              icon={<Icon icon={Clock} size="sm" />}
+                            />
+                          ) : (
+                            <Text type="supporting" weight="normal">
+                              {cd}
+                            </Text>
+                          )}
+                        </HStack>
                       }
                       description={
                         <Text type="supporting">
