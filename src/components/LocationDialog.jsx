@@ -12,7 +12,7 @@ import { List } from '@astryxdesign/core/List';
 import { Item } from '@astryxdesign/core/Item';
 import { Icon } from '@astryxdesign/core/Icon';
 import { Search, LocateFixed, House, Undo2 } from 'lucide-react';
-import { HOME_BORTLE, DEFAULT_LOC, haversine } from '../lib/astro.js';
+import { bortleForLoc, bortleLabel, haversine } from '../lib/astro.js';
 
 /* US state/territory abbreviations, so a trailing hint like "ca" or "tx" can
    match the right state ("Fresno ca" -> Fresno, California). Two-letter hints
@@ -144,7 +144,7 @@ export default function LocationDialog({
 
   const away = haversine(home.lat, home.lon, loc.lat, loc.lon) > 50;
   const miFromHome = Math.round(haversine(home.lat, home.lon, loc.lat, loc.lon));
-  const homeIsMedford = haversine(home.lat, home.lon, DEFAULT_LOC.lat, DEFAULT_LOC.lon) < 10;
+  const homeBortle = bortleForLoc(home);
 
   return (
     <Dialog
@@ -169,9 +169,9 @@ export default function LocationDialog({
                     Home
                   </Text>
                   <Text>{home.name}</Text>
-                  {homeIsMedford && (
-                    <Tooltip content={HOME_BORTLE.source}>
-                      <Token label={`Bortle ${HOME_BORTLE.value}`} size="sm" color="orange" />
+                  {homeBortle && (
+                    <Tooltip content={homeBortle.source}>
+                      <Token label={bortleLabel(homeBortle)} size="sm" color="orange" />
                     </Tooltip>
                   )}
                 </HStack>

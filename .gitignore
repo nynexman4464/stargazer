@@ -22,3 +22,6 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Bortle grid build workspace (3GB source raster, venv, scripts) — never commit
+.bortle-build/

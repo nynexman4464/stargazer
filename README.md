@@ -84,6 +84,15 @@ NASA's Goddard Space Flight Center). Moon phase photos in `public/img/moon/`
 are from Jay Tanner's rendered lunar phase set, used under CC BY-SA 3.0 via
 Wikimedia Commons.
 
+## Data
+
+The "Est. Bortle" ratings for arbitrary locations come from a 0.25° grid
+downsampled from the World Atlas of Artificial Night Sky Brightness
+(Falchi et al. 2016, Science Advances 2:e1600377), via GFZ Data Services
+(https://doi.org/10.5880/GFZ.1.4.2016.001), used under CC BY-NC 4.0 —
+non-commercial use only. See `tools/bortle-grid/README.md` for the method,
+validation, and regeneration instructions.
+
 ## License
 
 BSD-3-Clause — see [LICENSE](LICENSE).

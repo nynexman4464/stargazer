@@ -6,6 +6,7 @@ import {
   eciToEcf,
   ecfToLookAngles,
 } from 'satellite.js';
+import { BORTLE_GRID } from '../data/bortleGrid.js';
 
 /* ============================== config ============================== */
 export const DEFAULT_LOC = { name: 'Medford, MA', lat: 42.4184, lon: -71.1062 };
@@ -17,26 +18,78 @@ export const HOME_BORTLE = {
     'Inferred from Sky & Telescope zenith SQM readings in adjacent Arlington and Cambridge; no Medford measurement published.',
 };
 
-/* Bortle rating for a viewing location, only when we actually know it:
+/* Conventional SQM -> Bortle breakpoints (Wikipedia's Bortle scale table;
+   the 8/9 split at 17.5 is the common converter approximation). Kept in one
+   place so the satellite-grid estimate and any future use share it. */
+const BORTLE_BREAKS = [
+  [21.76, 1], [21.60, 2], [21.30, 3], [20.80, 4],
+  [19.25, 5], [18.50, 6], [18.00, 7], [17.50, 8],
+];
+export function sqmToBortle(sqm) {
+  for (const [edge, cls] of BORTLE_BREAKS) if (sqm >= edge) return cls;
+  return 9;
+}
+
+/* Estimated Bortle class from the bundled World Atlas 2016 satellite grid.
+   The grid stores zenith SQM as 0.05-mag bytes (255 = unknown); the byte is
+   decoded lazily once. Returns { value, sqm, estimated: true, source }, or
+   null when the coordinates fall outside the grid or on an unknown cell. */
+let _gridBytes = null;
+function gridBytes() {
+  if (!_gridBytes) {
+    const bin = atob(BORTLE_GRID.data);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    _gridBytes = bytes;
+  }
+  return _gridBytes;
+}
+export function estimateBortle(lat, lon) {
+  const g = BORTLE_GRID;
+  if (!g || !g.data || typeof lat !== 'number' || typeof lon !== 'number') return null;
+  const c = Math.floor((lon - g.lonMin) / g.step);
+  const r = Math.floor((g.latMax - lat) / g.step);
+  if (c < 0 || c >= g.cols || r < 0 || r >= g.rows) return null;
+  const q = gridBytes()[r * g.cols + c];
+  if (q === 255) return null;
+  const sqm = Math.round((16 + q * 0.05) * 10) / 10;
+  return {
+    value: String(sqmToBortle(sqm)),
+    sqm,
+    estimated: true,
+    source:
+      'Estimated Bortle class from 2016 satellite data (World Atlas of Artificial Night Sky Brightness, Falchi et al. 2016). A planning guide, not a measurement.',
+  };
+}
+
+/* Short display label for a bortleForLoc result: 'Bortle 8', or
+   'Est. Bortle 5' for satellite-grid estimates. Empty string when null. */
+export function bortleLabel(b) {
+  if (!b) return '';
+  return `${b.estimated ? 'Est. ' : ''}Bortle ${b.value}`;
+}
+
+/* Bortle rating for a viewing location:
    - a dark-sky destination picked from the map carries its published rating
    - Medford (the default home) is Bortle 8, inferred from nearby SQM readings
-   Anywhere else returns null: no free source gives Bortle for arbitrary
-   coordinates, so we show nothing rather than invent a number. */
+   - anywhere else with grid coverage: estimated from the satellite grid
+   Returns { value, source, estimated } or null when nothing is known. */
 export function bortleForLoc(loc) {
   if (!loc) return null;
   if (loc.bortle) {
     return {
       value: loc.bortle,
       source: loc.bortleSource || 'Published Bortle rating for this dark-sky destination.',
+      estimated: false,
     };
   }
   if (
     typeof loc.lat === 'number' &&
     haversine(loc.lat, loc.lon, DEFAULT_LOC.lat, DEFAULT_LOC.lon) < 10
   ) {
-    return HOME_BORTLE;
+    return { ...HOME_BORTLE, estimated: false };
   }
-  return null;
+  return estimateBortle(loc.lat, loc.lon);
 }
 export const SATS = [
   // mag: typical peak visual magnitude (lower = brighter). ISS can flare to

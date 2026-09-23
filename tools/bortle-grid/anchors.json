@@ -1,0 +1,380 @@
+[
+ {
+  "id": "frosty-drew",
+  "lat": 41.3672,
+  "lon": -71.6636,
+  "known_bortle": 4
+ },
+ {
+  "id": "myles-standish",
+  "lat": 41.8395,
+  "lon": -70.6913,
+  "known_bortle": 4
+ },
+ {
+  "id": "race-point",
+  "lat": 42.0606,
+  "lon": -70.1903,
+  "known_bortle": 4
+ },
+ {
+  "id": "heins-farm",
+  "lat": 42.0929,
+  "lon": -72.1115,
+  "known_bortle": 4
+ },
+ {
+  "id": "kancamagus",
+  "lat": 44.0271,
+  "lon": -71.4947,
+  "known_bortle": 2
+ },
+ {
+  "id": "kd-dubuque",
+  "lat": 42.5515,
+  "lon": -72.9412,
+  "known_bortle": 3
+ },
+ {
+  "id": "death-valley",
+  "lat": 36.46167,
+  "lon": -116.8673,
+  "known_bortle": 2
+ },
+ {
+  "id": "joshua-tree",
+  "lat": 33.74879,
+  "lon": -115.82405,
+  "known_bortle": 2
+ },
+ {
+  "id": "anza-borrego",
+  "lat": 33.25655,
+  "lon": -116.37771,
+  "known_bortle": 2
+ },
+ {
+  "id": "lassen-volcanic",
+  "lat": 40.43595,
+  "lon": -121.53366,
+  "known_bortle": 2
+ },
+ {
+  "id": "great-basin",
+  "lat": 39.0058,
+  "lon": -114.2196,
+  "known_bortle": 2
+ },
+ {
+  "id": "massacre-rim",
+  "lat": 41.48878,
+  "lon": -119.61604,
+  "known_bortle": 1
+ },
+ {
+  "id": "bryce-canyon",
+  "lat": 37.64005,
+  "lon": -112.17005,
+  "known_bortle": 2
+ },
+ {
+  "id": "arches",
+  "lat": 38.61653,
+  "lon": -109.61615,
+  "known_bortle": 2
+ },
+ {
+  "id": "canyonlands",
+  "lat": 38.16377,
+  "lon": -109.80422,
+  "known_bortle": 2
+ },
+ {
+  "id": "capitol-reef",
+  "lat": 38.2914,
+  "lon": -111.26186,
+  "known_bortle": 2
+ },
+ {
+  "id": "zion",
+  "lat": 37.1945,
+  "lon": -112.99276,
+  "known_bortle": 3
+ },
+ {
+  "id": "natural-bridges",
+  "lat": 37.60893,
+  "lon": -109.97637,
+  "known_bortle": 2
+ },
+ {
+  "id": "dead-horse-point",
+  "lat": 38.48461,
+  "lon": -109.73855,
+  "known_bortle": 2
+ },
+ {
+  "id": "goblin-valley",
+  "lat": 38.56822,
+  "lon": -110.70591,
+  "known_bortle": 2
+ },
+ {
+  "id": "antelope-island",
+  "lat": 40.91284,
+  "lon": -112.18972,
+  "known_bortle": 3
+ },
+ {
+  "id": "kodachrome-basin",
+  "lat": 37.51853,
+  "lon": -111.99025,
+  "known_bortle": 2
+ },
+ {
+  "id": "dinosaur",
+  "lat": 40.24297,
+  "lon": -108.97398,
+  "known_bortle": 2
+ },
+ {
+  "id": "black-canyon-gunnison",
+  "lat": 38.54121,
+  "lon": -107.69366,
+  "known_bortle": 2
+ },
+ {
+  "id": "great-sand-dunes",
+  "lat": 37.48531,
+  "lon": -105.89229,
+  "known_bortle": 2
+ },
+ {
+  "id": "florissant",
+  "lat": 38.91245,
+  "lon": -105.25338,
+  "known_bortle": 3
+ },
+ {
+  "id": "chaco",
+  "lat": 36.03039,
+  "lon": -107.91014,
+  "known_bortle": 2
+ },
+ {
+  "id": "cosmic-campground",
+  "lat": 33.47994,
+  "lon": -108.92287,
+  "known_bortle": 2
+ },
+ {
+  "id": "valles-caldera",
+  "lat": 35.76693,
+  "lon": -106.69317,
+  "known_bortle": 2
+ },
+ {
+  "id": "clayton-lake",
+  "lat": 36.57339,
+  "lon": -103.30184,
+  "known_bortle": 2
+ },
+ {
+  "id": "petrified-forest",
+  "lat": 35.06653,
+  "lon": -109.78211,
+  "known_bortle": 2
+ },
+ {
+  "id": "grand-canyon",
+  "lat": 35.823,
+  "lon": -111.86885,
+  "known_bortle": 2
+ },
+ {
+  "id": "kartchner-caverns",
+  "lat": 31.83195,
+  "lon": -110.35341,
+  "known_bortle": 2
+ },
+ {
+  "id": "oracle",
+  "lat": 32.61048,
+  "lon": -110.76719,
+  "known_bortle": 3
+ },
+ {
+  "id": "big-bend",
+  "lat": 29.3282,
+  "lon": -103.20614,
+  "known_bortle": 1
+ },
+ {
+  "id": "davis-mountains",
+  "lat": 30.58846,
+  "lon": -103.89466,
+  "known_bortle": 2
+ },
+ {
+  "id": "enchanted-rock",
+  "lat": 30.49658,
+  "lon": -98.82061,
+  "known_bortle": 3
+ },
+ {
+  "id": "south-llano-river",
+  "lat": 30.4453,
+  "lon": -99.80407,
+  "known_bortle": 3
+ },
+ {
+  "id": "cherry-springs",
+  "lat": 41.6631,
+  "lon": -77.823,
+  "known_bortle": 2
+ },
+ {
+  "id": "watoga",
+  "lat": 38.1628,
+  "lon": -80.17151,
+  "known_bortle": 2
+ },
+ {
+  "id": "staunton-river",
+  "lat": 36.76249,
+  "lon": -78.79558,
+  "known_bortle": 3
+ },
+ {
+  "id": "kissimmee-prairie",
+  "lat": 27.54619,
+  "lon": -81.01454,
+  "known_bortle": 2
+ },
+ {
+  "id": "stephen-foster",
+  "lat": 30.68621,
+  "lon": -82.56129,
+  "known_bortle": 2
+ },
+ {
+  "id": "pickett",
+  "lat": 36.53725,
+  "lon": -84.80235,
+  "known_bortle": 3
+ },
+ {
+  "id": "buffalo-river",
+  "lat": 36.23348,
+  "lon": -93.10626,
+  "known_bortle": 2
+ },
+ {
+  "id": "petit-jean",
+  "lat": 35.1175,
+  "lon": -92.93826,
+  "known_bortle": 3
+ },
+ {
+  "id": "merritt-reservoir",
+  "lat": 42.60617,
+  "lon": -100.88139,
+  "known_bortle": 2
+ },
+ {
+  "id": "theodore-roosevelt",
+  "lat": 46.9162,
+  "lon": -103.52612,
+  "known_bortle": 2
+ },
+ {
+  "id": "newport",
+  "lat": 45.23473,
+  "lon": -86.99932,
+  "known_bortle": 3
+ },
+ {
+  "id": "headlands",
+  "lat": 45.78437,
+  "lon": -84.77373,
+  "known_bortle": 2
+ },
+ {
+  "id": "keweenaw",
+  "lat": 47.46872,
+  "lon": -87.89256,
+  "known_bortle": 2
+ },
+ {
+  "id": "craters-of-the-moon",
+  "lat": 43.46176,
+  "lon": -113.56172,
+  "known_bortle": 2
+ },
+ {
+  "id": "central-idaho",
+  "lat": 43.68263,
+  "lon": -114.36373,
+  "known_bortle": 2
+ },
+ {
+  "id": "glacier",
+  "lat": 48.69703,
+  "lon": -113.71985,
+  "known_bortle": 2
+ },
+ {
+  "id": "boundary-waters",
+  "lat": 47.90331,
+  "lon": -91.85856,
+  "known_bortle": 1
+ },
+ {
+  "id": "voyageurs",
+  "lat": 48.5847,
+  "lon": -93.16119,
+  "known_bortle": 2
+ },
+ {
+  "id": "prineville-reservoir",
+  "lat": 44.08122,
+  "lon": -120.81494,
+  "known_bortle": 2
+ },
+ {
+  "id": "oregon-outback",
+  "lat": 42.18907,
+  "lon": -120.34598,
+  "known_bortle": 1
+ },
+ {
+  "id": "katahdin",
+  "lat": 45.99722,
+  "lon": -68.44549,
+  "known_bortle": 2
+ },
+ {
+  "id": "medford-ma",
+  "lat": 42.4184,
+  "lon": -71.1062,
+  "known_bortle": 8
+ },
+ {
+  "id": "new-york-ny",
+  "lat": 40.7128,
+  "lon": -74.006,
+  "known_bortle": 9
+ },
+ {
+  "id": "san-jose-ca",
+  "lat": 37.3382,
+  "lon": -121.8863,
+  "known_bortle": 8
+ },
+ {
+  "id": "vermilion-ab",
+  "lat": 53.3556,
+  "lon": -110.8572,
+  "known_bortle": null
+ }
+]
