@@ -17,7 +17,10 @@ const BASE_URL =
   'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}';
 const LABELS_URL =
   'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}';
-const ESRI_ATTR = '&copy; <a href="https://www.esri.com">Esri</a>';
+/* Base map tiles: Esri. Popup place names come from Nominatim
+   (OpenStreetMap data), whose license asks for a credit line. */
+const BASE_ATTR =
+  '&copy; <a href="https://www.esri.com">Esri</a> · Geocoding &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
 /* Popup content with a "Set as location" button. Plain DOM (not React) —
    Leaflet owns the popup lifecycle. Styled in extras.css. */
@@ -64,7 +67,7 @@ export default function DarkSkyMap({ spots, loc, onPickLocation }) {
       7,
     );
     L.tileLayer(BASE_URL, {
-      attribution: ESRI_ATTR,
+      attribution: BASE_ATTR,
       maxZoom: 19,
     }).addTo(map);
     L.tileLayer(LIGHTS_URL, {
