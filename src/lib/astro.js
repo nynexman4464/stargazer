@@ -30,7 +30,7 @@ export function sqmToBortle(sqm) {
   return 9;
 }
 
-/* Estimated Bortle class from the bundled World Atlas 2016 satellite grid.
+/* Estimated Bortle class from the bundled Black Marble 2025 satellite grid.
    The grid stores zenith SQM as 0.05-mag bytes (255 = unknown); the byte is
    decoded lazily once. Returns { value, sqm, estimated: true, source }, or
    null when the coordinates fall outside the grid or on an unknown cell. */
@@ -57,8 +57,7 @@ export function estimateBortle(lat, lon) {
     value: String(sqmToBortle(sqm)),
     sqm,
     estimated: true,
-    source:
-      'Estimated Bortle class from 2016 satellite data (World Atlas of Artificial Night Sky Brightness, Falchi et al. 2016). A planning guide, not a measurement.',
+    source: `${g.source || 'Estimated Bortle class from satellite data.'} A planning guide, not a measurement.`,
   };
 }
 
