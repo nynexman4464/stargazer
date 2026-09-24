@@ -13,6 +13,7 @@ import { Item } from '@astryxdesign/core/Item';
 import { Icon } from '@astryxdesign/core/Icon';
 import { Search, LocateFixed, House, Undo2 } from 'lucide-react';
 import { bortleForLoc, bortleLabel, haversine } from '../lib/astro.js';
+import { reverseGeocode } from '../lib/geo.js';
 
 /* US state/territory abbreviations, so a trailing hint like "ca" or "tx" can
    match the right state ("Fresno ca" -> Fresno, California). Two-letter hints
@@ -129,11 +130,7 @@ export default function LocationDialog({
         const { latitude: lat, longitude: lon } = pos.coords;
         let name = 'Current location';
         try {
-          const rg = await fetch(
-            `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`,
-          );
-          const j = await rg.json();
-          name = [j.city, j.principalSubdivisionCode].filter(Boolean).join(', ') || name;
+          name = await reverseGeocode(lat, lon);
         } catch {}
         setGeoBusy(false);
         onPick({ name, lat, lon });

@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { estimateBortle, matchDarkSkySite } from '../lib/astro.js';
+import { placeName } from '../lib/geo.js';
 
 /* NASA Black Marble (VIIRS city lights) as the light-pollution overlay.
    Public, no key. GoogleMapsCompatible_Level8 tops out at zoom 8 — Leaflet
@@ -17,22 +18,6 @@ const BASE_URL =
 const LABELS_URL =
   'https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}';
 const ESRI_ATTR = '&copy; <a href="https://www.esri.com">Esri</a>';
-
-/* Reverse-geocode a map click into a place name (same provider as the
-   location dialog). Falls back to raw coordinates. */
-async function nameFor(lat, lon) {
-  try {
-    const r = await fetch(
-      `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=en`,
-    );
-    const j = await r.json();
-    const named = [j.city || j.locality, j.principalSubdivisionCode || j.countryCode]
-      .filter(Boolean)
-      .join(', ');
-    if (named) return named;
-  } catch {}
-  return `${lat.toFixed(2)}, ${lon.toFixed(2)}`;
-}
 
 /* Popup content with a "Set as location" button. Plain DOM (not React) —
    Leaflet owns the popup lifecycle. Styled in extras.css. */
@@ -94,7 +79,7 @@ export default function DarkSkyMap({ spots, loc, onPickLocation }) {
     map.on('click', async (e) => {
       const { lat, lng } = e.latlng;
       const my = ++clickSeq.current;
-      const name = await nameFor(lat, lng);
+      const name = await placeName(lat, lng);
       if (clickSeq.current !== my || !mapRef.current) return; // a newer click won
       if (pinRef.current) {
         pinRef.current.remove();
