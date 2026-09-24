@@ -3,6 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { estimateBortle, matchDarkSkySite } from '../lib/astro.js';
 import { placeName } from '../lib/geo.js';
+import { bortleOverlayUrl, bortleOverlayBounds } from '../lib/bortleOverlay.js';
 
 /* NASA Black Marble (VIIRS city lights) as the light-pollution overlay.
    Public, no key. GoogleMapsCompatible_Level8 tops out at zoom 8 — Leaflet
@@ -46,12 +47,17 @@ function popupShell(title, subtitle, onPick) {
 }
 
 /* Dark-sky drive spots as dots on the map, plus a "you are here" marker.
-   Tapping a spot (or any point on the map) offers "Set as location". */
-export default function DarkSkyMap({ spots, loc, onPickLocation }) {
+   Tapping a spot (or any point on the map) offers "Set as location".
+   The glow overlay toggles between NASA city lights and a heatmap of our
+   estimated Bortle grid; the parent owns `mode` so the caption below the
+   map can describe whichever is showing. */
+export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeChange }) {
   const divRef = useRef(null);
   const mapRef = useRef(null);
   const markersRef = useRef(null);
   const pinRef = useRef(null);
+  const lightsRef = useRef(null);
+  const bortleRef = useRef(null);
   const pickRef = useRef(onPickLocation);
   pickRef.current = onPickLocation;
   // Spots change as data loads; the map-click handler is registered once, so
@@ -70,7 +76,7 @@ export default function DarkSkyMap({ spots, loc, onPickLocation }) {
       attribution: BASE_ATTR,
       maxZoom: 19,
     }).addTo(map);
-    L.tileLayer(LIGHTS_URL, {
+    lightsRef.current = L.tileLayer(LIGHTS_URL, {
       attribution:
         'City lights: <a href="https://earthdata.nasa.gov">NASA</a> Black Marble (VIIRS)',
       opacity: 0.7,
@@ -117,6 +123,29 @@ export default function DarkSkyMap({ spots, loc, onPickLocation }) {
     // Create the map once; markers/view update in the effect below.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Swap the glow overlay between NASA city lights and our Bortle heatmap.
+  // The heatmap image is painted lazily on first use so it never slows the
+  // initial page load.
+  useEffect(() => {
+    const map = mapRef.current;
+    const lights = lightsRef.current;
+    if (!map || !lights) return;
+    if (mode === 'bortle') {
+      if (!bortleRef.current) {
+        bortleRef.current = L.imageOverlay(bortleOverlayUrl(), bortleOverlayBounds(), {
+          opacity: 0.85,
+          interactive: false,
+        });
+      }
+      if (!map.hasLayer(bortleRef.current)) map.addLayer(bortleRef.current);
+      if (map.hasLayer(lights)) map.removeLayer(lights);
+    } else {
+      if (!map.hasLayer(lights)) map.addLayer(lights);
+      if (bortleRef.current && map.hasLayer(bortleRef.current))
+        map.removeLayer(bortleRef.current);
+    }
+  }, [mode]);
 
   useEffect(() => {
     const map = mapRef.current;
@@ -180,7 +209,34 @@ export default function DarkSkyMap({ spots, loc, onPickLocation }) {
     <div
       ref={divRef}
       className="sg-darksky-map"
-      aria-label="Map of nearby dark-sky spots with a city-lights overlay. Activate a spot, or any point on the map, to set it as your viewing location."
-    />
+      aria-label="Map of nearby dark-sky spots. Activate a spot, or any point on the map, to set it as your viewing location."
+    >
+      <div className="sg-map-mode-toggle" role="group" aria-label="Map overlay">
+        <button
+          type="button"
+          aria-pressed={mode !== 'bortle'}
+          onClick={() => onModeChange?.('lights')}
+        >
+          City lights
+        </button>
+        <button
+          type="button"
+          aria-pressed={mode === 'bortle'}
+          onClick={() => onModeChange?.('bortle')}
+        >
+          Sky quality
+        </button>
+      </div>
+      {mode === 'bortle' && (
+        <div className="sg-map-legend" aria-hidden="true">
+          <div>Est. Bortle class</div>
+          <div className="sg-map-legend-bar" />
+          <div className="sg-map-legend-labels">
+            <span>1 · pristine</span>
+            <span>9 · city</span>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

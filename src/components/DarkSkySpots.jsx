@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Card } from '@astryxdesign/core/Card';
 import { Heading } from '@astryxdesign/core/Text';
 import { Text } from '@astryxdesign/core/Text';
@@ -15,6 +16,7 @@ const BORTLE_EXPLAINER =
 
 /* Nationwide certified dark-sky places, nearest first, with sourced Bortle ratings. */
 export default function DarkSkySpots({ spots, loc, away, onPickLocation }) {
+  const [mapMode, setMapMode] = useState('lights');
   const withDist = spots
     .map((s) => ({ ...s, dist: haversine(loc.lat, loc.lon, s.lat, s.lon) }))
     .sort((a, b) => a.dist - b.dist);
@@ -41,11 +43,21 @@ export default function DarkSkySpots({ spots, loc, away, onPickLocation }) {
         </VStack>
         {spots.length > 0 && (
           <VStack gap={1}>
-            <DarkSkyMap spots={shown} loc={loc} onPickLocation={onPickLocation} />
+            <DarkSkyMap
+              spots={shown}
+              loc={loc}
+              onPickLocation={onPickLocation}
+              mode={mapMode}
+              onModeChange={setMapMode}
+            />
             <Text type="supporting">
-              {hasLocal
-                ? 'Glow is city lights (NASA Black Marble) — the darker the area, the darker the sky. Blue dots are the drives below; the gold dot is you. Tap a dot, or any point on the map, to set it as your viewing location.'
-                : 'Glow is city lights (NASA Black Marble) — the darker the area, the darker the sky. The gold dot is you. Tap any point on the map to set it as your viewing location.'}
+              {mapMode === 'bortle'
+                ? hasLocal
+                  ? 'Colors are our estimated Bortle class from 2025 satellite data — blue is dark sky, red is city glow. Blue dots are the drives below; the gold dot is you. Tap a dot, or any point on the map, to set it as your viewing location.'
+                  : 'Colors are our estimated Bortle class from 2025 satellite data — blue is dark sky, red is city glow. The gold dot is you. Tap any point on the map to set it as your viewing location.'
+                : hasLocal
+                  ? 'Glow is city lights (NASA Black Marble) — the darker the area, the darker the sky. Blue dots are the drives below; the gold dot is you. Tap a dot, or any point on the map, to set it as your viewing location.'
+                  : 'Glow is city lights (NASA Black Marble) — the darker the area, the darker the sky. The gold dot is you. Tap any point on the map to set it as your viewing location.'}
             </Text>
           </VStack>
         )}

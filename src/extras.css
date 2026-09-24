@@ -254,6 +254,71 @@ body {
   background: #3b4168;
 }
 
+/* Map overlay toggle (City lights / Sky quality) and the Bortle legend.
+   Absolutely positioned over the Leaflet container; hardcoded dark colors
+   (like the popups above) so they stay readable over the tiles. */
+.sg-map-mode-toggle {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  z-index: 800;
+  display: flex;
+  background: rgba(20, 23, 46, 0.92);
+  border: 1px solid #4a5178;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+.sg-map-mode-toggle button {
+  border: 0;
+  background: transparent;
+  color: #9aa0c3;
+  font: inherit;
+  font-size: 12px;
+  padding: 6px 10px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.sg-map-mode-toggle button[aria-pressed='true'] {
+  background: #2b3160;
+  color: #ffffff;
+}
+.sg-map-legend {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
+  z-index: 800;
+  background: rgba(20, 23, 46, 0.92);
+  border: 1px solid #4a5178;
+  border-radius: 8px;
+  padding: 6px 10px 8px;
+  color: #ffffff;
+  font-size: 11px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+.sg-map-legend-bar {
+  width: 120px;
+  height: 8px;
+  border-radius: 4px;
+  margin: 4px 0 3px;
+  background: linear-gradient(
+    to right,
+    rgba(48, 70, 170, 0.22),
+    rgba(36, 130, 205, 0.35),
+    rgba(36, 175, 170, 0.46),
+    rgba(105, 195, 95, 0.58),
+    rgba(225, 210, 75, 0.67),
+    rgba(242, 150, 45, 0.77),
+    rgba(236, 85, 50, 0.85),
+    rgba(255, 238, 238, 0.93)
+  );
+}
+.sg-map-legend-labels {
+  display: flex;
+  justify-content: space-between;
+  color: #9aa0c3;
+}
+
 .sg-hero-img {
   width: calc(var(--spacing-12) * 2);
   height: calc(var(--spacing-12) * 2);
