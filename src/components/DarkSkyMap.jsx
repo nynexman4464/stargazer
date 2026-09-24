@@ -74,7 +74,7 @@ export default function DarkSkyMap({ spots, loc, onPickLocation }) {
       attribution:
         'City lights: <a href="https://earthdata.nasa.gov">NASA</a> Black Marble (VIIRS)',
       opacity: 0.7,
-      maxZoom: 8,
+      maxNativeZoom: 8,
     }).addTo(map);
     L.tileLayer(LABELS_URL, { maxZoom: 19 }).addTo(map);
     markersRef.current = L.layerGroup().addTo(map);
