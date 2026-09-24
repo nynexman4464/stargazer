@@ -2,11 +2,13 @@ import { BORTLE_GRID } from '../data/bortleGrid.js';
 import { sqmToBortle } from './astro.js';
 
 /* Render the bundled Bortle grid as a heatmap image for the Leaflet map.
-   One column per 0.25-degree grid column; rows are remapped into
-   Web-Mercator space (see below). Colors follow the same Bortle class
-   breaks the point estimates use. Class 1 (pristine) is fully transparent
-   so the dark basemap shows through; intensity builds to a near-white hot
-   core at class 9. Unknown cells stay transparent. */
+   Rendered at 2x the grid resolution with bilinear interpolation between
+   cells, so the coarse 0.25-degree cells melt into smooth gradients instead
+   of chunky squares. Rows are remapped into Web-Mercator space (see below);
+   columns map 2:1. Colors follow the same Bortle class breaks the point
+   estimates use. Class 1 (pristine) is fully transparent so the dark basemap
+   shows through; intensity builds to a near-white hot core at class 9.
+   Unknown cells stay transparent. */
 
 const RAMP = {
   1: [0, 0, 0, 0],
@@ -28,7 +30,8 @@ const RAMP = {
    So each canvas row is placed by inverse-Mercator: canvas row j shows the
    grid row whose latitude sits at that row's Mercator position, exactly
    undoing Leaflet's stretch. Longitude is linear in both spaces, so columns
-   map 1:1. Constants mirror Leaflet's SphericalMercator, clamp included. */
+   map uniformly. Constants mirror Leaflet's SphericalMercator, clamp
+   included. */
 const MERC_R = 6378137;
 const MERC_MAX_LAT = 85.0511287798;
 function mercY(lat) {
@@ -40,8 +43,7 @@ function mercLat(y) {
   return ((2 * Math.atan(Math.exp(y / MERC_R)) - Math.PI / 2) * 180) / Math.PI;
 }
 
-const COLS = 1440;
-const ROWS = 1160; // 2x the grid: keeps full 0.25-degree source detail at the equator
+const UPSCALE = 2; // render at 2x grid resolution for smooth gradients
 
 let _bytes = null;
 function gridBytes() {
@@ -83,39 +85,93 @@ export function bortleOverlayBounds() {
 }
 
 let _url = null;
-/* Paint the grid once and return a data URL for L.imageOverlay. The ~1.7M
-   pixel fill takes a fraction of a second; call it lazily on first toggle
-   so it never slows the initial page load. */
+/* Paint the grid once and return a data URL for L.imageOverlay. The ~6.7M
+   pixel bilinear fill takes on the order of a second; call it lazily on
+   first toggle so it never slows the initial page load. */
 export function bortleOverlayUrl() {
   if (_url) return _url;
   const g = BORTLE_GRID;
   const bytes = gridBytes();
   const lut = colorLut();
+  const cols = g.cols;
+  const rows = g.rows;
+  const step = g.step;
+  const latMax = g.latMax;
+  const lastR = rows - 1;
+  const lastC = cols - 1;
+  const W = cols * UPSCALE;
+  const H = 1160 * UPSCALE;
   const yNorth = mercY(g.latMax);
-  const ySouth = mercY(g.latMax - g.rows * g.step);
+  const ySouth = mercY(g.latMax - rows * step);
   const canvas = document.createElement('canvas');
-  canvas.width = COLS;
-  canvas.height = ROWS;
+  canvas.width = W;
+  canvas.height = H;
   const ctx = canvas.getContext('2d');
-  const img = ctx.createImageData(COLS, ROWS);
+  const img = ctx.createImageData(W, H);
   const d = img.data;
-  for (let j = 0; j < ROWS; j++) {
-    // Source grid row for this canvas row, via inverse-Mercator.
-    const y = yNorth - ((j + 0.5) / ROWS) * (yNorth - ySouth);
-    const lat = mercLat(y);
-    const srcRow = Math.max(
-      0,
-      Math.min(g.rows - 1, Math.round((g.latMax - lat) / g.step)),
-    );
-    const rowOff = srcRow * g.cols;
-    const pxOff = j * COLS;
-    for (let c = 0; c < COLS; c++) {
-      const lo = bytes[rowOff + c] * 4;
-      const o = (pxOff + c) * 4;
-      d[o] = lut[lo];
-      d[o + 1] = lut[lo + 1];
-      d[o + 2] = lut[lo + 2];
-      d[o + 3] = lut[lo + 3];
+  for (let j = 0; j < H; j++) {
+    // Canvas row center -> latitude, undoing Leaflet's Mercator stretch.
+    const lat = mercLat(yNorth - ((j + 0.5) / H) * (yNorth - ySouth));
+    // Fractional grid row, floor-aligned: cell r covers
+    // [latMax-(r+1)*step, latMax-r*step), the same convention estimateBortle
+    // uses. (Math.round here would shove every cell half a cell north.)
+    let fr = (latMax - lat) / step - 0.5;
+    fr = fr < 0 ? 0 : fr > lastR ? lastR : fr;
+    const r0 = fr >= lastR ? lastR - 1 : Math.floor(fr);
+    const dr = fr - r0;
+    const wr0 = 1 - dr;
+    const wr1 = dr;
+    const ro0 = r0 * cols;
+    const ro1 = ro0 + cols;
+    const pxRow = j * W;
+    for (let i = 0; i < W; i++) {
+      // Longitude is linear in both spaces; at 2x, pixel centers fall on
+      // quarter-cell points, so blend the two bracketing grid columns.
+      let fc = i * 0.5 - 0.25;
+      fc = fc < 0 ? 0 : fc > lastC ? lastC : fc;
+      let c0 = Math.floor(fc);
+      if (c0 >= lastC) c0 = lastC - 1;
+      const dc = fc - c0;
+      const c1 = c0 + 1;
+      const wc0 = 1 - dc;
+      const q00 = bytes[ro0 + c0];
+      const q01 = bytes[ro0 + c1];
+      const q10 = bytes[ro1 + c0];
+      const q11 = bytes[ro1 + c1];
+      // Bilinear blend over the known samples; unknown (255) cells are
+      // skipped and the weights renormalized. All-unknown -> transparent.
+      let num = 0;
+      let den = 0;
+      if (q00 !== 255) {
+        const w = wr0 * wc0;
+        num += q00 * w;
+        den += w;
+      }
+      if (q01 !== 255) {
+        const w = wr0 * dc;
+        num += q01 * w;
+        den += w;
+      }
+      if (q10 !== 255) {
+        const w = wr1 * wc0;
+        num += q10 * w;
+        den += w;
+      }
+      if (q11 !== 255) {
+        const w = wr1 * dc;
+        num += q11 * w;
+        den += w;
+      }
+      const o = (pxRow + i) * 4;
+      if (den === 0) {
+        d[o + 3] = 0;
+      } else {
+        const lo = Math.round(num / den) * 4;
+        d[o] = lut[lo];
+        d[o + 1] = lut[lo + 1];
+        d[o + 2] = lut[lo + 2];
+        d[o + 3] = lut[lo + 3];
+      }
     }
   }
   ctx.putImageData(img, 0, 0);
