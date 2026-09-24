@@ -23,6 +23,20 @@ const LABELS_URL =
 const BASE_ATTR =
   '&copy; <a href="https://www.esri.com">Esri</a> · Geocoding &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 
+/* The toggle and legend live inside Leaflet's map container. A press on them
+   must not start a map drag, so native mousedown/touchstart are stopped at
+   the element itself. Clicks are a different story: React's synthetic onClick
+   fires at the root *after* Leaflet's native container listener, so stopping
+   propagation in a React handler would be too late — and a native click stop
+   would keep the event from ever reaching React and break the buttons.
+   Instead the map click handler below ignores clicks from inside .sg-map-ui. */
+function stopNativePress(el) {
+  if (!el) return;
+  const stop = (e) => e.stopPropagation();
+  el.addEventListener('mousedown', stop);
+  el.addEventListener('touchstart', stop);
+}
+
 /* Popup content with a "Set as location" button. Plain DOM (not React) —
    Leaflet owns the popup lifecycle. Styled in extras.css. */
 function popupShell(title, subtitle, onPick) {
@@ -85,7 +99,10 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
     L.tileLayer(LABELS_URL, { maxZoom: 19 }).addTo(map);
     markersRef.current = L.layerGroup().addTo(map);
     // Click anywhere: drop a pin and offer it as the viewing location.
+    // (Clicks on the overlay toggle / legend bubble up here too — those are
+    // UI, not map picks, so ignore them.)
     map.on('click', async (e) => {
+      if (e.originalEvent?.target?.closest?.('.sg-map-ui')) return;
       const { lat, lng } = e.latlng;
       const my = ++clickSeq.current;
       const name = await placeName(lat, lng);
@@ -211,7 +228,12 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
       className="sg-darksky-map"
       aria-label="Map of nearby dark-sky spots. Activate a spot, or any point on the map, to set it as your viewing location."
     >
-      <div className="sg-map-mode-toggle" role="group" aria-label="Map overlay">
+      <div
+        ref={stopNativePress}
+        className="sg-map-mode-toggle sg-map-ui"
+        role="group"
+        aria-label="Map overlay"
+      >
         <button
           type="button"
           aria-pressed={mode !== 'bortle'}
@@ -228,7 +250,7 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
         </button>
       </div>
       {mode === 'bortle' && (
-        <div className="sg-map-legend" aria-hidden="true">
+        <div ref={stopNativePress} className="sg-map-legend sg-map-ui" aria-hidden="true">
           <div>Est. Bortle class</div>
           <div className="sg-map-legend-bar" />
           <div className="sg-map-legend-labels">
