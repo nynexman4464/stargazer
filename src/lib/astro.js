@@ -7,6 +7,7 @@ import {
   ecfToLookAngles,
 } from 'satellite.js';
 import { BORTLE_GRID } from '../data/bortleGrid.js';
+import { BORTLE_FINE } from '../data/bortleFine.js';
 
 /* ============================== config ============================== */
 export const DEFAULT_LOC = { name: 'Medford, MA', lat: 42.4184, lon: -71.1062 };
@@ -44,21 +45,69 @@ function gridBytes() {
   }
   return _gridBytes;
 }
+/* Fine 0.05-degree Bortle patches (BORTLE_FINE): a 5x5 patch of fine cells for
+   every coarse cell at SQM <= 21.0 (plus a 1-cell halo). The coarse grid
+   fills in everywhere else. Decoded lazily once, like the coarse grid. */
+let _fine = null;
+function finePatch() {
+  if (!_fine) {
+    const f = BORTLE_FINE;
+    const n = f.count;
+    const idxBin = atob(f.index);
+    const idxBytes = new Uint8Array(idxBin.length);
+    for (let i = 0; i < idxBin.length; i++) idxBytes[i] = idxBin.charCodeAt(i);
+    const keys = new Uint32Array(idxBytes.buffer); // little-endian, matches <u4
+    const datBin = atob(f.data);
+    const bytes = new Uint8Array(datBin.length);
+    for (let i = 0; i < datBin.length; i++) bytes[i] = datBin.charCodeAt(i);
+    const map = new Map();
+    for (let i = 0; i < n; i++) map.set(keys[i], i);
+    _fine = { per: f.per, step: f.step, map, bytes };
+  }
+  return _fine;
+}
+/* Fine-patch SQM byte at lat/lon, or null when the coarse cell has no patch
+   or the fine cell has no coverage (falls back to the coarse grid). */
+function sampleFineByte(lat, lon) {
+  const g = BORTLE_GRID;
+  const c = Math.floor((lon - g.lonMin) / g.step);
+  const r = Math.floor((g.latMax - lat) / g.step);
+  if (c < 0 || c >= g.cols || r < 0 || r >= g.rows) return null;
+  const f = finePatch();
+  const pi = f.map.get(r * g.cols + c);
+  if (pi === undefined) return null;
+  const per = f.per;
+  const st = f.step;
+  const fr = Math.floor((g.latMax - r * g.step - lat) / st);
+  const fc = Math.floor((lon - (g.lonMin + c * g.step)) / st);
+  if (fr < 0 || fr >= per || fc < 0 || fc >= per) return null;
+  const q = f.bytes[pi * per * per + fr * per + fc];
+  return q === 255 ? null : q;
+}
+function bortleResult(q, source) {
+  /* Classify from the exact stored quantum (16 + q*0.05), not the rounded
+     display value: rounding 17.45 to 17.5 first would flip borderline cells
+     a class brighter than the heatmap (which classifies exact bytes). */
+  const sqmExact = 16 + q * 0.05;
+  const sqm = Math.round(sqmExact * 100) / 100;
+  return {
+    value: String(sqmToBortle(sqmExact)),
+    sqm,
+    estimated: true,
+    source: `${source || 'Estimated Bortle class from satellite data.'} A planning guide, not a measurement.`,
+  };
+}
 export function estimateBortle(lat, lon) {
   const g = BORTLE_GRID;
   if (!g || !g.data || typeof lat !== 'number' || typeof lon !== 'number') return null;
+  const fq = sampleFineByte(lat, lon);
+  if (fq != null) return bortleResult(fq, g.source);
   const c = Math.floor((lon - g.lonMin) / g.step);
   const r = Math.floor((g.latMax - lat) / g.step);
   if (c < 0 || c >= g.cols || r < 0 || r >= g.rows) return null;
   const q = gridBytes()[r * g.cols + c];
   if (q === 255) return null;
-  const sqm = Math.round((16 + q * 0.05) * 10) / 10;
-  return {
-    value: String(sqmToBortle(sqm)),
-    sqm,
-    estimated: true,
-    source: `${g.source || 'Estimated Bortle class from satellite data.'} A planning guide, not a measurement.`,
-  };
+  return bortleResult(q, g.source);
 }
 
 /* Short display label for a bortleForLoc result: 'Bortle 8', or

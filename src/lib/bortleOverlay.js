@@ -1,4 +1,5 @@
 import { BORTLE_GRID } from '../data/bortleGrid.js';
+import { BORTLE_FINE } from '../data/bortleFine.js';
 import { sqmToBortle } from './astro.js';
 
 /* Render the bundled Bortle grid as a heatmap image for the Leaflet map.
@@ -82,6 +83,28 @@ export function bortleOverlayBounds() {
     [g.latMax - g.rows * g.step, g.lonMin],
     [g.latMax, g.lonMin + g.cols * g.step],
   ];
+}
+
+/* Fine 0.05-degree patches (BORTLE_FINE), decoded lazily once. index holds
+   uint32LE coarse keys (r*cols+c); data holds 25 SQM bytes per patch
+   (255 = no coverage) in index order. */
+let _fine = null;
+function finePatch() {
+  if (!_fine) {
+    const f = BORTLE_FINE;
+    const n = f.count;
+    const idxBin = atob(f.index);
+    const idxBytes = new Uint8Array(idxBin.length);
+    for (let i = 0; i < idxBin.length; i++) idxBytes[i] = idxBin.charCodeAt(i);
+    const keys = new Uint32Array(idxBytes.buffer); // little-endian, matches <u4
+    const datBin = atob(f.data);
+    const bytes = new Uint8Array(datBin.length);
+    for (let i = 0; i < datBin.length; i++) bytes[i] = datBin.charCodeAt(i);
+    const map = new Map();
+    for (let i = 0; i < n; i++) map.set(keys[i], i);
+    _fine = { per: f.per, step: f.step, map, bytes };
+  }
+  return _fine;
 }
 
 let _url = null;
@@ -171,6 +194,85 @@ export function bortleOverlayUrl() {
         d[o + 1] = lut[lo + 1];
         d[o + 2] = lut[lo + 2];
         d[o + 3] = lut[lo + 3];
+      }
+    }
+  }
+  /* Fine patches: repaint each patched coarse cell from its 5x5 fine cells
+     with bilinear sampling (clamped at patch edges), same class colors.
+     Only each patch's small canvas rect is touched, so this stays cheap.
+     All-unknown fine neighborhoods keep the coarse pixel already painted. */
+  const fp = finePatch();
+  const fper = fp.per;
+  const fstep = fp.step;
+  const flast = fper - 1;
+  const lonSpan = cols * step;
+  for (const [key, pi] of fp.map) {
+    const r = Math.floor(key / cols);
+    const c = key % cols;
+    const latN = latMax - r * step;
+    const lonW = g.lonMin + c * step;
+    // Exact integer canvas bounds for this coarse cell: each cell is
+    // UPSCALE px wide, so cells never overlap (FP floor/ceil on the
+    // fractional bounds could bleed a pixel into the neighbor, letting a
+    // later patch overwrite with clamped edge values).
+    const ix0 = c * UPSCALE;
+    const ix1 = (c + 1) * UPSCALE - 1;
+    const jy0 = Math.max(0, Math.floor(((yNorth - mercY(latN)) / (yNorth - ySouth)) * H));
+    const jy1 = Math.min(H - 1, Math.floor(((yNorth - mercY(latN - step)) / (yNorth - ySouth)) * H));
+    const base = pi * fper * fper;
+    const fb = fp.bytes;
+    for (let j = jy0; j <= jy1; j++) {
+      const lat = mercLat(yNorth - ((j + 0.5) / H) * (yNorth - ySouth));
+      let fr = (latN - lat) / fstep - 0.5;
+      fr = fr < 0 ? 0 : fr > flast ? flast : fr;
+      const r0 = fr >= flast ? flast - 1 : Math.floor(fr);
+      const dr = fr - r0;
+      const wr0 = 1 - dr;
+      const fr0 = base + r0 * fper;
+      const fr1 = fr0 + fper;
+      const pxRow = j * W;
+      for (let i = ix0; i <= ix1; i++) {
+        const lon = g.lonMin + ((i + 0.5) / W) * lonSpan;
+        let fc = (lon - lonW) / fstep - 0.5;
+        fc = fc < 0 ? 0 : fc > flast ? flast : fc;
+        let c0 = Math.floor(fc);
+        if (c0 >= flast) c0 = flast - 1;
+        const dc = fc - c0;
+        const wc0 = 1 - dc;
+        const q00 = fb[fr0 + c0];
+        const q01 = fb[fr0 + c0 + 1];
+        const q10 = fb[fr1 + c0];
+        const q11 = fb[fr1 + c0 + 1];
+        let num = 0;
+        let den = 0;
+        if (q00 !== 255) {
+          const w = wr0 * wc0;
+          num += q00 * w;
+          den += w;
+        }
+        if (q01 !== 255) {
+          const w = wr0 * dc;
+          num += q01 * w;
+          den += w;
+        }
+        if (q10 !== 255) {
+          const w = dr * wc0;
+          num += q10 * w;
+          den += w;
+        }
+        if (q11 !== 255) {
+          const w = dr * dc;
+          num += q11 * w;
+          den += w;
+        }
+        if (den > 0) {
+          const lo = Math.round(num / den) * 4;
+          const o = (pxRow + i) * 4;
+          d[o] = lut[lo];
+          d[o + 1] = lut[lo + 1];
+          d[o + 2] = lut[lo + 2];
+          d[o + 3] = lut[lo + 3];
+        }
       }
     }
   }
