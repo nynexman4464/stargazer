@@ -79,6 +79,12 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
   const spotsRef = useRef(spots);
   spotsRef.current = spots;
   const clickSeq = useRef(0);
+  // Signature of the marker set + location. The markers effect below re-runs
+  // whenever the parent re-renders (spots is a fresh array each time), but
+  // the view should only re-fit — and the dropped pin only cleared — when
+  // the markers or location actually change, not on unrelated re-renders
+  // like the overlay toggle.
+  const viewSig = useRef(null);
 
   useEffect(() => {
     if (!divRef.current || mapRef.current) return;
@@ -169,10 +175,6 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
     const layer = markersRef.current;
     if (!map || !layer) return;
     layer.clearLayers();
-    if (pinRef.current) {
-      pinRef.current.remove();
-      pinRef.current = null;
-    }
     const bounds = [];
     (spots || []).forEach((s) => {
       if (typeof s.lat !== 'number' || typeof s.lon !== 'number') return;
@@ -218,8 +220,20 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
         })
         .addTo(layer);
     }
-    if (bounds.length > 1) map.fitBounds(bounds, { padding: [24, 24] });
-    else if (bounds.length === 1) map.setView(bounds[0], 7);
+    // Only re-fit the view when the marker set or location genuinely changed —
+    // an unrelated parent re-render (e.g. the overlay toggle) must not reset
+    // the user's zoom or clear their dropped pin.
+    const sig =
+      (spots || []).map((s) => s.name).join('|') + `|${loc?.lat},${loc?.lon}`;
+    if (sig !== viewSig.current) {
+      viewSig.current = sig;
+      if (pinRef.current) {
+        pinRef.current.remove();
+        pinRef.current = null;
+      }
+      if (bounds.length > 1) map.fitBounds(bounds, { padding: [24, 24] });
+      else if (bounds.length === 1) map.setView(bounds[0], 7);
+    }
   }, [spots, loc]);
 
   return (
