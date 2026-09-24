@@ -1,0 +1,66 @@
+55/62 within +/-1 (baseline 54/62)
+
+anchor                       known  pred    sqm
+frosty-drew                      4     4  21.10
+myles-standish                   4     5  20.75
+race-point                       4     2  21.70  <-- MISS
+heins-farm                       4     4  20.85
+kancamagus                       2     1  21.85
+kd-dubuque                       3     3  21.55
+death-valley                     2     1  21.95
+joshua-tree                      2     2  21.65
+anza-borrego                     2     3  21.35
+lassen-volcanic                  2     1  21.95
+great-basin                      2     1  22.00
+massacre-rim                     1     1  22.00
+bryce-canyon                     2     1  21.95
+arches                           2     1  21.80
+canyonlands                      2     1  22.00
+capitol-reef                     2     1  22.00
+zion                             3     1  21.90  <-- MISS
+natural-bridges                  2     1  22.00
+dead-horse-point                 2     1  21.95
+goblin-valley                    2     1  22.00
+antelope-island                  3     4  21.00
+kodachrome-basin                 2     1  22.00
+dinosaur                         2     1  21.85
+black-canyon-gunnison            2     1  21.95
+great-sand-dunes                 2     3  21.55
+florissant                       3     3  21.50
+chaco                            2     1  21.95
+cosmic-campground                2     1  22.00
+valles-caldera                   2     2  21.65
+clayton-lake                     2     1  22.00
+petrified-forest                 2     1  22.00
+grand-canyon                     2     1  22.00
+kartchner-caverns                2     3  21.50
+oracle                           3     3  21.55
+big-bend                         1     1  22.00
+davis-mountains                  2     1  21.85
+enchanted-rock                   3     2  21.60
+south-llano-river                3     1  21.85  <-- MISS
+cherry-springs                   2     1  21.90
+watoga                           2     1  21.85
+staunton-river                   3     4  21.10
+kissimmee-prairie                2     3  21.40
+stephen-foster                   2     2  21.70
+pickett                          3     3  21.55
+buffalo-river                    2     4  21.15  <-- MISS
+petit-jean                       3     3  21.45
+merritt-reservoir                2     1  22.00
+theodore-roosevelt               2     1  21.85
+newport                          3     1  21.95  <-- MISS
+headlands                        2     1  21.95
+keweenaw                         2     1  22.00
+craters-of-the-moon              2     1  21.95
+central-idaho                    2     1  21.95
+glacier                          2     1  21.95
+boundary-waters                  1     1  21.90
+voyageurs                        2     1  22.00
+prineville-reservoir             2     3  21.50
+oregon-outback                   1     1  21.90
+katahdin                         2     1  21.95
+medford-ma                       8     6  18.70  <-- MISS
+new-york-ny                      9     8  17.90
+san-jose-ca                      8     6  18.90  <-- MISS
+vermilion-ab                     -     2  21.75

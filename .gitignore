@@ -25,3 +25,11 @@ dist-ssr
 
 # Bortle grid build workspace (3GB source raster, venv, scripts) — never commit
 .bortle-build/
+
+# Black Marble 2025 build intermediates (regenerable via run_full.py)
+tools/bortle-grid/blackmarble-2025/full2025_sum.npy
+tools/bortle-grid/blackmarble-2025/full2025_cnt.npy
+tools/bortle-grid/blackmarble-2025/full2025_mean_rad.npy
+tools/bortle-grid/blackmarble-2025/full2025_artificial_mcd.npy
+tools/bortle-grid/blackmarble-2025/cal2015_*.npy
+tools/bortle-grid/blackmarble-2025/__pycache__/

@@ -87,11 +87,14 @@ Wikimedia Commons.
 ## Data
 
 The "Est. Bortle" ratings for arbitrary locations come from a 0.25° grid
-downsampled from the World Atlas of Artificial Night Sky Brightness
-(Falchi et al. 2016, Science Advances 2:e1600377), via GFZ Data Services
-(https://doi.org/10.5880/GFZ.1.4.2016.001), used under CC BY-NC 4.0 —
-non-commercial use only. See `tools/bortle-grid/README.md` for the method,
-validation, and regeneration instructions.
+built from NASA Black Marble annual nighttime lights (VJ146A4, NOAA-20 VIIRS,
+2025, via LAADS DAAC), calibrated against the World Atlas of Artificial
+Night Sky Brightness (Falchi et al. 2016, Science Advances 2:e1600377).
+The calibration fit inherits the World Atlas model, so treat this grid as
+non-commercial like its predecessor until re-validated otherwise.
+See `tools/bortle-grid/README.md` and
+`tools/bortle-grid/blackmarble-2025/README.md` for the method, validation
+(55/62 anchors within ±1 Bortle class), and regeneration instructions.
 
 ## License
 
