@@ -18,7 +18,7 @@ import {
    near-white hot core at class 9. Unknown cells stay transparent. */
 
 const RAMP = {
-  1: [0, 0, 0, 0],
+  1: [48, 70, 170, 24],
   2: [48, 70, 170, 56],
   3: [36, 130, 205, 88],
   4: [36, 175, 170, 118],
