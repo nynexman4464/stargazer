@@ -16,7 +16,7 @@ from scipy.ndimage import map_coordinates
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from merc_grid import (
-    XMIN, YMAX, COLS, ROWS, COARSE_M, FINE_M, PER,
+    XMIN, YMAX, COLS, ROWS, COARSE_M, FINE_M, PER, R_MERC, y_to_lat,
     K1, K2, WALKER_P, WALKER_RMAX_CELLS, WALKER_SQRT,
     artificial_to_sqm, quantize,
 )
@@ -45,8 +45,39 @@ def main():
     print(f"Coarse shape: {qb.shape}", flush=True)
 
     # Bright cells: SQM <= 21.0 => byte <= (21.0-16)/0.05 = 100
-    bright = (qb != 255) & (qb <= 100)
-    print(f"Bright coarse cells: {np.count_nonzero(bright)}", flush=True)
+    # Broad coverage for NA/Europe (where users and bright sources are):
+    # SQM <= 21.9 => byte <= 118. This catches small cities like Plattsburgh
+    # NY whose 0.25deg coarse cell averages dark but has a bright core.
+    # Elsewhere (oceans, etc.) keep the selective 21.0 trigger.
+    sqm_thresh_std = 100   # SQM 21.0
+    sqm_thresh_broad = 118 # SQM 21.9
+
+    # Build lat/lon for each coarse cell center (vectorized)
+    cc = np.arange(COLS)
+    rr = np.arange(ROWS)
+    # lon = degrees(x / R_MERC), x = XMIN + (c+0.5)*COARSE_M
+    lon_c = np.degrees((XMIN + (cc + 0.5) * COARSE_M) / R_MERC)
+    # lat from y = YMAX - (r+0.5)*COARSE_M
+    y_r = YMAX - (rr + 0.5) * COARSE_M
+    lat_r = np.array([y_to_lat(y) for y in y_r])
+    # Broadcast to (ROWS, COLS)
+    lon_grid = np.broadcast_to(lon_c, (ROWS, COLS))
+    lat_grid = np.broadcast_to(lat_r[:, None], (ROWS, COLS))
+
+    # North America: lat 15-75, lon -170 to -55
+    na_mask = (lat_grid >= 15) & (lat_grid <= 75) & (lon_grid >= -170) & (lon_grid <= -55)
+    # Europe: lat 35-72, lon -12 to 45
+    eu_mask = (lat_grid >= 35) & (lat_grid <= 72) & (lon_grid >= -12) & (lon_grid <= 45)
+    broad_mask = na_mask | eu_mask
+
+    valid = qb != 255
+    bright = valid & (
+        ((~broad_mask) & (qb <= sqm_thresh_std)) |
+        (broad_mask & (qb <= sqm_thresh_broad))
+    )
+    print(f"Bright coarse cells: {np.count_nonzero(bright)} "
+          f"(broad-region: {np.count_nonzero(bright & broad_mask)}, "
+          f"selective: {np.count_nonzero(bright & ~broad_mask)})", flush=True)
 
     # Add 1-cell halo via dilation
     from scipy.ndimage import binary_dilation
