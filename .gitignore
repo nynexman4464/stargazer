@@ -33,3 +33,4 @@ tools/bortle-grid/blackmarble-2025/full2025_mean_rad.npy
 tools/bortle-grid/blackmarble-2025/full2025_artificial_mcd.npy
 tools/bortle-grid/blackmarble-2025/cal2015_*.npy
 tools/bortle-grid/blackmarble-2025/__pycache__/
+__pycache__/
