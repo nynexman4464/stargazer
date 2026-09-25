@@ -422,29 +422,19 @@ export function paintBortleTile(x, y, z, canvas) {
   const north = mercToLat(yTop);
   const south = mercToLat(yTop - tileSpan);
 
-  // Find regions, ensure they're loaded
+  // Find regions. Paint with whatever is cached; missing regions leave
+  // transparent pixels. The layer redraws when they arrive (see below).
   const rids = regionsForBounds(south, west, north, east);
-  let allLoaded = true;
   const regions = new Map();
+  const missing = [];
   for (const rid of rids) {
-    // We need lat/lon to get the region; use the center
-    const centerLat = (south + north) / 2;
-    const centerLon = (west + east) / 2;
-    // Actually, getRegionSync needs lat/lon; we'll use a representative point
-    // For simplicity, ensure by rid directly via a helper
-    // (We'll add a ensureRegionById to bortleRegions.js)
     const region = getRegionByIdSync(rid);
     if (region) {
       regions.set(rid, region);
     } else {
-      allLoaded = false;
+      missing.push(rid);
       ensureRegionById(rid);
     }
-  }
-
-  if (!allLoaded) {
-    // Not all regions loaded yet; return false so caller can retry
-    return false;
   }
 
   // Paint the tile with the pre-split renderer logic: fine-first (4km) where
@@ -469,58 +459,56 @@ export function paintBortleTile(x, y, z, canvas) {
     }
   }
   ctx.putImageData(img, 0, 0);
-  return true;
+  // Return the list of region IDs that were missing (for redraw subscription).
+  // Empty array means the tile is fully painted.
+  return missing;
 }
 
-/* Leaflet tile layer for the heatmap. Handles async region loading by
-   re-requesting tiles when their regions arrive. */
+/* Leaflet tile layer for the heatmap. Tiles paint synchronously with cached
+   regions; when a tile needs regions that aren't loaded yet, it paints what
+   it can and subscribes to redraw when they arrive. */
 export function createBortleTileLayer(L) {
+  const pendingRedraws = new Set(); // region IDs we're waiting on
+  let layer = null;
+
   const BortleTiles = L.GridLayer.extend({
     createTile(coords, done) {
       const tile = document.createElement('canvas');
       const size = this.getTileSize();
       tile.width = size.x;
       tile.height = size.y;
-      // Try synchronous paint first (regions already cached)
+      // Synchronous paint: uses cached regions, missing ones stay transparent.
+      // Returns the list of missing region IDs (empty if fully painted).
+      let missing = [];
       try {
-        const painted = paintBortleTile(coords.x, coords.y, coords.z, tile);
-        if (painted) {
-          if (done) done(null, tile);
-          return tile;
-        }
+        missing = paintBortleTile(coords.x, coords.y, coords.z, tile) || [];
       } catch (e) {
-        console.warn('Bortle tile paint failed (sync)', e);
+        console.warn('Bortle tile paint failed', e);
       }
-      // Regions are loading: wait for them, then paint. Use the promise-based
-      // ensure to avoid polling forever on a failed import.
-      const n = 2 ** coords.z;
-      const xLeft = (coords.x / n) * MERC_WORLD - MERC_LIMIT;
-      const yTop = MERC_LIMIT - (coords.y / n) * MERC_WORLD;
-      const tileSpan = MERC_WORLD / n;
-      const west = mercToLon(xLeft);
-      const east = mercToLon(xLeft + tileSpan);
-      const north = mercToLat(yTop);
-      const south = mercToLat(yTop - tileSpan);
-      const rids = regionsForBounds(south, west, north, east);
-      Promise.all(rids.map((rid) => ensureRegionById(rid).catch(() => null)))
-        .then(() => {
-          try {
-            paintBortleTile(coords.x, coords.y, coords.z, tile);
-          } catch (e) {
-            console.warn('Bortle tile paint failed (async)', e);
-          }
-          // Always signal completion so Leaflet doesn't hang the tile forever.
-          // If painting failed, the tile stays transparent.
-          if (done) done(null, tile);
-        });
+      // If regions were missing, ensure we redraw when they load.
+      for (const rid of missing) {
+        if (!pendingRedraws.has(rid)) {
+          pendingRedraws.add(rid);
+          ensureRegionById(rid).then(
+            () => {
+              pendingRedraws.delete(rid);
+              if (layer && layer._map) layer.redraw();
+            },
+            () => pendingRedraws.delete(rid),
+          );
+        }
+      }
+      // Always signal completion synchronously — never hang a tile.
+      if (done) done(null, tile);
       return tile;
     },
   });
-  return new BortleTiles({
+  layer = new BortleTiles({
     tileSize: TILE_SIZE,
     maxZoom: TILE_MAX_ZOOM,
     opacity: 0.85,
     interactive: false,
     pane: 'overlayPane',
   });
+  return layer;
 }
