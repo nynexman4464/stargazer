@@ -128,29 +128,28 @@ function sampleBortleByte(xM, yM, regions) {
   const dc = fcg - fc0;
 
   // Helper: get fine cell value at region-local fine coords (fr, fc).
-  // Crosses region boundaries: if the cell belongs to a neighboring region,
-  // looks up the fine patch in that region's map.
+  // Crosses region boundaries: the fine patch for a global cell may be stored
+  // in a neighboring region's map (the generator assigns overlap cells to the
+  // first region in its list, not necessarily the one regionIdFor returns).
+  // Searches all loaded regions for the patch by its global key.
   const getFine = (fr, fc) => {
     const lc = Math.floor(fc / per);
     const lr = Math.floor(fr / per);
     const globalC = lc + coarse.c0;
     const globalR = lr + coarse.r0;
-    // Find the region containing this global coarse cell
-    let targetRegion = region;
-    if (lc < 0 || lc >= coarse.cols || lr < 0 || lr >= coarse.rows) {
-      // Out of bounds: compute lat/lon of the cell center and find its region
-      const cellXM = coarse.xMin + (lc + 0.5) * cm;
-      const cellYM = coarse.yMax - (lr + 0.5) * cm;
-      const cellLat = mercToLat(cellYM);
-      const cellLon = mercToLon(cellXM);
-      const nrid = regionIdFor(cellLat, cellLon);
-      const nregion = nrid ? regions.get(nrid) : null;
-      if (!nregion) return null;
-      targetRegion = nregion;
-    }
     const fkey = globalR * coarse.globalCols + globalC;
-    const pi = targetRegion.fine.map.get(fkey);
-    if (pi === undefined) return null;
+    // Find which loaded region has this patch
+    let targetRegion = null;
+    let pi = undefined;
+    for (const [, reg] of regions) {
+      const idx = reg.fine.map.get(fkey);
+      if (idx !== undefined) {
+        targetRegion = reg;
+        pi = idx;
+        break;
+      }
+    }
+    if (!targetRegion) return null;
     // Convert to target-region local fine coords via global space
     const gfc = fc + coarse.c0 * per;
     const gfr = fr + coarse.r0 * per;
