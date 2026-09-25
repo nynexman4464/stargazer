@@ -58,5 +58,14 @@ def quantize(sqm):
     q[ok] = np.round((sqm[ok] - 16.0) / 0.05).astype(np.uint8)
     return q
 
-# K1/K2 model (same as before)
-K1, K2, SIGMA = 0.1179, 0.0642, 0.5
+# K1/K2 model — Walker-law skyglow kernel (recalibrated 2026-09-25 against
+# tighter Bortle breaks, see kernel-upgrade/RECALIBRATION.md).
+# art = K1 * local + K2 * sqrt(walker_sum), where walker_sum is the
+# unnormalized d^(-3.0) convolution over 150km. The sqrt compresses the
+# dynamic range: without it, sites near bright cities (e.g. Antelope Island
+# 25km from SLC) get 28x the regional term of marginal dark sites (Rutland),
+# making them impossible to satisfy simultaneously with a linear model.
+K1, K2 = 0.11, 0.05
+WALKER_P = 3.0
+WALKER_RMAX_CELLS = 5  # 125km at 25km cells
+WALKER_SQRT = True  # apply sqrt to walker_sum before K2 weighting

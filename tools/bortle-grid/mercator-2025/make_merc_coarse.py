@@ -11,12 +11,13 @@ import time
 
 import h5py
 import numpy as np
-from scipy.ndimage import gaussian_filter, map_coordinates
+from scipy.ndimage import convolve, map_coordinates
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from merc_grid import (
     XMIN, YMAX, XMAX_ADJ, YMIN_ADJ, COLS, ROWS, COARSE_M,
-    K1, K2, artificial_to_sqm, quantize, y_to_lat,
+    K1, K2, WALKER_P, WALKER_RMAX_CELLS, WALKER_SQRT,
+    artificial_to_sqm, quantize, y_to_lat,
 )
 
 TILE_DIR = "/home/hatch/workspace/data/blackmarble/tiles_2025"
@@ -135,23 +136,29 @@ def main():
     np.save('/tmp/merc_coarse_mean.npy', mean_rad)
     print("Saved /tmp/merc_coarse_mean.npy", flush=True)
 
-    # Apply K1/K2 model with Gaussian blur
-    # Blur sigma: 55km (0.5 deg at equator) / 25km = 2.2 cells
-    print("Applying Gaussian blur...", flush=True)
-    filled = np.nan_to_num(mean_rad, nan=0.0)
-    # Use gaussian_filter with NaN handling via mask
-    # Simple approach: blur the filled array and the mask separately
-    mask = np.isfinite(mean_rad).astype(np.float64)
-    blurred_num = gaussian_filter(filled * mask, sigma=2.75)
-    blurred_den = gaussian_filter(mask, sigma=2.75)
-    blurred = np.full((ROWS, COLS), np.nan)
-    okb = blurred_den > 1e-9
-    blurred[okb] = blurred_num[okb] / blurred_den[okb]
+    # Apply K1/K2 model with Walker-law skyglow kernel.
+    # w(d) = d^(-p) for 0.5 < d <= rmax cells, center excluded (k1*local
+    # handles the center). Unnormalized weighted sum: skyglow is a sum of
+    # contributions, not an average. Calibrated 2026-09-25 (kernel-upgrade/).
+    print("Applying Walker skyglow kernel...", flush=True)
+    r = int(math.ceil(WALKER_RMAX_CELLS))
+    yy, xx = np.mgrid[-r:r+1, -r:r+1]
+    d = np.sqrt(xx**2 + yy**2)
+    kernel = np.zeros((2*r+1, 2*r+1))
+    m = (d > 0.5) & (d <= WALKER_RMAX_CELLS)
+    kernel[m] = d[m] ** (-WALKER_P)
+    print(f"  kernel {kernel.shape}, sum={kernel.sum():.1f}", flush=True)
 
-    art = K1 * np.maximum(mean_rad, 0.0) + K2 * np.maximum(blurred, 0.0)
-    # Where mean_rad is NaN, art will be NaN; fill with blurred where available
+    filled = np.nan_to_num(mean_rad, nan=0.0)
+    walker_sum = convolve(filled, kernel, mode='constant', cval=0.0)
+    if WALKER_SQRT:
+        walker_sum = np.sqrt(np.maximum(walker_sum, 0.0))
+
+    art = K1 * np.maximum(mean_rad, 0.0) + K2 * np.maximum(walker_sum, 0.0)
+    # Where mean_rad is NaN (oceans etc.), fall back to the regional term so
+    # coastal waters still show nearby city glow.
     nan_art = ~np.isfinite(art)
-    art[nan_art] = (K1 + K2) * np.maximum(blurred[nan_art], 0.0)
+    art[nan_art] = (K1 + K2) * np.maximum(walker_sum[nan_art], 0.0)
 
     sqm = artificial_to_sqm(art)
     qb = quantize(sqm)

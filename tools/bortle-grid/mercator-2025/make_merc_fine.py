@@ -17,7 +17,8 @@ from scipy.ndimage import map_coordinates
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from merc_grid import (
     XMIN, YMAX, COLS, ROWS, COARSE_M, FINE_M, PER,
-    K1, K2, artificial_to_sqm, quantize,
+    K1, K2, WALKER_P, WALKER_RMAX_CELLS, WALKER_SQRT,
+    artificial_to_sqm, quantize,
 )
 
 TILE_DIR = "/home/hatch/workspace/data/blackmarble/tiles_2025"
@@ -60,18 +61,21 @@ def main():
     # Load coarse mean for the blurred term
     coarse_mean = np.load('/tmp/merc_coarse_mean.npy')
 
-    # For the blurred term at fine centers: we need the Gaussian-blurred
-    # coarse mean sampled at fine resolution. We'll compute the blurred
-    # coarse grid once, then sample it.
-    from scipy.ndimage import gaussian_filter
-    print("Computing blurred coarse for K2 term...", flush=True)
+    # For the regional term at fine centers: we need the Walker-convolved
+    # coarse mean sampled at fine resolution. Compute the Walker sum on the
+    # coarse grid once, then sample it bilinearly.
+    from scipy.ndimage import convolve
+    print("Computing Walker skyglow sum on coarse grid for K2 term...", flush=True)
+    r = int(math.ceil(WALKER_RMAX_CELLS))
+    yy, xx = np.mgrid[-r:r+1, -r:r+1]
+    d = np.sqrt(xx**2 + yy**2)
+    kernel = np.zeros((2*r+1, 2*r+1))
+    m = (d > 0.5) & (d <= WALKER_RMAX_CELLS)
+    kernel[m] = d[m] ** (-WALKER_P)
     filled = np.nan_to_num(coarse_mean, nan=0.0)
-    cmask = np.isfinite(coarse_mean).astype(np.float64)
-    bnum = gaussian_filter(filled * cmask, sigma=2.75)
-    bden = gaussian_filter(cmask, sigma=2.75)
-    blurred_coarse = np.full_like(coarse_mean, np.nan)
-    okb = bden > 1e-9
-    blurred_coarse[okb] = bnum[okb] / bden[okb]
+    walker_coarse = convolve(filled, kernel, mode='constant', cval=0.0)
+    if WALKER_SQRT:
+        walker_coarse = np.sqrt(np.maximum(walker_coarse, 0.0))
 
     # Group fine cells by source tile for efficient sampling
     # Each fine cell: 5km, center in meters -> lat/lon -> tile/pixel
@@ -185,7 +189,7 @@ def main():
             # Convert fine cell meters to coarse cell indices
             # Coarse col = floor((x - XMIN) / COARSE_M), row = floor((YMAX - y) / COARSE_M)
             # We have the patch (r,c) and fine (fr,fc), so coarse is just (r,c)
-            # But for the blurred term, we sample the blurred_coarse grid
+            # But for the regional term, we sample the walker_coarse grid
             # at the fine cell's location (bilinear).
             # Coarse grid coordinates: col = (x - XMIN)/COARSE_M - 0.5, row = (YMAX - y)/COARSE_M - 0.5
             # We can compute from the patch indices directly:
@@ -198,10 +202,10 @@ def main():
                 if valid_s[idx] < 0.5:
                     continue
                 local = sampled[idx]
-                # Blurred term: sample blurred_coarse at fine center
+                # Regional term: sample walker_coarse at fine center
                 cc = cols[pi] + (fci + 0.5) / PER - 0.5
                 cr = rows[pi] + (fri + 0.5) / PER - 0.5
-                # Bilinear sample from blurred_coarse
+                # Bilinear sample from walker_coarse
                 # (simplified: use nearest for now, or do bilinear)
                 # Let's do bilinear properly
                 c0i, r0i = int(math.floor(cc)), int(math.floor(cr))
@@ -210,18 +214,18 @@ def main():
                 if not (0 <= c0i < COLS - 1 and 0 <= r0i < ROWS - 1):
                     continue
                 dx, dy = cc - c0i, cr - r0i
-                b00 = blurred_coarse[r0i, c0i]
-                b10 = blurred_coarse[r0i, c1i]
-                b01 = blurred_coarse[r1i, c0i]
-                b11 = blurred_coarse[r1i, c1i]
+                b00 = walker_coarse[r0i, c0i]
+                b10 = walker_coarse[r0i, c1i]
+                b01 = walker_coarse[r1i, c0i]
+                b11 = walker_coarse[r1i, c1i]
                 if not (np.isfinite(b00) and np.isfinite(b10) and np.isfinite(b01) and np.isfinite(b11)):
-                    # Fall back to local if blurred not available
-                    blurred_val = local
+                    # Fall back to local if regional sum not available
+                    regional_val = local
                 else:
-                    blurred_val = (b00 * (1-dx) * (1-dy) + b10 * dx * (1-dy) +
+                    regional_val = (b00 * (1-dx) * (1-dy) + b10 * dx * (1-dy) +
                                    b01 * (1-dx) * dy + b11 * dx * dy)
 
-                art = K1 * max(local, 0.0) + K2 * max(blurred_val, 0.0)
+                art = K1 * max(local, 0.0) + K2 * max(regional_val, 0.0)
                 sqm = artificial_to_sqm(np.array([art]))[0]
                 qb_val = quantize(np.array([sqm]))[0]
                 patch_data_sorted[pi, fri * PER + fci] = qb_val
