@@ -119,9 +119,10 @@ function getFineCell(frg, fcg) {
   const fc = fcg - c * per;
   if (fr < 0 || fr >= per || fc < 0 || fc >= per) return 255;
   // 3x3 tent filter to suppress single-cell spikes (e.g. one very bright
-  // 0.05-degree cell creating a sharp white stripe). Center weight 4,
-  // edge weight 2, corner weight 1. Missing cells (255) are skipped and
-  // the blend renormalizes.
+  // 0.05-degree cell creating a sharp white stripe). Center weight 6,
+  // edge weight 2, corner weight 1 — preserves the bright core while
+  // softening outliers. Missing cells (255) are skipped and the blend
+  // renormalizes.
   const bytes = finePatch().bytes;
   const base = pi * per * per;
   let num = 0;
@@ -133,7 +134,7 @@ function getFineCell(frg, fcg) {
       if (nr < 0 || nr >= per || nc < 0 || nc >= per) continue;
       const q = bytes[base + nr * per + nc];
       if (q === 255) continue;
-      const w = dr === 0 && dc === 0 ? 4 : dr === 0 || dc === 0 ? 2 : 1;
+      const w = dr === 0 && dc === 0 ? 6 : dr === 0 || dc === 0 ? 2 : 1;
       num += q * w;
       den += w;
     }
