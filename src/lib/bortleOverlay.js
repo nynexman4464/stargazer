@@ -90,6 +90,141 @@ function regionsForBounds(south, west, north, east) {
   return [...ids];
 }
 
+/* Bilinearly sample the fine patch at (xM, yM) meters, or null if no patch.
+   Returns a float byte value. */
+function sampleFineBilinear(xM, yM, region) {
+  const { coarse, fine } = region;
+  if (fine.count === 0) return null;
+  const cm = coarse.cellM;
+  const fm = fine.cellM;
+  const per = fine.per;
+
+  const lat = mercToLat(yM);
+  const lon = mercToLon(xM);
+  
+  // Global coarse cell
+  const localCf = (xM - coarse.xMin) / cm;
+  const localRf = (coarse.yMax - yM) / cm;
+  const lc = Math.floor(localCf);
+  const lr = Math.floor(localRf);
+  if (lc < 0 || lc >= coarse.cols || lr < 0 || lr >= coarse.rows) return null;
+  
+  const globalC = lc + coarse.c0;
+  const globalR = lr + coarse.r0;
+  const fkey = globalR * coarse.globalCols + globalC;
+  const pi = fine.map.get(fkey);
+  if (pi === undefined) return null;
+
+  // Position within the coarse cell (in fine cell units)
+  const fx = (localCf - lc) * per;
+  const fy = (localRf - lr) * per;
+  const fc0 = Math.floor(fx);
+  const fr0 = Math.floor(fy);
+  const tx = fx - fc0;
+  const ty = fy - fr0;
+
+  // Sample 4 fine cells with clamping at patch edges
+  const getFine = (fr, fc) => {
+    const cr = Math.max(0, Math.min(per - 1, fr));
+    const cc = Math.max(0, Math.min(per - 1, fc));
+    const q = fine.bytes[pi * per * per + cr * per + cc];
+    return q === 255 ? null : q;
+  };
+  
+  const q00 = getFine(fr0, fc0);
+  const q10 = getFine(fr0, fc0 + 1);
+  const q01 = getFine(fr0 + 1, fc0);
+  const q11 = getFine(fr0 + 1, fc0 + 1);
+  
+  const samples = [q00, q10, q01, q11];
+  const weights = [(1-tx)*(1-ty), tx*(1-ty), (1-tx)*ty, tx*ty];
+  let sum = 0, wsum = 0;
+  for (let i = 0; i < 4; i++) {
+    if (samples[i] != null) {
+      sum += samples[i] * weights[i];
+      wsum += weights[i];
+    }
+  }
+  return wsum === 0 ? null : sum / wsum;
+}
+
+/* Bilinearly sample the coarse grid at (xM, yM) meters.
+   Returns a float byte value, or null if no coverage.
+   Handles region boundaries by looking up each of the 4 surrounding cells
+   in its own region. */
+function sampleCoarseBilinear(xM, yM, regions) {
+  // Find the region containing this point
+  const lat = mercToLat(yM);
+  const lon = mercToLon(xM);
+  const rid = regionIdFor(lat, lon);
+  if (!rid) return null;
+  const region = regions.get(rid);
+  if (!region) return null;
+  const { coarse } = region;
+  const cm = coarse.cellM;
+
+  // Coarse cell coordinates (fractional)
+  // Global cell index: we need to map region-local to global
+  // coarse.xMin = XMIN_global + c0*cm, so globalC = (xM - XMIN_global)/cm
+  // But we don't have XMIN_global; instead: localC = (xM - coarse.xMin)/cm
+  // globalC = localC + coarse.c0
+  const localCf = (xM - coarse.xMin) / cm;
+  const localRf = (coarse.yMax - yM) / cm;
+  
+  const c0 = Math.floor(localCf);
+  const r0 = Math.floor(localRf);
+  const fx = localCf - c0;
+  const fy = localRf - r0;
+
+  // Sample the 4 corners, handling region boundaries
+  // For each corner, compute its global coordinates, then find its region
+  const samples = [];
+  for (let dr = 0; dr <= 1; dr++) {
+    for (let dc = 0; dc <= 1; dc++) {
+      const lr = r0 + dr;
+      const lc = c0 + dc;
+      // Check if in this region's bounds
+      let q = null;
+      if (lr >= 0 && lr < coarse.rows && lc >= 0 && lc < coarse.cols) {
+        q = coarse.bytes[lr * coarse.cols + lc];
+        if (q === 255) q = null;
+      } else {
+        // Neighbor is in an adjacent region; find it via lat/lon
+        // Compute the meter coordinates of this cell's center
+        const cellXM = coarse.xMin + (lc + 0.5) * cm;
+        const cellYM = coarse.yMax - (lr + 0.5) * cm;
+        const cellLat = mercToLat(cellYM);
+        const cellLon = mercToLon(cellXM);
+        const nrid = regionIdFor(cellLat, cellLon);
+        const nregion = nrid ? regions.get(nrid) : null;
+        if (nregion) {
+          q = sampleRegionByte(nregion, cellLat, cellLon);
+        }
+      }
+      samples.push(q);
+    }
+  }
+
+  // Bilinear interpolation, ignoring nulls (renormalize weights)
+  // samples order: (0,0), (0,1), (1,0), (1,1) -> weights: (1-fx)(1-fy), fx(1-fy), (1-fx)fy, fx*fy
+  const weights = [
+    (1 - fx) * (1 - fy),
+    fx * (1 - fy),
+    (1 - fx) * fy,
+    fx * fy,
+  ];
+  let sum = 0;
+  let wsum = 0;
+  for (let i = 0; i < 4; i++) {
+    if (samples[i] != null) {
+      sum += samples[i] * weights[i];
+      wsum += weights[i];
+    }
+  }
+  if (wsum === 0) return null;
+  return sum / wsum;
+}
+
 /* Paint one Web-Mercator tile (x, y, z) into the given square canvas.
    Returns true if the tile was fully painted, false if some regions are
    still loading (caller should retry when they arrive). */
@@ -135,32 +270,26 @@ export function paintBortleTile(x, y, z, canvas) {
     return false;
   }
 
-  // Paint the tile
-  // Cache the last used region to avoid repeated lookups
-  let lastRid = null;
-  let lastRegion = null;
+  // Paint the tile with bilinear interpolation for smooth gradients.
+  // Fine patches (4km) take precedence where available; coarse (20km) fills in.
   for (let j = 0; j < size; j++) {
     const yM = yTop - ((j + 0.5) / size) * tileSpan;
-    const lat = mercToLat(yM);
     const rowOff = j * size;
     for (let i = 0; i < size; i++) {
       const xM = xLeft + ((i + 0.5) / size) * tileSpan;
+      const o = (rowOff + i) * 4;
+      // Find the region for fine patch lookup
+      const lat = mercToLat(yM);
       const lon = mercToLon(xM);
       const rid = regionIdFor(lat, lon);
-      let region = null;
-      if (rid === lastRid) {
-        region = lastRegion;
-      } else if (rid) {
-        region = regions.get(rid) || getRegionByIdSync(rid);
-        lastRid = rid;
-        lastRegion = region;
+      const region = rid ? regions.get(rid) : null;
+      let q = null;
+      if (region) {
+        q = sampleFineBilinear(xM, yM, region);
       }
-      const o = (rowOff + i) * 4;
-      if (!region) {
-        d[o + 3] = 0;
-        continue;
+      if (q == null) {
+        q = sampleCoarseBilinear(xM, yM, regions);
       }
-      const q = sampleRegionByte(region, lat, lon);
       if (q == null) {
         d[o + 3] = 0;
       } else {
