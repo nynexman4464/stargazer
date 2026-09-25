@@ -168,7 +168,13 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
       if (!bortleRef.current) {
         bortleRef.current = createBortleTileLayer(L);
       }
-      if (!map.hasLayer(bortleRef.current)) map.addLayer(bortleRef.current);
+      const bortle = bortleRef.current;
+      if (!map.hasLayer(bortle)) {
+        map.addLayer(bortle);
+        // Force fresh tiles: Leaflet can hold stale async tile state
+        // when a GridLayer is removed and re-added.
+        bortle.redraw();
+      }
       if (map.hasLayer(lights)) map.removeLayer(lights);
     } else {
       if (!map.hasLayer(lights)) map.addLayer(lights);
