@@ -45,7 +45,7 @@ function gridBytes() {
   }
   return _gridBytes;
 }
-/* Fine 0.05-degree Bortle patches (BORTLE_FINE): a 5x5 patch of fine cells for
+/* Fine 5km Bortle patches (BORTLE_FINE): a 5x5 patch of fine cells for
    every coarse cell at SQM <= 21.0 (plus a 1-cell halo). The coarse grid
    fills in everywhere else. Decoded lazily once, like the coarse grid. */
 let _fine = null;
@@ -62,24 +62,36 @@ function finePatch() {
     for (let i = 0; i < datBin.length; i++) bytes[i] = datBin.charCodeAt(i);
     const map = new Map();
     for (let i = 0; i < n; i++) map.set(keys[i], i);
-    _fine = { per: f.per, step: f.step, map, bytes };
+    _fine = { per: f.per, cellM: f.cellM, map, bytes };
   }
   return _fine;
+}
+/* Web-Mercator projection (matches bortleOverlay.js). */
+const MERC_R = 6378137;
+function latLonToMerc(lat, lon) {
+  const x = (lon * Math.PI) / 180 * MERC_R;
+  const s = Math.sin((lat * Math.PI) / 180);
+  const sc = Math.max(-0.9999999, Math.min(0.9999999, s));
+  const y = (MERC_R * Math.log((1 + sc) / (1 - sc))) / 2;
+  return { x, y };
 }
 /* Fine-patch SQM byte at lat/lon, or null when the coarse cell has no patch
    or the fine cell has no coverage (falls back to the coarse grid). */
 function sampleFineByte(lat, lon) {
   const g = BORTLE_GRID;
-  const c = Math.floor((lon - g.lonMin) / g.step);
-  const r = Math.floor((g.latMax - lat) / g.step);
+  const { x, y } = latLonToMerc(lat, lon);
+  const c = Math.floor((x - g.xMin) / g.cellM);
+  const r = Math.floor((g.yMax - y) / g.cellM);
   if (c < 0 || c >= g.cols || r < 0 || r >= g.rows) return null;
   const f = finePatch();
   const pi = f.map.get(r * g.cols + c);
   if (pi === undefined) return null;
   const per = f.per;
-  const st = f.step;
-  const fr = Math.floor((g.latMax - r * g.step - lat) / st);
-  const fc = Math.floor((lon - (g.lonMin + c * g.step)) / st);
+  const cm = g.cellM; // 25000
+  const fm = f.cellM; // 5000
+  // Fine cell within the patch: offset from the coarse cell's SW corner
+  const fr = Math.floor((g.yMax - r * cm - y) / fm);
+  const fc = Math.floor((x - (g.xMin + c * cm)) / fm);
   if (fr < 0 || fr >= per || fc < 0 || fc >= per) return null;
   const q = f.bytes[pi * per * per + fr * per + fc];
   return q === 255 ? null : q;
@@ -102,8 +114,9 @@ export function estimateBortle(lat, lon) {
   if (!g || !g.data || typeof lat !== 'number' || typeof lon !== 'number') return null;
   const fq = sampleFineByte(lat, lon);
   if (fq != null) return bortleResult(fq, g.source);
-  const c = Math.floor((lon - g.lonMin) / g.step);
-  const r = Math.floor((g.latMax - lat) / g.step);
+  const { x, y } = latLonToMerc(lat, lon);
+  const c = Math.floor((x - g.xMin) / g.cellM);
+  const r = Math.floor((g.yMax - y) / g.cellM);
   if (c < 0 || c >= g.cols || r < 0 || r >= g.rows) return null;
   const q = gridBytes()[r * g.cols + c];
   if (q === 255) return null;
