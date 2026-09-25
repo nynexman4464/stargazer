@@ -18,12 +18,15 @@ export const HOME_BORTLE = {
     'Inferred from Sky & Telescope zenith SQM readings in adjacent Arlington and Cambridge; no Medford measurement published.',
 };
 
-/* Conventional SQM -> Bortle breakpoints (Wikipedia's Bortle scale table;
-   the 8/9 split at 17.5 is the common converter approximation). Kept in one
-   place so the satellite-grid estimate and any future use share it. */
+/* SQM -> Bortle breakpoints. Tightened 2026-09-25 after comparison against
+   lightpollutionmap.info: their Bortle 1 requires SQM >= 21.99 (vs our old
+   21.76), and our old scale handed out Bortle 1 to areas that aren't truly
+   pristine. These breaks sit between Wikipedia's loose scale and their
+   strict one. Kept in one place so the satellite-grid estimate and any
+   future use share it. */
 const BORTLE_BREAKS = [
-  [21.76, 1], [21.60, 2], [21.30, 3], [20.80, 4],
-  [19.25, 5], [18.50, 6], [18.00, 7], [17.50, 8],
+  [21.90, 1], [21.70, 2], [21.40, 3], [20.90, 4],
+  [19.45, 5], [18.70, 6], [18.20, 7], [17.70, 8],
 ];
 export function sqmToBortle(sqm) {
   for (const [edge, cls] of BORTLE_BREAKS) if (sqm >= edge) return cls;
