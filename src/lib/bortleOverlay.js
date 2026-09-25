@@ -91,16 +91,13 @@ function regionsForBounds(south, west, north, east) {
 }
 
 /* Bilinearly sample the fine patch at (xM, yM) meters, or null if no patch.
-   Returns a float byte value. */
+   Returns a float byte value. Values are at cell centers (half-cell offset). */
 function sampleFineBilinear(xM, yM, region) {
   const { coarse, fine } = region;
   if (fine.count === 0) return null;
   const cm = coarse.cellM;
   const fm = fine.cellM;
   const per = fine.per;
-
-  const lat = mercToLat(yM);
-  const lon = mercToLon(xM);
   
   // Global coarse cell
   const localCf = (xM - coarse.xMin) / cm;
@@ -115,13 +112,14 @@ function sampleFineBilinear(xM, yM, region) {
   const pi = fine.map.get(fkey);
   if (pi === undefined) return null;
 
-  // Position within the coarse cell (in fine cell units)
+  // Position within the coarse cell, in fine-cell units.
+  // Fine cell (fr,fc) covers [fc,fc+1]x[fr,fr+1], value at center.
   const fx = (localCf - lc) * per;
   const fy = (localRf - lr) * per;
-  const fc0 = Math.floor(fx);
-  const fr0 = Math.floor(fy);
-  const tx = fx - fc0;
-  const ty = fy - fr0;
+  const fc0 = Math.floor(fx - 0.5);
+  const fr0 = Math.floor(fy - 0.5);
+  const tx = (fx - 0.5) - fc0;
+  const ty = (fy - 0.5) - fr0;
 
   // Sample 4 fine cells with clamping at patch edges
   const getFine = (fr, fc) => {
@@ -151,7 +149,7 @@ function sampleFineBilinear(xM, yM, region) {
 /* Bilinearly sample the coarse grid at (xM, yM) meters.
    Returns a float byte value, or null if no coverage.
    Handles region boundaries by looking up each of the 4 surrounding cells
-   in its own region. */
+   in its own region. Values are at cell CENTERS, so we offset by half a cell. */
 function sampleCoarseBilinear(xM, yM, regions) {
   // Find the region containing this point
   const lat = mercToLat(yM);
@@ -163,18 +161,16 @@ function sampleCoarseBilinear(xM, yM, regions) {
   const { coarse } = region;
   const cm = coarse.cellM;
 
-  // Coarse cell coordinates (fractional)
-  // Global cell index: we need to map region-local to global
-  // coarse.xMin = XMIN_global + c0*cm, so globalC = (xM - XMIN_global)/cm
-  // But we don't have XMIN_global; instead: localC = (xM - coarse.xMin)/cm
-  // globalC = localC + coarse.c0
+  // Cell coordinates (fractional). Cell (r,c) covers [c,c+1]x[r,r+1],
+  // with its value at the center (c+0.5, r+0.5).
   const localCf = (xM - coarse.xMin) / cm;
   const localRf = (coarse.yMax - yM) / cm;
   
-  const c0 = Math.floor(localCf);
-  const r0 = Math.floor(localRf);
-  const fx = localCf - c0;
-  const fy = localRf - r0;
+  // Find the 4 surrounding cell centers
+  const c0 = Math.floor(localCf - 0.5);
+  const r0 = Math.floor(localRf - 0.5);
+  const fx = (localCf - 0.5) - c0;
+  const fy = (localRf - 0.5) - r0;
 
   // Sample the 4 corners, handling region boundaries
   // For each corner, compute its global coordinates, then find its region
