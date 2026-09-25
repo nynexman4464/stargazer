@@ -3,7 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { estimateBortleAsync, matchDarkSkySite } from '../lib/astro.js';
 import { placeName } from '../lib/geo.js';
-import { createBortleTileLayer } from '../lib/bortleOverlay.js';
+import { createBortleTileLayer, preloadRegionsForBounds } from '../lib/bortleOverlay.js';
 
 /* NASA Black Marble (VIIRS city lights) as the light-pollution overlay.
    Public, no key. GoogleMapsCompatible_Level8 tops out at zoom 8 — Leaflet
@@ -173,6 +173,19 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
         if (map.hasLayer(bortleRef.current)) map.removeLayer(bortleRef.current);
         bortleRef.current = null;
       }
+      // Preload regions for the visible area (with halo) so tiles don't
+      // paint with gaps. The layer redraws when they arrive.
+      const bounds = map.getBounds();
+      preloadRegionsForBounds(
+        bounds.getSouth(),
+        bounds.getWest(),
+        bounds.getNorth(),
+        bounds.getEast(),
+      ).then(() => {
+        if (bortleRef.current && map.hasLayer(bortleRef.current)) {
+          bortleRef.current.redraw();
+        }
+      });
       bortleRef.current = createBortleTileLayer(L);
       map.addLayer(bortleRef.current);
       if (map.hasLayer(lights)) map.removeLayer(lights);

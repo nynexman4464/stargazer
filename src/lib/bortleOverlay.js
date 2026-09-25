@@ -8,6 +8,16 @@ import {
   sampleRegionByte,
 } from './bortleRegions.js';
 
+/* Preload all regions intersecting a lat/lon bounding box (with a small halo
+   so edge tiles have their neighbors). Returns a promise that resolves when
+   all are loaded (or failed). */
+export function preloadRegionsForBounds(south, west, north, east) {
+  // Expand by ~0.5 degrees to cover tiles straddling the edge
+  const pad = 0.5;
+  const rids = regionsForBounds(south - pad, west - pad, north + pad, east + pad);
+  return Promise.all(rids.map((rid) => ensureRegionById(rid).catch(() => null)));
+}
+
 /* Bortle heatmap as a Leaflet tile layer. Tiles (256px) are rendered on
    demand at the map's zoom: each pixel samples the 20km Web-Mercator coarse
    grid and, where they exist, the 4km fine patches, from lazy-loaded regional
@@ -143,51 +153,63 @@ function sampleBortleByte(xM, yM, regions) {
   if (fq10 != null) { hasFine = true; const w = dr*(1-dc); fnum += fq10*w; fden += w; }
   const fq11 = getFine(fr0+1, fc0+1);
   if (fq11 != null) { hasFine = true; const w = dr*dc; fnum += fq11*w; fden += w; }
-  // Fine is authoritative where it exists: don't smear coarse over it.
-  if (hasFine) return fden > 0 ? fnum / fden : null;
 
-  // Coarse: bilinear between cell centers (20km cells).
-  const localCf = (xM - coarse.xMin) / cm;
-  const localRf = (coarse.yMax - yM) / cm;
-  const cr = localCf - 0.5;
-  const cc = localRf - 0.5;
-  // Clamp to valid range (matching pre-split behavior)
-  const lastR = coarse.rows - 1;
-  const lastC = coarse.cols - 1;
-  const crc = Math.max(0, Math.min(lastR, cr));
-  const ccc = Math.max(0, Math.min(lastC, cc));
-  const r0 = crc >= lastR ? lastR - 1 : Math.floor(crc);
-  const c0 = ccc >= lastC ? lastC - 1 : Math.floor(ccc);
-  const cdr = crc - r0;
-  const cdc = ccc - c0;
-
-  // Helper: get coarse cell value, crossing region boundaries if needed
-  const getCoarse = (r, c) => {
-    if (r >= 0 && r < coarse.rows && c >= 0 && c < coarse.cols) {
-      const q = coarse.bytes[r * coarse.cols + c];
-      return q === 255 ? null : q;
-    }
-    // Cross-region: convert to lat/lon and look up
-    const cellXM = coarse.xMin + (c + 0.5) * cm;
-    const cellYM = coarse.yMax - (r + 0.5) * cm;
-    const cellLat = mercToLat(cellYM);
-    const cellLon = mercToLon(cellXM);
-    const nrid = regionIdFor(cellLat, cellLon);
-    const nregion = nrid ? regions.get(nrid) : null;
-    if (!nregion) return null;
-    return sampleRegionByte(nregion, cellLat, cellLon);
+  // Coarse sampler (bilinear between 20km cell centers), shared by the
+  // fallback path and the fine-edge blend below.
+  const sampleCoarse = () => {
+    const localCf = (xM - coarse.xMin) / cm;
+    const localRf = (coarse.yMax - yM) / cm;
+    const cr = localCf - 0.5;
+    const cc = localRf - 0.5;
+    const lastR = coarse.rows - 1;
+    const lastC = coarse.cols - 1;
+    const crc = Math.max(0, Math.min(lastR, cr));
+    const ccc = Math.max(0, Math.min(lastC, cc));
+    const r0 = crc >= lastR ? lastR - 1 : Math.floor(crc);
+    const c0 = ccc >= lastC ? lastC - 1 : Math.floor(ccc);
+    const cdr = crc - r0;
+    const cdc = ccc - c0;
+    const getCoarse = (r, c) => {
+      if (r >= 0 && r < coarse.rows && c >= 0 && c < coarse.cols) {
+        const q = coarse.bytes[r * coarse.cols + c];
+        return q === 255 ? null : q;
+      }
+      const cellXM = coarse.xMin + (c + 0.5) * cm;
+      const cellYM = coarse.yMax - (r + 0.5) * cm;
+      const cellLat = mercToLat(cellYM);
+      const cellLon = mercToLon(cellXM);
+      const nrid = regionIdFor(cellLat, cellLon);
+      const nregion = nrid ? regions.get(nrid) : null;
+      if (!nregion) return null;
+      return sampleRegionByte(nregion, cellLat, cellLon);
+    };
+    let cnum = 0, cden = 0;
+    const b00 = getCoarse(r0, c0);
+    if (b00 != null) { const w = (1-cdr)*(1-cdc); cnum += b00*w; cden += w; }
+    const b01 = getCoarse(r0, c0+1);
+    if (b01 != null) { const w = (1-cdr)*cdc; cnum += b01*w; cden += w; }
+    const b10 = getCoarse(r0+1, c0);
+    if (b10 != null) { const w = cdr*(1-cdc); cnum += b10*w; cden += w; }
+    const b11 = getCoarse(r0+1, c0+1);
+    if (b11 != null) { const w = cdr*cdc; cnum += b11*w; cden += w; }
+    return cden > 0 ? cnum / cden : null;
   };
 
-  let cnum = 0, cden = 0;
-  const b00 = getCoarse(r0, c0);
-  if (b00 != null) { const w = (1-cdr)*(1-cdc); cnum += b00*w; cden += w; }
-  const b01 = getCoarse(r0, c0+1);
-  if (b01 != null) { const w = (1-cdr)*cdc; cnum += b01*w; cden += w; }
-  const b10 = getCoarse(r0+1, c0);
-  if (b10 != null) { const w = cdr*(1-cdc); cnum += b10*w; cden += w; }
-  const b11 = getCoarse(r0+1, c0+1);
-  if (b11 != null) { const w = cdr*cdc; cnum += b11*w; cden += w; }
-  return cden > 0 ? cnum / cden : null;
+  // Fine is authoritative where it fully covers the pixel. At patch edges
+  // (partial fine coverage), blend with coarse to avoid a hard line where
+  // crisp fine city data meets smooth coarse rural data.
+  if (hasFine) {
+    const fineVal = fden > 0 ? fnum / fden : null;
+    if (fden < 0.99 && fineVal != null) {
+      const coarseVal = sampleCoarse();
+      if (coarseVal != null) {
+        return fineVal * fden + coarseVal * (1 - fden);
+      }
+    }
+    return fineVal;
+  }
+
+  return sampleCoarse();
 }
 
 /* Unified bilinear sampler: treats the grid as a global fine (4km) grid.
