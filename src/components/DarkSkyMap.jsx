@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { estimateBortleAsync, matchDarkSkySite } from '../lib/astro.js';
@@ -160,7 +159,9 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
   }, []);
 
   // Fullscreen expanded mode: Escape closes, background page can't scroll,
-  // and Leaflet recalculates the map size after the container moves.
+  // and Leaflet recalculates the map size after the container resizes.
+  // The map DOM element stays in place (CSS-only fullscreen); only its
+  // positioning changes, so the Leaflet instance survives.
   useEffect(() => {
     if (!expanded) return;
     const onKey = (e) => {
@@ -169,8 +170,6 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
     document.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    // The portal moves the same DOM node, so the Leaflet instance stays
-    // valid — it just needs to re-measure the new container size.
     const t = setTimeout(() => mapRef.current?.invalidateSize(), 50);
     return () => {
       document.removeEventListener('keydown', onKey);
@@ -288,10 +287,21 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
     }
   }, [spots, loc]);
 
-  const mapNode = (
-    <div
-      ref={divRef}
-      className={`sg-darksky-map${expanded ? ' sg-darksky-map-expanded' : ''}`}
+  // Fullscreen uses CSS-only positioning (the map element stays in the same
+  // DOM position, so the Leaflet instance survives). A separate backdrop
+  // dims the page behind it.
+  return (
+    <>
+      {expanded && (
+        <div
+          className="sg-map-fullscreen-backdrop"
+          onClick={() => setExpanded(false)}
+          aria-hidden="true"
+        />
+      )}
+      <div
+        ref={divRef}
+        className={`sg-darksky-map${expanded ? ' sg-darksky-map-expanded' : ''}`}
       aria-label="Map of nearby dark-sky spots. Activate a spot, or any point on the map, to set it as your viewing location."
     >
       <div
@@ -340,17 +350,6 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
         </div>
       )}
     </div>
+    </>
   );
-
-  // Fullscreen: portal the same map node (same DOM element, so the Leaflet
-  // instance survives) into a fixed overlay.
-  if (expanded) {
-    return createPortal(
-      <div className="sg-map-fullscreen" role="dialog" aria-modal="true" aria-label="Dark-sky map, fullscreen">
-        {mapNode}
-      </div>,
-      document.body,
-    );
-  }
-  return mapNode;
 }

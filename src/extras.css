@@ -187,20 +187,22 @@ body {
   height: calc(var(--spacing-12) * 1.25);
 }
 
-/* Fullscreen expanded map. The map node is portaled here (same DOM element,
-   so the Leaflet instance survives); the overlay dims the page behind it. */
-.sg-map-fullscreen {
+/* Fullscreen expanded map. CSS-only: the map element stays in the same DOM
+   position (so the Leaflet instance survives); only its positioning changes
+   to fixed. A separate backdrop dims the page behind it. */
+.sg-map-fullscreen-backdrop {
   position: fixed;
   inset: 0;
   z-index: 2000;
   background: rgba(8, 10, 24, 0.92);
-  padding: var(--spacing-4);
-  display: flex;
 }
 .sg-darksky-map-expanded {
-  flex: 1;
+  position: fixed;
+  inset: var(--spacing-4);
+  z-index: 2001;
   height: auto;
   border-radius: var(--radius-element);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 /* Expand/collapse button, top-right below the mode toggle (top-left is taken
    by Leaflet's zoom controls, which sit at z-index 1000). Same dark treatment
