@@ -90,10 +90,108 @@ function regionsForBounds(south, west, north, east) {
   return [...ids];
 }
 
+/* Sample the Bortle byte at (xM, yM) meters, matching the pre-split renderer.
+   Fine patches (4km) take precedence where they exist: if any of the 4
+   surrounding fine cells has valid data, the result is fine-only (bilinear).
+   Otherwise, falls back to coarse (20km) bilinear. This preserves the crisp
+   city detail of the original instead of washing it out by blending. */
+function sampleBortleByte(xM, yM, regions) {
+  const lat = mercToLat(yM);
+  const lon = mercToLon(xM);
+  const rid = regionIdFor(lat, lon);
+  if (!rid) return null;
+  const region = regions.get(rid);
+  if (!region) return null;
+  const { coarse, fine } = region;
+  const cm = coarse.cellM;
+  const fm = fine.cellM;
+  const per = fine.per;
+
+  // Fine: bilinear over 4km grid (cell centers at integer - 0.5)
+  const localFxf = (xM - coarse.xMin) / fm;
+  const localFyf = (coarse.yMax - yM) / fm;
+  const frg = localFyf - 0.5;
+  const fcg = localFxf - 0.5;
+  const fr0 = Math.floor(frg);
+  const fc0 = Math.floor(fcg);
+  const dr = frg - fr0;
+  const dc = fcg - fc0;
+
+  // Helper: get fine cell value at region-local fine coords (fr, fc)
+  const getFine = (fr, fc) => {
+    const lc = Math.floor(fc / per);
+    const lr = Math.floor(fr / per);
+    if (lc < 0 || lc >= coarse.cols || lr < 0 || lr >= coarse.rows) return null;
+    const globalC = lc + coarse.c0;
+    const globalR = lr + coarse.r0;
+    const fkey = globalR * coarse.globalCols + globalC;
+    const pi = fine.map.get(fkey);
+    if (pi === undefined) return null;
+    const pfr = fr - lr * per;
+    const pfc = fc - lc * per;
+    if (pfr < 0 || pfr >= per || pfc < 0 || pfc >= per) return null;
+    const q = fine.bytes[pi * per * per + pfr * per + pfc];
+    return q === 255 ? null : q;
+  };
+
+  let fnum = 0, fden = 0, hasFine = false;
+  const fq00 = getFine(fr0, fc0);
+  if (fq00 != null) { hasFine = true; const w = (1-dr)*(1-dc); fnum += fq00*w; fden += w; }
+  const fq01 = getFine(fr0, fc0+1);
+  if (fq01 != null) { hasFine = true; const w = (1-dr)*dc; fnum += fq01*w; fden += w; }
+  const fq10 = getFine(fr0+1, fc0);
+  if (fq10 != null) { hasFine = true; const w = dr*(1-dc); fnum += fq10*w; fden += w; }
+  const fq11 = getFine(fr0+1, fc0+1);
+  if (fq11 != null) { hasFine = true; const w = dr*dc; fnum += fq11*w; fden += w; }
+  // Fine is authoritative where it exists: don't smear coarse over it.
+  if (hasFine) return fden > 0 ? fnum / fden : null;
+
+  // Coarse: bilinear between cell centers (20km cells).
+  const localCf = (xM - coarse.xMin) / cm;
+  const localRf = (coarse.yMax - yM) / cm;
+  const cr = localCf - 0.5;
+  const cc = localRf - 0.5;
+  // Clamp to valid range (matching pre-split behavior)
+  const lastR = coarse.rows - 1;
+  const lastC = coarse.cols - 1;
+  const crc = Math.max(0, Math.min(lastR, cr));
+  const ccc = Math.max(0, Math.min(lastC, cc));
+  const r0 = crc >= lastR ? lastR - 1 : Math.floor(crc);
+  const c0 = ccc >= lastC ? lastC - 1 : Math.floor(ccc);
+  const cdr = crc - r0;
+  const cdc = ccc - c0;
+
+  // Helper: get coarse cell value, crossing region boundaries if needed
+  const getCoarse = (r, c) => {
+    if (r >= 0 && r < coarse.rows && c >= 0 && c < coarse.cols) {
+      const q = coarse.bytes[r * coarse.cols + c];
+      return q === 255 ? null : q;
+    }
+    // Cross-region: convert to lat/lon and look up
+    const cellXM = coarse.xMin + (c + 0.5) * cm;
+    const cellYM = coarse.yMax - (r + 0.5) * cm;
+    const cellLat = mercToLat(cellYM);
+    const cellLon = mercToLon(cellXM);
+    const nrid = regionIdFor(cellLat, cellLon);
+    const nregion = nrid ? regions.get(nrid) : null;
+    if (!nregion) return null;
+    return sampleRegionByte(nregion, cellLat, cellLon);
+  };
+
+  let cnum = 0, cden = 0;
+  const b00 = getCoarse(r0, c0);
+  if (b00 != null) { const w = (1-cdr)*(1-cdc); cnum += b00*w; cden += w; }
+  const b01 = getCoarse(r0, c0+1);
+  if (b01 != null) { const w = (1-cdr)*cdc; cnum += b01*w; cden += w; }
+  const b10 = getCoarse(r0+1, c0);
+  if (b10 != null) { const w = cdr*(1-cdc); cnum += b10*w; cden += w; }
+  const b11 = getCoarse(r0+1, c0+1);
+  if (b11 != null) { const w = cdr*cdc; cnum += b11*w; cden += w; }
+  return cden > 0 ? cnum / cden : null;
+}
+
 /* Unified bilinear sampler: treats the grid as a global fine (4km) grid.
-   For positions in a fine patch, uses the patch values; otherwise uses the
-   coarse cell value (as if the coarse cell were a constant 5x5 fine block).
-   This ensures smooth interpolation across patch boundaries. */
+   DEPRECATED: Use sampleBortleByte instead (fine-first, not blended). */
 function sampleUnifiedBilinear(xM, yM, regions) {
   // Find the region containing this point
   const lat = mercToLat(yM);
@@ -349,16 +447,16 @@ export function paintBortleTile(x, y, z, canvas) {
     return false;
   }
 
-  // Paint the tile with unified bilinear interpolation for smooth gradients.
-  // The unified sampler blends fine patches (4km) and coarse (20km) seamlessly,
-  // with no hard lines at patch or region boundaries.
+  // Paint the tile with the pre-split renderer logic: fine-first (4km) where
+  // patches exist, coarse (20km) bilinear elsewhere. Preserves crisp city
+  // detail without washing out at patch boundaries.
   for (let j = 0; j < size; j++) {
     const yM = yTop - ((j + 0.5) / size) * tileSpan;
     const rowOff = j * size;
     for (let i = 0; i < size; i++) {
       const xM = xLeft + ((i + 0.5) / size) * tileSpan;
       const o = (rowOff + i) * 4;
-      const q = sampleUnifiedBilinear(xM, yM, regions);
+      const q = sampleBortleByte(xM, yM, regions);
       if (q == null) {
         d[o + 3] = 0;
       } else {
