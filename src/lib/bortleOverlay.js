@@ -478,7 +478,18 @@ export function paintBortleTile(x, y, z, canvas) {
       regions.set(rid, region);
     } else {
       missing.push(rid);
-      ensureRegionById(rid);
+      ensureRegionById(rid).catch(() => {}); // error already logged in ensureRegionById
+    }
+  }
+  // DEBUG: log tiles that paint with missing regions (throttled by tile key)
+  if (missing.length > 0) {
+    const key = `${z}/${x}/${y}`;
+    if (!paintBortleTile._loggedMissing) paintBortleTile._loggedMissing = new Set();
+    if (!paintBortleTile._loggedMissing.has(key)) {
+      paintBortleTile._loggedMissing.add(key);
+      console.log(`[bortle] tile ${key} missing regions: ${missing.join(',')} (needed: ${rids.join(',')})`);
+      // Prevent unbounded growth
+      if (paintBortleTile._loggedMissing.size > 500) paintBortleTile._loggedMissing.clear();
     }
   }
 

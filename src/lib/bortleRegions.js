@@ -101,6 +101,8 @@ export function ensureRegion(lat, lon) {
     return cached instanceof Promise ? cached : Promise.resolve(cached);
   }
 
+  // DEBUG
+  console.log(`[bortle] loading region ${rid} (via lat/lon)...`);
   const promise = Promise.all([
     import(`../data/bortle/${rid}/coarse.js`),
     import(`../data/bortle/${rid}/fine.js`),
@@ -110,6 +112,8 @@ export function ensureRegion(lat, lon) {
       fine: decodeFine(fineMod, rid),
     };
     _cache.set(rid, region);
+    // DEBUG
+    console.log(`[bortle] region ${rid} loaded: coarse ${region.coarse.cols}x${region.coarse.rows}, fine patches ${region.fine.count}`);
     // Notify subscribers
     const subs = _subscribers.get(rid);
     if (subs) {
@@ -119,6 +123,8 @@ export function ensureRegion(lat, lon) {
     return region;
   }).catch(err => {
     _cache.delete(rid);
+    // DEBUG
+    console.error(`[bortle] FAILED to load region ${rid}:`, err?.message || err);
     throw err;
   });
 
@@ -156,12 +162,15 @@ export function onRegionLoad(lat, lon, callback) {
 }
 
 /* Ensure a region is loaded by ID (for tile renderer which works in meters).
-   Returns a promise that resolves to the decoded region. */
+   Returns a promise that resolves to the decoded region.
+   DEBUG: logs load start/success/failure to console. */
 export function ensureRegionById(rid) {
   const cached = _cache.get(rid);
   if (cached) {
     return cached instanceof Promise ? cached : Promise.resolve(cached);
   }
+  // DEBUG
+  console.log(`[bortle] loading region ${rid}...`);
   const promise = Promise.all([
     import(`../data/bortle/${rid}/coarse.js`),
     import(`../data/bortle/${rid}/fine.js`),
@@ -171,6 +180,8 @@ export function ensureRegionById(rid) {
       fine: decodeFine(fineMod, rid),
     };
     _cache.set(rid, region);
+    // DEBUG
+    console.log(`[bortle] region ${rid} loaded: coarse ${region.coarse.cols}x${region.coarse.rows}, fine patches ${region.fine.count}`);
     const subs = _subscribers.get(rid);
     if (subs) {
       subs.forEach(cb => cb(region));
@@ -179,6 +190,8 @@ export function ensureRegionById(rid) {
     return region;
   }).catch(err => {
     _cache.delete(rid);
+    // DEBUG
+    console.error(`[bortle] FAILED to load region ${rid}:`, err?.message || err);
     throw err;
   });
   _cache.set(rid, promise);
