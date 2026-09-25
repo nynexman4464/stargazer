@@ -332,6 +332,16 @@ export default function App() {
                     Stargazer on GitHub
                   </Link>
                 </HStack>
+                <Text type="supporting" justify="center">
+                  Build {__GIT_SHA__} ·{' '}
+                  {new Date(__BUILD_TIME__).toLocaleString('en-US', {
+                    month: 'short',
+                    day: 'numeric',
+                    hour: 'numeric',
+                    minute: '2-digit',
+                    timeZone: 'America/New_York',
+                  })}
+                </Text>
               </VStack>
             </VStack>
           </LayoutContent>
