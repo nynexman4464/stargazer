@@ -498,8 +498,10 @@ export function createBortleTileLayer(L) {
           );
         }
       }
-      // Always signal completion synchronously — never hang a tile.
-      if (done) done(null, tile);
+      // Always signal completion — but asynchronously. Leaflet hasn't finished
+      // registering the tile when createTile returns, so a synchronous done()
+      // gets ignored and the tile never gets the 'loaded' class.
+      setTimeout(() => { if (done) done(null, tile); }, 0);
       return tile;
     },
   });
