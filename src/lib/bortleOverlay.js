@@ -90,8 +90,91 @@ function regionsForBounds(south, west, north, east) {
   return [...ids];
 }
 
+/* Unified bilinear sampler: treats the grid as a global fine (4km) grid.
+   For positions in a fine patch, uses the patch values; otherwise uses the
+   coarse cell value (as if the coarse cell were a constant 5x5 fine block).
+   This ensures smooth interpolation across patch boundaries. */
+function sampleUnifiedBilinear(xM, yM, regions) {
+  // Find the region containing this point
+  const lat = mercToLat(yM);
+  const lon = mercToLon(xM);
+  const rid = regionIdFor(lat, lon);
+  if (!rid) return null;
+  const region = regions.get(rid);
+  if (!region) return null;
+  const { coarse, fine } = region;
+  const cm = coarse.cellM;
+  const fm = fine.cellM;
+  const per = fine.per; // 5
+
+  // Position in fine-cell coordinates (global, within region)
+  // Fine cell (fr,fc) covers [fc,fc+1]x[fr,fr+1], value at center.
+  const localFxf = (xM - coarse.xMin) / fm;
+  const localFyf = (coarse.yMax - yM) / fm;
+  
+  const fc0 = Math.floor(localFxf - 0.5);
+  const fr0 = Math.floor(localFyf - 0.5);
+  const tx = (localFxf - 0.5) - fc0;
+  const ty = (localFyf - 0.5) - fr0;
+
+  // Helper: get the fine-grid value at (fr, fc) in region-local fine coords
+  // Returns the byte, or null if no coverage.
+  const getFineValue = (fr, fc) => {
+    // Map to coarse cell
+    const lc = Math.floor(fc / per);
+    const lr = Math.floor(fr / per);
+    if (lc < 0 || lc >= coarse.cols || lr < 0 || lr >= coarse.rows) {
+      // Outside region; try adjacent region via lat/lon
+      const cellXM = coarse.xMin + (fc + 0.5) * fm;
+      const cellYM = coarse.yMax - (fr + 0.5) * fm;
+      const cellLat = mercToLat(cellYM);
+      const cellLon = mercToLon(cellXM);
+      const nrid = regionIdFor(cellLat, cellLon);
+      const nregion = nrid ? regions.get(nrid) : null;
+      if (!nregion) return null;
+      // Recursively sample (but avoid infinite recursion by using coarse only)
+      const nq = sampleRegionByte(nregion, cellLat, cellLon);
+      return nq;
+    }
+    // Check if this coarse cell has a fine patch
+    const globalC = lc + coarse.c0;
+    const globalR = lr + coarse.r0;
+    const fkey = globalR * coarse.globalCols + globalC;
+    const pi = fine.map.get(fkey);
+    if (pi !== undefined) {
+      // In a patch: get the fine cell value
+      const pfr = fr - lr * per;
+      const pfc = fc - lc * per;
+      if (pfr >= 0 && pfr < per && pfc >= 0 && pfc < per) {
+        const q = fine.bytes[pi * per * per + pfr * per + pfc];
+        return q === 255 ? null : q;
+      }
+    }
+    // Not in a patch: use the coarse cell value
+    const q = coarse.bytes[lr * coarse.cols + lc];
+    return q === 255 ? null : q;
+  };
+
+  const q00 = getFineValue(fr0, fc0);
+  const q10 = getFineValue(fr0, fc0 + 1);
+  const q01 = getFineValue(fr0 + 1, fc0);
+  const q11 = getFineValue(fr0 + 1, fc0 + 1);
+  
+  const samples = [q00, q10, q01, q11];
+  const weights = [(1-tx)*(1-ty), tx*(1-ty), (1-tx)*ty, tx*ty];
+  let sum = 0, wsum = 0;
+  for (let i = 0; i < 4; i++) {
+    if (samples[i] != null) {
+      sum += samples[i] * weights[i];
+      wsum += weights[i];
+    }
+  }
+  return wsum === 0 ? null : sum / wsum;
+}
+
 /* Bilinearly sample the fine patch at (xM, yM) meters, or null if no patch.
-   Returns a float byte value. Values are at cell centers (half-cell offset). */
+   Returns a float byte value. Values are at cell centers (half-cell offset).
+   DEPRECATED: Use sampleUnifiedBilinear instead. */
 function sampleFineBilinear(xM, yM, region) {
   const { coarse, fine } = region;
   if (fine.count === 0) return null;
@@ -266,26 +349,16 @@ export function paintBortleTile(x, y, z, canvas) {
     return false;
   }
 
-  // Paint the tile with bilinear interpolation for smooth gradients.
-  // Fine patches (4km) take precedence where available; coarse (20km) fills in.
+  // Paint the tile with unified bilinear interpolation for smooth gradients.
+  // The unified sampler blends fine patches (4km) and coarse (20km) seamlessly,
+  // with no hard lines at patch or region boundaries.
   for (let j = 0; j < size; j++) {
     const yM = yTop - ((j + 0.5) / size) * tileSpan;
     const rowOff = j * size;
     for (let i = 0; i < size; i++) {
       const xM = xLeft + ((i + 0.5) / size) * tileSpan;
       const o = (rowOff + i) * 4;
-      // Find the region for fine patch lookup
-      const lat = mercToLat(yM);
-      const lon = mercToLon(xM);
-      const rid = regionIdFor(lat, lon);
-      const region = rid ? regions.get(rid) : null;
-      let q = null;
-      if (region) {
-        q = sampleFineBilinear(xM, yM, region);
-      }
-      if (q == null) {
-        q = sampleCoarseBilinear(xM, yM, regions);
-      }
+      const q = sampleUnifiedBilinear(xM, yM, regions);
       if (q == null) {
         d[o + 3] = 0;
       } else {
