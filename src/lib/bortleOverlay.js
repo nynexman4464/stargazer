@@ -43,23 +43,33 @@ function gridBytes() {
   return _bytes;
 }
 
-// Byte value -> [r, g, b, a] as a flat Uint8Array, so the per-pixel loop is
-// a few indexed reads with no allocation.
-let _lut = null;
-function colorLut() {
-  if (!_lut) {
-    const lut = new Uint8Array(256 * 4);
-    for (let q = 0; q < 255; q++) {
-      const [r, g, b, a] = RAMP[sqmToBortle(16 + q * 0.05)];
-      const o = q * 4;
-      lut[o] = r;
-      lut[o + 1] = g;
-      lut[o + 2] = b;
-      lut[o + 3] = a;
+/* Byte thresholds for Bortle classes (sqm = 16 + byte*0.05), from BORTLE_BREAKS
+   in astro.js. Used for smooth color interpolation across class edges. */
+const BYTE_BREAKS = [
+  [115.2, 1], [112.0, 2], [106.0, 3], [96.0, 4],
+  [65.0, 5], [50.0, 6], [40.0, 7], [30.0, 8],
+];
+
+/* Smoothly interpolated [r,g,b,a] for a float SQM byte. Blends between class
+   colors near boundaries so steep gradients don't render as sharp stripes. */
+function byteColor(b) {
+  for (let i = 0; i < BYTE_BREAKS.length; i++) {
+    const [edge, cls] = BYTE_BREAKS[i];
+    if (b >= edge) {
+      if (i === 0) return RAMP[1];
+      const [prevEdge, prevCls] = BYTE_BREAKS[i - 1];
+      const t = (b - edge) / (prevEdge - edge);
+      const c0 = RAMP[cls];
+      const c1 = RAMP[prevCls];
+      return [
+        c0[0] + (c1[0] - c0[0]) * t,
+        c0[1] + (c1[1] - c0[1]) * t,
+        c0[2] + (c1[2] - c0[2]) * t,
+        c0[3] + (c1[3] - c0[3]) * t,
+      ];
     }
-    _lut = lut; // q=255 stays [0,0,0,0]: transparent
   }
-  return _lut;
+  return RAMP[9];
 }
 
 /* Geographic bounds of the grid, as Leaflet [[south, west], [north, east]]. */
@@ -93,104 +103,115 @@ function finePatch() {
   return _fine;
 }
 
-/* Sample the SQM byte (0-254) at a lat/lon: fine patch first (bilinear over
-   its 5x5 cells), falling back to coarse-grid bilinear. Returns 255 when
-   the location has no coverage. */
+/* Sample the SQM byte (0-254) at a lat/lon: fine patches first (bilinear
+   over the global 0.05-degree grid, blending across patch boundaries),
+   falling back to coarse-grid bilinear. Returns 255 when the location has
+   no coverage. */
+function getFineCell(frg, fcg) {
+  const g = BORTLE_GRID;
+  const per = 5;
+  const r = Math.floor(frg / per);
+  const c = Math.floor(fcg / per);
+  if (r < 0 || r >= g.rows || c < 0 || c >= g.cols) return 255;
+  const pi = finePatch().map.get(r * g.cols + c);
+  if (pi === undefined) return 255;
+  const fr = frg - r * per;
+  const fc = fcg - c * per;
+  if (fr < 0 || fr >= per || fc < 0 || fc >= per) return 255;
+  return finePatch().bytes[pi * per * per + fr * per + fc];
+}
+
 function sampleBortleByte(lat, lon) {
   const g = BORTLE_GRID;
-  const step = g.step;
-  const cols = g.cols;
-  const rows = g.rows;
-  let c = Math.floor((lon - g.lonMin) / step);
-  let r = Math.floor((g.latMax - lat) / step);
-  if (c < 0 || c >= cols || r < 0 || r >= rows) return 255;
+  const fstep = 0.05;
 
-  const fp = finePatch();
-  const pi = fp.map.get(r * cols + c);
-  if (pi !== undefined) {
-    const fper = fp.per;
-    const fstep = fp.step;
-    const flast = fper - 1;
-    const latN = g.latMax - r * step;
-    const lonW = g.lonMin + c * step;
-    let fr = (latN - lat) / fstep - 0.5;
-    let fc = (lon - lonW) / fstep - 0.5;
-    fr = fr < 0 ? 0 : fr > flast ? flast : fr;
-    fc = fc < 0 ? 0 : fc > flast ? flast : fc;
-    const r0 = fr >= flast ? flast - 1 : Math.floor(fr);
-    const c0 = fc >= flast ? flast - 1 : Math.floor(fc);
-    const dr = fr - r0;
-    const dc = fc - c0;
-    const base = pi * fper * fper;
-    const fb = fp.bytes;
-    const q00 = fb[base + r0 * fper + c0];
-    const q01 = fb[base + r0 * fper + c0 + 1];
-    const q10 = fb[base + (r0 + 1) * fper + c0];
-    const q11 = fb[base + (r0 + 1) * fper + c0 + 1];
-    let num = 0;
-    let den = 0;
-    if (q00 !== 255) {
-      const w = (1 - dr) * (1 - dc);
-      num += q00 * w;
-      den += w;
-    }
-    if (q01 !== 255) {
-      const w = (1 - dr) * dc;
-      num += q01 * w;
-      den += w;
-    }
-    if (q10 !== 255) {
-      const w = dr * (1 - dc);
-      num += q10 * w;
-      den += w;
-    }
-    if (q11 !== 255) {
-      const w = dr * dc;
-      num += q11 * w;
-      den += w;
-    }
-    if (den > 0) return Math.round(num / den);
-  }
-
-  // Coarse grid, bilinear between cell centers.
-  const bytes = gridBytes();
-  const lastR = rows - 1;
-  const lastC = cols - 1;
-  let fr = (g.latMax - lat) / step - 0.5;
-  let fc = (lon - g.lonMin) / step - 0.5;
-  fr = fr < 0 ? 0 : fr > lastR ? lastR : fr;
-  fc = fc < 0 ? 0 : fc > lastC ? lastC : fc;
-  const r0 = fr >= lastR ? lastR - 1 : Math.floor(fr);
-  const c0 = fc >= lastC ? lastC - 1 : Math.floor(fc);
-  const dr = fr - r0;
-  const dc = fc - c0;
-  const q00 = bytes[r0 * cols + c0];
-  const q01 = bytes[r0 * cols + c0 + 1];
-  const q10 = bytes[(r0 + 1) * cols + c0];
-  const q11 = bytes[(r0 + 1) * cols + c0 + 1];
+  // Fine: bilinear over global 0.05-degree coordinates (cell centers on
+  // integers). Neighbors may live in adjacent patches; missing cells (255)
+  // are skipped and the blend renormalizes. Returns a float for smooth
+  // color interpolation (255 = no coverage).
+  const frg = (g.latMax - lat) / fstep - 0.5;
+  const fcg = (lon - g.lonMin) / fstep - 0.5;
+  const fr0 = Math.floor(frg);
+  const fc0 = Math.floor(fcg);
+  const dr = frg - fr0;
+  const dc = fcg - fc0;
   let num = 0;
   let den = 0;
+  let hasFine = false;
+  const q00 = getFineCell(fr0, fc0);
   if (q00 !== 255) {
+    hasFine = true;
     const w = (1 - dr) * (1 - dc);
     num += q00 * w;
     den += w;
   }
+  const q01 = getFineCell(fr0, fc0 + 1);
   if (q01 !== 255) {
+    hasFine = true;
     const w = (1 - dr) * dc;
     num += q01 * w;
     den += w;
   }
+  const q10 = getFineCell(fr0 + 1, fc0);
   if (q10 !== 255) {
+    hasFine = true;
     const w = dr * (1 - dc);
     num += q10 * w;
     den += w;
   }
+  const q11 = getFineCell(fr0 + 1, fc0 + 1);
   if (q11 !== 255) {
+    hasFine = true;
     const w = dr * dc;
     num += q11 * w;
     den += w;
   }
-  return den > 0 ? Math.round(num / den) : 255;
+  // In a patched region, fine is authoritative: if it says no data (water),
+  // stay transparent rather than smearing the bright coarse mean over it.
+  if (hasFine) return den > 0 ? num / den : 255;
+
+  // Coarse grid, bilinear between cell centers.
+  const step = g.step;
+  const cols = g.cols;
+  const rows = g.rows;
+  const bytes = gridBytes();
+  const lastR = rows - 1;
+  const lastC = cols - 1;
+  let cr = (g.latMax - lat) / step - 0.5;
+  let cc = (lon - g.lonMin) / step - 0.5;
+  cr = cr < 0 ? 0 : cr > lastR ? lastR : cr;
+  cc = cc < 0 ? 0 : cc > lastC ? lastC : cc;
+  const r0 = cr >= lastR ? lastR - 1 : Math.floor(cr);
+  const c0 = cc >= lastC ? lastC - 1 : Math.floor(cc);
+  const cdr = cr - r0;
+  const cdc = cc - c0;
+  const b00 = bytes[r0 * cols + c0];
+  const b01 = bytes[r0 * cols + c0 + 1];
+  const b10 = bytes[(r0 + 1) * cols + c0];
+  const b11 = bytes[(r0 + 1) * cols + c0 + 1];
+  let cnum = 0;
+  let cden = 0;
+  if (b00 !== 255) {
+    const w = (1 - cdr) * (1 - cdc);
+    cnum += b00 * w;
+    cden += w;
+  }
+  if (b01 !== 255) {
+    const w = (1 - cdr) * cdc;
+    cnum += b01 * w;
+    cden += w;
+  }
+  if (b10 !== 255) {
+    const w = cdr * (1 - cdc);
+    cnum += b10 * w;
+    cden += w;
+  }
+  if (b11 !== 255) {
+    const w = cdr * cdc;
+    cnum += b11 * w;
+    cden += w;
+  }
+  return cden > 0 ? cnum / cden : 255;
 }
 
 /* Paint one Web-Mercator tile (x, y, z) into the given square canvas. */
@@ -199,7 +220,6 @@ export function paintBortleTile(x, y, z, canvas) {
   const ctx = canvas.getContext('2d');
   const img = ctx.createImageData(size, size);
   const d = img.data;
-  const lut = colorLut();
 
   const n = 2 ** z;
   const lonWest = (x / n) * 360 - 180;
@@ -208,6 +228,8 @@ export function paintBortleTile(x, y, z, canvas) {
   const ySpan = (2 * Math.PI * MERC_R) / n;
 
   // Lat/lon at each pixel center; rows share a lat, columns share a lon.
+  // Colors are smoothly interpolated (not quantized) so class boundaries
+  // render as gradients, not sharp stripes.
   for (let j = 0; j < size; j++) {
     const lat = mercLat(yTop - ((j + 0.5) / size) * ySpan);
     const rowOff = j * size;
@@ -215,11 +237,15 @@ export function paintBortleTile(x, y, z, canvas) {
       const lon = lonWest + ((i + 0.5) / size) * lonSpan;
       const q = sampleBortleByte(lat, lon);
       const o = (rowOff + i) * 4;
-      const lo = q * 4;
-      d[o] = lut[lo];
-      d[o + 1] = lut[lo + 1];
-      d[o + 2] = lut[lo + 2];
-      d[o + 3] = lut[lo + 3];
+      if (q === 255) {
+        d[o + 3] = 0;
+      } else {
+        const [r, g, b, a] = byteColor(q);
+        d[o] = r;
+        d[o + 1] = g;
+        d[o + 2] = b;
+        d[o + 3] = a;
+      }
     }
   }
   ctx.putImageData(img, 0, 0);
