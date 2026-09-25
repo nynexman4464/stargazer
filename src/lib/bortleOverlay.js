@@ -465,9 +465,12 @@ export function paintBortleTile(x, y, z, canvas) {
   const north = mercToLat(yTop);
   const south = mercToLat(yTop - tileSpan);
 
-  // Find regions. Paint with whatever is cached; missing regions leave
-  // transparent pixels. The layer redraws when they arrive (see below).
-  const rids = regionsForBounds(south, west, north, east);
+  // Find regions. Pad the bounds so the bilinear sampler can cross region
+  // boundaries (it needs the neighboring region's data for edge pixels).
+  // Paint with whatever is cached; missing regions leave transparent pixels.
+  // The layer redraws when they arrive (see below).
+  const pad = 0.5; // degrees, covers the 20km coarse cell halo
+  const rids = regionsForBounds(south - pad, west - pad, north + pad, east + pad);
   const regions = new Map();
   const missing = [];
   for (const rid of rids) {
