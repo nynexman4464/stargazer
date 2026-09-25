@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Dialog } from '@astryxdesign/core/Dialog';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { estimateBortleAsync, matchDarkSkySite } from '../lib/astro.js';
@@ -69,6 +70,8 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
   const divRef = useRef(null);
   const mapRef = useRef(null);
   const [expanded, setExpanded] = useState(false);
+  const dialogContentRef = useRef(null);
+  const originalParentRef = useRef(null);
   const markersRef = useRef(null);
   const pinRef = useRef(null);
   const lightsRef = useRef(null);
@@ -158,25 +161,27 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Fullscreen expanded mode: Escape closes, background page can't scroll,
-  // and Leaflet recalculates the map size after the container resizes.
-  // The map DOM element stays in place (CSS-only fullscreen); only its
-  // positioning changes, so the Leaflet instance survives.
+  // Fullscreen expanded mode via Astryx Dialog (portal). The Leaflet-owned
+  // DOM node is moved imperatively with appendChild — React never unmounts
+  // it, so the Leaflet instance survives. The Dialog handles Escape,
+  // backdrop click, focus trap, and body scroll lock.
   useEffect(() => {
     if (!expanded) return;
-    const onKey = (e) => {
-      if (e.key === 'Escape') setExpanded(false);
-    };
-    document.addEventListener('keydown', onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const mapNode = divRef.current;
+    const dialogNode = dialogContentRef.current;
+    if (!mapNode || !dialogNode) return;
+    // Remember where to put it back.
+    originalParentRef.current = mapNode.parentNode;
+    dialogNode.appendChild(mapNode);
     const t = setTimeout(() => mapRef.current?.invalidateSize(), 50);
     return () => {
-      document.removeEventListener('keydown', onKey);
-      document.body.style.overflow = prev;
       clearTimeout(t);
-      // Re-measure when collapsing back to the inline size.
-      setTimeout(() => mapRef.current?.invalidateSize(), 50);
+      const parent = originalParentRef.current;
+      if (parent && mapNode) {
+        parent.appendChild(mapNode);
+        // Re-measure when collapsing back to the inline size.
+        setTimeout(() => mapRef.current?.invalidateSize(), 50);
+      }
     };
   }, [expanded]);
 
@@ -287,21 +292,14 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
     }
   }, [spots, loc]);
 
-  // Fullscreen uses CSS-only positioning (the map element stays in the same
-  // DOM position, so the Leaflet instance survives). A separate backdrop
-  // dims the page behind it.
+  // Fullscreen via Astryx Dialog (portal). The map element is moved
+  // imperatively into the dialog (see effect above); React never unmounts
+  // it, so the Leaflet instance survives.
   return (
     <>
-      {expanded && (
-        <div
-          className="sg-map-fullscreen-backdrop"
-          onClick={() => setExpanded(false)}
-          aria-hidden="true"
-        />
-      )}
       <div
         ref={divRef}
-        className={`sg-darksky-map${expanded ? ' sg-darksky-map-expanded' : ''}`}
+        className="sg-darksky-map"
       aria-label="Map of nearby dark-sky spots. Activate a spot, or any point on the map, to set it as your viewing location."
     >
       <div
@@ -349,7 +347,16 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
           </div>
         </div>
       )}
-    </div>
+      </div>
+      <Dialog
+        variant="fullscreen"
+        isOpen={expanded}
+        onOpenChange={(open) => setExpanded(open)}
+        purpose="info"
+        aria-label="Dark-sky map, fullscreen"
+      >
+        <div ref={dialogContentRef} className="sg-map-dialog-content" />
+      </Dialog>
     </>
   );
 }
