@@ -202,12 +202,13 @@ body {
   height: auto;
   border-radius: var(--radius-element);
 }
-/* Expand/collapse button, top-left of the map. Same dark treatment as the
-   mode toggle so it stays readable over the tiles. */
+/* Expand/collapse button, top-right below the mode toggle (top-left is taken
+   by Leaflet's zoom controls, which sit at z-index 1000). Same dark treatment
+   as the mode toggle so it stays readable over the tiles. */
 .sg-map-expand {
   position: absolute;
-  top: 10px;
-  left: 10px;
+  top: 52px;
+  right: 10px;
   z-index: 800;
   background: rgba(20, 23, 46, 0.92);
   border: 1px solid #4a5178;
