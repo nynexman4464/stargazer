@@ -179,8 +179,8 @@ function sampleBortleByte(xM, yM, regions) {
   const sampleCoarse = () => {
     const localCf = (xM - coarse.xMin) / cm;
     const localRf = (coarse.yMax - yM) / cm;
-    const cr = localCf - 0.5;
-    const cc = localRf - 0.5;
+    const cr = localRf - 0.5;
+    const cc = localCf - 0.5;
     const lastR = coarse.rows - 1;
     const lastC = coarse.cols - 1;
     const crc = Math.max(0, Math.min(lastR, cr));
@@ -478,18 +478,7 @@ export function paintBortleTile(x, y, z, canvas) {
       regions.set(rid, region);
     } else {
       missing.push(rid);
-      ensureRegionById(rid).catch(() => {}); // error already logged in ensureRegionById
-    }
-  }
-  // DEBUG: log tiles that paint with missing regions (throttled by tile key)
-  if (missing.length > 0) {
-    const key = `${z}/${x}/${y}`;
-    if (!paintBortleTile._loggedMissing) paintBortleTile._loggedMissing = new Set();
-    if (!paintBortleTile._loggedMissing.has(key)) {
-      paintBortleTile._loggedMissing.add(key);
-      console.log(`[bortle] tile ${key} missing regions: ${missing.join(',')} (needed: ${rids.join(',')})`);
-      // Prevent unbounded growth
-      if (paintBortleTile._loggedMissing.size > 500) paintBortleTile._loggedMissing.clear();
+      ensureRegionById(rid).catch(() => {});
     }
   }
 
