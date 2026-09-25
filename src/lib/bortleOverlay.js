@@ -481,38 +481,26 @@ export function createBortleTileLayer(L) {
       const size = this.getTileSize();
       tile.width = size.x;
       tile.height = size.y;
-      // Try synchronous paint first (regions already cached)
-      try {
-        const painted = paintBortleTile(coords.x, coords.y, coords.z, tile);
-        if (painted) {
-          if (done) done(null, tile);
-          return tile;
-        }
-      } catch (e) {
-        console.warn('Bortle tile paint failed (sync)', e);
-      }
-      // Regions are loading: wait for them, then paint. Use the promise-based
-      // ensure to avoid polling forever on a failed import.
-      const n = 2 ** coords.z;
-      const xLeft = (coords.x / n) * MERC_WORLD - MERC_LIMIT;
-      const yTop = MERC_LIMIT - (coords.y / n) * MERC_WORLD;
-      const tileSpan = MERC_WORLD / n;
-      const west = mercToLon(xLeft);
-      const east = mercToLon(xLeft + tileSpan);
-      const north = mercToLat(yTop);
-      const south = mercToLat(yTop - tileSpan);
-      const rids = regionsForBounds(south, west, north, east);
-      Promise.all(rids.map((rid) => ensureRegionById(rid).catch(() => null)))
-        .then(() => {
-          try {
-            paintBortleTile(coords.x, coords.y, coords.z, tile);
-          } catch (e) {
-            console.warn('Bortle tile paint failed (async)', e);
+      const painted = paintBortleTile(coords.x, coords.y, coords.z, tile);
+      if (!painted) {
+        // Regions are loading; when they arrive, redraw this tile
+        // We'll use a simple approach: set a timeout to retry
+        // (A more robust approach would subscribe to region load events)
+        const layer = this;
+        const retry = () => {
+          const ok = paintBortleTile(coords.x, coords.y, coords.z, tile);
+          if (ok) {
+            done(null, tile);
+          } else {
+            setTimeout(retry, 200);
           }
-          // Always signal completion so Leaflet doesn't hang the tile forever.
-          // If painting failed, the tile stays transparent.
-          if (done) done(null, tile);
-        });
+        };
+        setTimeout(retry, 200);
+        // Return the (empty) tile immediately; done() will be called when painted
+        return tile;
+      }
+      // Synchronous path: already painted
+      if (done) done(null, tile);
       return tile;
     },
   });
