@@ -127,20 +127,41 @@ function sampleBortleByte(xM, yM, regions) {
   const dr = frg - fr0;
   const dc = fcg - fc0;
 
-  // Helper: get fine cell value at region-local fine coords (fr, fc)
+  // Helper: get fine cell value at region-local fine coords (fr, fc).
+  // Crosses region boundaries: if the cell belongs to a neighboring region,
+  // looks up the fine patch in that region's map.
   const getFine = (fr, fc) => {
     const lc = Math.floor(fc / per);
     const lr = Math.floor(fr / per);
-    if (lc < 0 || lc >= coarse.cols || lr < 0 || lr >= coarse.rows) return null;
     const globalC = lc + coarse.c0;
     const globalR = lr + coarse.r0;
+    // Find the region containing this global coarse cell
+    let targetRegion = region;
+    if (lc < 0 || lc >= coarse.cols || lr < 0 || lr >= coarse.rows) {
+      // Out of bounds: compute lat/lon of the cell center and find its region
+      const cellXM = coarse.xMin + (lc + 0.5) * cm;
+      const cellYM = coarse.yMax - (lr + 0.5) * cm;
+      const cellLat = mercToLat(cellYM);
+      const cellLon = mercToLon(cellXM);
+      const nrid = regionIdFor(cellLat, cellLon);
+      const nregion = nrid ? regions.get(nrid) : null;
+      if (!nregion) return null;
+      targetRegion = nregion;
+    }
     const fkey = globalR * coarse.globalCols + globalC;
-    const pi = fine.map.get(fkey);
+    const pi = targetRegion.fine.map.get(fkey);
     if (pi === undefined) return null;
-    const pfr = fr - lr * per;
-    const pfc = fc - lc * per;
+    // Convert to target-region local fine coords via global space
+    const gfc = fc + coarse.c0 * per;
+    const gfr = fr + coarse.r0 * per;
+    const tfc = gfc - targetRegion.coarse.c0 * per;
+    const tfr = gfr - targetRegion.coarse.r0 * per;
+    const tlc = Math.floor(tfc / per);
+    const tlr = Math.floor(tfr / per);
+    const pfc = tfc - tlc * per;
+    const pfr = tfr - tlr * per;
     if (pfr < 0 || pfr >= per || pfc < 0 || pfc >= per) return null;
-    const q = fine.bytes[pi * per * per + pfr * per + pfc];
+    const q = targetRegion.fine.bytes[pi * per * per + Math.floor(pfr) * per + Math.floor(pfc)];
     return q === 255 ? null : q;
   };
 
