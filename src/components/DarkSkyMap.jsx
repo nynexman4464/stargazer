@@ -319,12 +319,11 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
       </div>
       <div ref={stopNativePress} className="sg-map-ui sg-map-expand">
         <IconButton
-          onClick={() => setExpanded((v) => !v)}
-          aria-label={expanded ? 'Exit fullscreen map' : 'View map fullscreen'}
+          icon={<Icon icon={expanded ? Minimize2 : Maximize2} size="sm" />}
+          label={expanded ? 'Exit fullscreen map' : 'View map fullscreen'}
           title={expanded ? 'Exit fullscreen' : 'Expand map'}
-        >
-          <Icon icon={expanded ? Minimize2 : Maximize2} size="sm" />
-        </IconButton>
+          onClick={() => setExpanded((v) => !v)}
+        />
       </div>
       {mode === 'bortle' && (
         <div ref={stopNativePress} className="sg-map-legend sg-map-ui" aria-hidden="true">
