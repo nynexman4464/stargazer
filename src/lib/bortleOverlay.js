@@ -2,14 +2,14 @@ import { BORTLE_GRID } from '../data/bortleGrid.js';
 import { BORTLE_FINE } from '../data/bortleFine.js';
 import { sqmToBortle } from './astro.js';
 
-/* Render the bundled Bortle grid as a heatmap image for the Leaflet map.
-   Rendered at 2x the grid resolution with bilinear interpolation between
-   cells, so the coarse 0.25-degree cells melt into smooth gradients instead
-   of chunky squares. Rows are remapped into Web-Mercator space (see below);
-   columns map 2:1. Colors follow the same Bortle class breaks the point
-   estimates use. Class 1 (pristine) is fully transparent so the dark basemap
-   shows through; intensity builds to a near-white hot core at class 9.
-   Unknown cells stay transparent. */
+/* Bortle heatmap as a Leaflet tile layer. Tiles (256px) are rendered on
+   demand at the map's zoom: each pixel samples the coarse 0.25-degree grid
+   (bilinear) and, where they exist, the 0.05-degree fine patches. Zooming
+   in reveals true fine detail instead of a smeared global image, and only
+   the visible viewport is ever painted. Colors follow the same Bortle class
+   breaks the point estimates use. Class 1 (pristine) is fully transparent
+   so the dark basemap shows through; intensity builds to a near-white hot
+   core at class 9. Unknown cells stay transparent. */
 
 const RAMP = {
   1: [0, 0, 0, 0],
@@ -23,28 +23,14 @@ const RAMP = {
   9: [255, 238, 238, 238],
 };
 
-/* Leaflet's L.imageOverlay stretches its image linearly between the
-   projected (Web-Mercator) corners of the lat/lon bounds — but the grid is
-   linear in latitude, not in Mercator-y. Painting the grid rows 1:1 onto
-   the canvas would render every city ~30 degrees too far north (Boston's
-   glow lands past Hudson Bay; what shows over Boston is Venezuela).
-   So each canvas row is placed by inverse-Mercator: canvas row j shows the
-   grid row whose latitude sits at that row's Mercator position, exactly
-   undoing Leaflet's stretch. Longitude is linear in both spaces, so columns
-   map uniformly. Constants mirror Leaflet's SphericalMercator, clamp
-   included. */
+/* Web-Mercator helpers (mirror Leaflet's SphericalMercator). */
 const MERC_R = 6378137;
-const MERC_MAX_LAT = 85.0511287798;
-function mercY(lat) {
-  const c = Math.max(-MERC_MAX_LAT, Math.min(MERC_MAX_LAT, lat));
-  const s = Math.sin((c * Math.PI) / 180);
-  return (MERC_R * Math.log((1 + s) / (1 - s))) / 2;
-}
 function mercLat(y) {
   return ((2 * Math.atan(Math.exp(y / MERC_R)) - Math.PI / 2) * 180) / Math.PI;
 }
 
-const UPSCALE = 2; // render at 2x grid resolution for smooth gradients
+const TILE_SIZE = 256;
+const TILE_MAX_ZOOM = 12;
 
 let _bytes = null;
 function gridBytes() {
@@ -107,176 +93,157 @@ function finePatch() {
   return _fine;
 }
 
-let _url = null;
-/* Paint the grid once and return a data URL for L.imageOverlay. The ~6.7M
-   pixel bilinear fill takes on the order of a second; call it lazily on
-   first toggle so it never slows the initial page load. */
-export function bortleOverlayUrl() {
-  if (_url) return _url;
+/* Sample the SQM byte (0-254) at a lat/lon: fine patch first (bilinear over
+   its 5x5 cells), falling back to coarse-grid bilinear. Returns 255 when
+   the location has no coverage. */
+function sampleBortleByte(lat, lon) {
   const g = BORTLE_GRID;
-  const bytes = gridBytes();
-  const lut = colorLut();
+  const step = g.step;
   const cols = g.cols;
   const rows = g.rows;
-  const step = g.step;
-  const latMax = g.latMax;
-  const lastR = rows - 1;
-  const lastC = cols - 1;
-  const W = cols * UPSCALE;
-  const H = 1160 * UPSCALE;
-  const yNorth = mercY(g.latMax);
-  const ySouth = mercY(g.latMax - rows * step);
-  const canvas = document.createElement('canvas');
-  canvas.width = W;
-  canvas.height = H;
-  const ctx = canvas.getContext('2d');
-  const img = ctx.createImageData(W, H);
-  const d = img.data;
-  for (let j = 0; j < H; j++) {
-    // Canvas row center -> latitude, undoing Leaflet's Mercator stretch.
-    const lat = mercLat(yNorth - ((j + 0.5) / H) * (yNorth - ySouth));
-    // Fractional grid row, floor-aligned: cell r covers
-    // [latMax-(r+1)*step, latMax-r*step), the same convention estimateBortle
-    // uses. (Math.round here would shove every cell half a cell north.)
-    let fr = (latMax - lat) / step - 0.5;
-    fr = fr < 0 ? 0 : fr > lastR ? lastR : fr;
-    const r0 = fr >= lastR ? lastR - 1 : Math.floor(fr);
-    const dr = fr - r0;
-    const wr0 = 1 - dr;
-    const wr1 = dr;
-    const ro0 = r0 * cols;
-    const ro1 = ro0 + cols;
-    const pxRow = j * W;
-    for (let i = 0; i < W; i++) {
-      // Longitude is linear in both spaces; at 2x, pixel centers fall on
-      // quarter-cell points, so blend the two bracketing grid columns.
-      let fc = i * 0.5 - 0.25;
-      fc = fc < 0 ? 0 : fc > lastC ? lastC : fc;
-      let c0 = Math.floor(fc);
-      if (c0 >= lastC) c0 = lastC - 1;
-      const dc = fc - c0;
-      const c1 = c0 + 1;
-      const wc0 = 1 - dc;
-      const q00 = bytes[ro0 + c0];
-      const q01 = bytes[ro0 + c1];
-      const q10 = bytes[ro1 + c0];
-      const q11 = bytes[ro1 + c1];
-      // Bilinear blend over the known samples; unknown (255) cells are
-      // skipped and the weights renormalized. All-unknown -> transparent.
-      let num = 0;
-      let den = 0;
-      if (q00 !== 255) {
-        const w = wr0 * wc0;
-        num += q00 * w;
-        den += w;
-      }
-      if (q01 !== 255) {
-        const w = wr0 * dc;
-        num += q01 * w;
-        den += w;
-      }
-      if (q10 !== 255) {
-        const w = wr1 * wc0;
-        num += q10 * w;
-        den += w;
-      }
-      if (q11 !== 255) {
-        const w = wr1 * dc;
-        num += q11 * w;
-        den += w;
-      }
-      const o = (pxRow + i) * 4;
-      if (den === 0) {
-        d[o + 3] = 0;
-      } else {
-        const lo = Math.round(num / den) * 4;
-        d[o] = lut[lo];
-        d[o + 1] = lut[lo + 1];
-        d[o + 2] = lut[lo + 2];
-        d[o + 3] = lut[lo + 3];
-      }
-    }
-  }
-  /* Fine patches: repaint each patched coarse cell from its 5x5 fine cells
-     with bilinear sampling (clamped at patch edges), same class colors.
-     Only each patch's small canvas rect is touched, so this stays cheap.
-     All-unknown fine neighborhoods keep the coarse pixel already painted. */
+  let c = Math.floor((lon - g.lonMin) / step);
+  let r = Math.floor((g.latMax - lat) / step);
+  if (c < 0 || c >= cols || r < 0 || r >= rows) return 255;
+
   const fp = finePatch();
-  const fper = fp.per;
-  const fstep = fp.step;
-  const flast = fper - 1;
-  const lonSpan = cols * step;
-  for (const [key, pi] of fp.map) {
-    const r = Math.floor(key / cols);
-    const c = key % cols;
-    const latN = latMax - r * step;
+  const pi = fp.map.get(r * cols + c);
+  if (pi !== undefined) {
+    const fper = fp.per;
+    const fstep = fp.step;
+    const flast = fper - 1;
+    const latN = g.latMax - r * step;
     const lonW = g.lonMin + c * step;
-    // Exact integer canvas bounds for this coarse cell: each cell is
-    // UPSCALE px wide, so cells never overlap (FP floor/ceil on the
-    // fractional bounds could bleed a pixel into the neighbor, letting a
-    // later patch overwrite with clamped edge values).
-    const ix0 = c * UPSCALE;
-    const ix1 = (c + 1) * UPSCALE - 1;
-    const jy0 = Math.max(0, Math.floor(((yNorth - mercY(latN)) / (yNorth - ySouth)) * H));
-    const jy1 = Math.min(H - 1, Math.floor(((yNorth - mercY(latN - step)) / (yNorth - ySouth)) * H));
+    let fr = (latN - lat) / fstep - 0.5;
+    let fc = (lon - lonW) / fstep - 0.5;
+    fr = fr < 0 ? 0 : fr > flast ? flast : fr;
+    fc = fc < 0 ? 0 : fc > flast ? flast : fc;
+    const r0 = fr >= flast ? flast - 1 : Math.floor(fr);
+    const c0 = fc >= flast ? flast - 1 : Math.floor(fc);
+    const dr = fr - r0;
+    const dc = fc - c0;
     const base = pi * fper * fper;
     const fb = fp.bytes;
-    for (let j = jy0; j <= jy1; j++) {
-      const lat = mercLat(yNorth - ((j + 0.5) / H) * (yNorth - ySouth));
-      let fr = (latN - lat) / fstep - 0.5;
-      fr = fr < 0 ? 0 : fr > flast ? flast : fr;
-      const r0 = fr >= flast ? flast - 1 : Math.floor(fr);
-      const dr = fr - r0;
-      const wr0 = 1 - dr;
-      const fr0 = base + r0 * fper;
-      const fr1 = fr0 + fper;
-      const pxRow = j * W;
-      for (let i = ix0; i <= ix1; i++) {
-        const lon = g.lonMin + ((i + 0.5) / W) * lonSpan;
-        let fc = (lon - lonW) / fstep - 0.5;
-        fc = fc < 0 ? 0 : fc > flast ? flast : fc;
-        let c0 = Math.floor(fc);
-        if (c0 >= flast) c0 = flast - 1;
-        const dc = fc - c0;
-        const wc0 = 1 - dc;
-        const q00 = fb[fr0 + c0];
-        const q01 = fb[fr0 + c0 + 1];
-        const q10 = fb[fr1 + c0];
-        const q11 = fb[fr1 + c0 + 1];
-        let num = 0;
-        let den = 0;
-        if (q00 !== 255) {
-          const w = wr0 * wc0;
-          num += q00 * w;
-          den += w;
-        }
-        if (q01 !== 255) {
-          const w = wr0 * dc;
-          num += q01 * w;
-          den += w;
-        }
-        if (q10 !== 255) {
-          const w = dr * wc0;
-          num += q10 * w;
-          den += w;
-        }
-        if (q11 !== 255) {
-          const w = dr * dc;
-          num += q11 * w;
-          den += w;
-        }
-        if (den > 0) {
-          const lo = Math.round(num / den) * 4;
-          const o = (pxRow + i) * 4;
-          d[o] = lut[lo];
-          d[o + 1] = lut[lo + 1];
-          d[o + 2] = lut[lo + 2];
-          d[o + 3] = lut[lo + 3];
-        }
-      }
+    const q00 = fb[base + r0 * fper + c0];
+    const q01 = fb[base + r0 * fper + c0 + 1];
+    const q10 = fb[base + (r0 + 1) * fper + c0];
+    const q11 = fb[base + (r0 + 1) * fper + c0 + 1];
+    let num = 0;
+    let den = 0;
+    if (q00 !== 255) {
+      const w = (1 - dr) * (1 - dc);
+      num += q00 * w;
+      den += w;
+    }
+    if (q01 !== 255) {
+      const w = (1 - dr) * dc;
+      num += q01 * w;
+      den += w;
+    }
+    if (q10 !== 255) {
+      const w = dr * (1 - dc);
+      num += q10 * w;
+      den += w;
+    }
+    if (q11 !== 255) {
+      const w = dr * dc;
+      num += q11 * w;
+      den += w;
+    }
+    if (den > 0) return Math.round(num / den);
+  }
+
+  // Coarse grid, bilinear between cell centers.
+  const bytes = gridBytes();
+  const lastR = rows - 1;
+  const lastC = cols - 1;
+  let fr = (g.latMax - lat) / step - 0.5;
+  let fc = (lon - g.lonMin) / step - 0.5;
+  fr = fr < 0 ? 0 : fr > lastR ? lastR : fr;
+  fc = fc < 0 ? 0 : fc > lastC ? lastC : fc;
+  const r0 = fr >= lastR ? lastR - 1 : Math.floor(fr);
+  const c0 = fc >= lastC ? lastC - 1 : Math.floor(fc);
+  const dr = fr - r0;
+  const dc = fc - c0;
+  const q00 = bytes[r0 * cols + c0];
+  const q01 = bytes[r0 * cols + c0 + 1];
+  const q10 = bytes[(r0 + 1) * cols + c0];
+  const q11 = bytes[(r0 + 1) * cols + c0 + 1];
+  let num = 0;
+  let den = 0;
+  if (q00 !== 255) {
+    const w = (1 - dr) * (1 - dc);
+    num += q00 * w;
+    den += w;
+  }
+  if (q01 !== 255) {
+    const w = (1 - dr) * dc;
+    num += q01 * w;
+    den += w;
+  }
+  if (q10 !== 255) {
+    const w = dr * (1 - dc);
+    num += q10 * w;
+    den += w;
+  }
+  if (q11 !== 255) {
+    const w = dr * dc;
+    num += q11 * w;
+    den += w;
+  }
+  return den > 0 ? Math.round(num / den) : 255;
+}
+
+/* Paint one Web-Mercator tile (x, y, z) into the given square canvas. */
+export function paintBortleTile(x, y, z, canvas) {
+  const size = canvas.width;
+  const ctx = canvas.getContext('2d');
+  const img = ctx.createImageData(size, size);
+  const d = img.data;
+  const lut = colorLut();
+
+  const n = 2 ** z;
+  const lonWest = (x / n) * 360 - 180;
+  const lonSpan = 360 / n;
+  const yTop = Math.PI * MERC_R - (y / n) * 2 * Math.PI * MERC_R;
+  const ySpan = (2 * Math.PI * MERC_R) / n;
+
+  // Lat/lon at each pixel center; rows share a lat, columns share a lon.
+  for (let j = 0; j < size; j++) {
+    const lat = mercLat(yTop - ((j + 0.5) / size) * ySpan);
+    const rowOff = j * size;
+    for (let i = 0; i < size; i++) {
+      const lon = lonWest + ((i + 0.5) / size) * lonSpan;
+      const q = sampleBortleByte(lat, lon);
+      const o = (rowOff + i) * 4;
+      const lo = q * 4;
+      d[o] = lut[lo];
+      d[o + 1] = lut[lo + 1];
+      d[o + 2] = lut[lo + 2];
+      d[o + 3] = lut[lo + 3];
     }
   }
   ctx.putImageData(img, 0, 0);
-  _url = canvas.toDataURL();
-  return _url;
+}
+
+/* Leaflet tile layer for the heatmap. */
+export function createBortleTileLayer(L) {
+  const b = bortleOverlayBounds();
+  const BortleTiles = L.GridLayer.extend({
+    createTile(coords) {
+      const tile = document.createElement('canvas');
+      const size = this.getTileSize();
+      tile.width = size.x;
+      tile.height = size.y;
+      paintBortleTile(coords.x, coords.y, coords.z, tile);
+      return tile;
+    },
+  });
+  return new BortleTiles({
+    tileSize: TILE_SIZE,
+    bounds: L.latLngBounds(b[0], b[1]),
+    maxZoom: TILE_MAX_ZOOM,
+    opacity: 0.85,
+    interactive: false,
+    pane: 'overlayPane',
+  });
 }

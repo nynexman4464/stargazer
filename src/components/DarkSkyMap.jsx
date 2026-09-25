@@ -3,7 +3,7 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { estimateBortle, matchDarkSkySite } from '../lib/astro.js';
 import { placeName } from '../lib/geo.js';
-import { bortleOverlayUrl, bortleOverlayBounds } from '../lib/bortleOverlay.js';
+import { createBortleTileLayer } from '../lib/bortleOverlay.js';
 
 /* NASA Black Marble (VIIRS city lights) as the light-pollution overlay.
    Public, no key. GoogleMapsCompatible_Level8 tops out at zoom 8 — Leaflet
@@ -148,18 +148,15 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
   }, []);
 
   // Swap the glow overlay between NASA city lights and our Bortle heatmap.
-  // The heatmap image is painted lazily on first use so it never slows the
-  // initial page load.
+  // The heatmap is a tile layer rendered on demand at the map's zoom, so
+  // zooming in reveals true 0.05-degree fine detail.
   useEffect(() => {
     const map = mapRef.current;
     const lights = lightsRef.current;
     if (!map || !lights) return;
     if (mode === 'bortle') {
       if (!bortleRef.current) {
-        bortleRef.current = L.imageOverlay(bortleOverlayUrl(), bortleOverlayBounds(), {
-          opacity: 0.85,
-          interactive: false,
-        });
+        bortleRef.current = createBortleTileLayer(L);
       }
       if (!map.hasLayer(bortleRef.current)) map.addLayer(bortleRef.current);
       if (map.hasLayer(lights)) map.removeLayer(lights);
