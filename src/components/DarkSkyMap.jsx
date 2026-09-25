@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import { estimateBortle, matchDarkSkySite } from '../lib/astro.js';
+import { estimateBortleAsync, matchDarkSkySite } from '../lib/astro.js';
 import { placeName } from '../lib/geo.js';
 import { createBortleTileLayer } from '../lib/bortleOverlay.js';
 
@@ -128,14 +128,24 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
       // Show the same rating the point would get if set as the location: a
       // nearby certified site's value wins over the raw grid estimate.
       const site = matchDarkSkySite(lat, lng, name, spotsRef.current);
-      const est = site ? null : estimateBortle(lat, lng);
-      const bortleBit = site ? `Bortle ${site.bortle}` : est ? `Est. Bortle ${est.value}` : '';
+      const bortleBit = site ? `Bortle ${site.bortle}` : '';
       const sub = `${lat.toFixed(3)}, ${lng.toFixed(3)}${bortleBit ? ` · ${bortleBit}` : ''}`;
       pin
         .bindPopup(
           popupShell(name, sub, () => pickRef.current?.({ name, lat, lon: lng })),
         )
         .openPopup();
+      // Load the grid estimate asynchronously and update the popup
+      if (!site) {
+        estimateBortleAsync(lat, lng).then(est => {
+          if (est) {
+            const newSub = `${lat.toFixed(3)}, ${lng.toFixed(3)} · Est. Bortle ${est.value}`;
+            pin.setPopupContent(
+              popupShell(name, newSub, () => pickRef.current?.({ name, lat, lon: lng })),
+            );
+          }
+        });
+      }
       pinRef.current = pin;
     });
     mapRef.current = map;

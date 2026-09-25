@@ -12,7 +12,8 @@ import {
 import { Icon } from '@astryxdesign/core/Icon';
 import { Telescope, MapPin, House } from 'lucide-react';
 import ViewingDate from './ViewingDate.jsx';
-import { bortleForLoc, bortleLabel } from '../lib/astro.js';
+import { bortleLabel } from '../lib/astro.js';
+import { useBortleForLoc } from '../hooks/useBortleEstimate.js';
 
 /* Location menu: a real dropdown (bottom sheet on touch) to flip the viewing
    location between home and the last away spot, with the full location
@@ -33,8 +34,8 @@ export default function TopBar({
   // On phones the header is tight, so the location trigger collapses to an
   // icon-only button (the location name moves into its tooltip/label).
   const isCompact = useMediaQuery('(max-width: 639px)');
-  const homeBortle = bortleForLoc(home);
-  const awayBortle = bortleForLoc(awayLoc);
+  const homeBortle = useBortleForLoc(home);
+  const awayBortle = useBortleForLoc(awayLoc);
   const homeBortleText = bortleLabel(homeBortle);
   const awayBortleText = bortleLabel(awayBortle);
   const locLabel = `${locName}${away ? ' · away' : ''}`;

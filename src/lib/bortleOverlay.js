@@ -1,15 +1,21 @@
-import { BORTLE_GRID } from '../data/bortleGrid.js';
-import { BORTLE_FINE } from '../data/bortleFine.js';
 import { sqmToBortle } from './astro.js';
+import {
+  regionIdFor,
+  ensureRegion,
+  getRegionSync,
+  getRegionByIdSync,
+  ensureRegionById,
+  sampleRegionByte,
+} from './bortleRegions.js';
 
 /* Bortle heatmap as a Leaflet tile layer. Tiles (256px) are rendered on
-   demand at the map's zoom: each pixel samples the coarse 25km Web-Mercator
-   grid (bilinear) and, where they exist, the 5km fine patches. The grid is
-   defined in Web-Mercator meters, so cells are square on the map (no
-   latitude-dependent stretching). Colors follow the same Bortle class breaks
-   the point estimates use. Class 1 (pristine) is fully transparent so the
-   dark basemap shows through; intensity builds to a near-white hot core at
-   class 9. Unknown cells stay transparent. */
+   demand at the map's zoom: each pixel samples the 20km Web-Mercator coarse
+   grid and, where they exist, the 4km fine patches, from lazy-loaded regional
+   files. The grid is defined in Web-Mercator meters, so cells are square on
+   the map (no latitude-dependent stretching). Colors follow the same Bortle
+   class breaks the point estimates use. Class 1 (pristine) is fully
+   transparent so the dark basemap shows through; intensity builds to a
+   near-white hot core at class 9. Unknown cells stay transparent. */
 
 const RAMP = {
   1: [0, 0, 0, 0],
@@ -28,15 +34,6 @@ const MERC_R = 6378137;
 const MERC_WORLD = 2 * Math.PI * MERC_R; // 40075016.68557849
 const MERC_LIMIT = 20037508.342789244;
 
-function latLonToMerc(lat, lon) {
-  const x = (lon * Math.PI) / 180 * MERC_R;
-  const s = Math.sin((lat * Math.PI) / 180);
-  // Clamp to avoid inf at poles
-  const sc = Math.max(-0.9999999, Math.min(0.9999999, s));
-  const y = (MERC_R * Math.log((1 + sc) / (1 - sc))) / 2;
-  return { x, y };
-}
-
 function mercToLat(y) {
   return ((2 * Math.atan(Math.exp(y / MERC_R)) - Math.PI / 2) * 180) / Math.PI;
 }
@@ -47,17 +44,6 @@ function mercToLon(x) {
 
 const TILE_SIZE = 256;
 const TILE_MAX_ZOOM = 12;
-
-let _bytes = null;
-function gridBytes() {
-  if (!_bytes) {
-    const bin = atob(BORTLE_GRID.data);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    _bytes = bytes;
-  }
-  return _bytes;
-}
 
 /* Byte thresholds for Bortle classes (sqm = 16 + byte*0.05), from BORTLE_BREAKS
    in astro.js. Used for smooth color interpolation across class edges. */
@@ -88,165 +74,25 @@ function byteColor(b) {
   return RAMP[9];
 }
 
-/* Geographic bounds of the grid, as Leaflet [[south, west], [north, east]].
-   Converts the Web-Mercator meter bounds back to lat/lon. */
-export function bortleOverlayBounds() {
-  const g = BORTLE_GRID;
-  const yMin = g.yMax - g.rows * g.cellM;
-  const xMax = g.xMin + g.cols * g.cellM;
-  return [
-    [mercToLat(yMin), mercToLon(g.xMin)],
-    [mercToLat(g.yMax), mercToLon(xMax)],
-  ];
-}
-
-/* Fine 5km patches (BORTLE_FINE), decoded lazily once. index holds
-   uint32LE coarse keys (r*cols+c); data holds 25 SQM bytes per patch
-   (255 = no coverage) in index order. */
-let _fine = null;
-function finePatch() {
-  if (!_fine) {
-    const f = BORTLE_FINE;
-    const n = f.count;
-    const idxBin = atob(f.index);
-    const idxBytes = new Uint8Array(idxBin.length);
-    for (let i = 0; i < idxBin.length; i++) idxBytes[i] = idxBin.charCodeAt(i);
-    const keys = new Uint32Array(idxBytes.buffer); // little-endian, matches <u4
-    const datBin = atob(f.data);
-    const bytes = new Uint8Array(datBin.length);
-    for (let i = 0; i < datBin.length; i++) bytes[i] = datBin.charCodeAt(i);
-    const map = new Map();
-    for (let i = 0; i < n; i++) map.set(keys[i], i);
-    _fine = { per: f.per, cellM: f.cellM, map, bytes };
+/* Get all region IDs that intersect a lat/lon bounding box. */
+function regionsForBounds(south, west, north, east) {
+  const ids = new Set();
+  // Sample the corners and center to find regions
+  // (regions are large, so corners+center is sufficient)
+  const lats = [south, (south + north) / 2, north];
+  const lons = [west, (west + east) / 2, east];
+  for (const lat of lats) {
+    for (const lon of lons) {
+      const rid = regionIdFor(lat, lon);
+      if (rid) ids.add(rid);
+    }
   }
-  return _fine;
-}
-
-/* Sample the SQM byte (0-254) at fine-grid coordinates (frg, fcg in units
-   of fine cells). Returns 255 when the location has no coverage.
-   NOTE: No tent filter — the Web-Mercator grid has square cells, so there
-   is no stripe artifact to suppress. The data is sampled as-is. */
-function getFineCell(frg, fcg) {
-  const g = BORTLE_GRID;
-  const per = 5;
-  const r = Math.floor(frg / per);
-  const c = Math.floor(fcg / per);
-  if (r < 0 || r >= g.rows || c < 0 || c >= g.cols) return 255;
-  const pi = finePatch().map.get(r * g.cols + c);
-  if (pi === undefined) return 255;
-  const fr = Math.floor(frg - r * per);
-  const fc = Math.floor(fcg - c * per);
-  if (fr < 0 || fr >= per || fc < 0 || fc >= per) return 255;
-  const bytes = finePatch().bytes;
-  const q = bytes[pi * per * per + fr * per + fc];
-  return q;
-}
-
-/* Sample the SQM byte at Web-Mercator meters (x, y). Fine patches first
-   (bilinear over the 5km grid), falling back to coarse-grid bilinear.
-   Returns 255 when the location has no coverage, or a float for smooth
-   color interpolation. */
-function sampleBortleByteMerc(x, y) {
-  const g = BORTLE_GRID;
-  const fCellM = BORTLE_FINE.cellM; // 5000
-
-  // Fine: bilinear over 5km grid (cell centers on integers)
-  const frg = (g.yMax - y) / fCellM - 0.5;
-  const fcg = (x - g.xMin) / fCellM - 0.5;
-  const fr0 = Math.floor(frg);
-  const fc0 = Math.floor(fcg);
-  const dr = frg - fr0;
-  const dc = fcg - fc0;
-  let num = 0;
-  let den = 0;
-  let hasFine = false;
-  const q00 = getFineCell(fr0, fc0);
-  if (q00 !== 255) {
-    hasFine = true;
-    const w = (1 - dr) * (1 - dc);
-    num += q00 * w;
-    den += w;
-  }
-  const q01 = getFineCell(fr0, fc0 + 1);
-  if (q01 !== 255) {
-    hasFine = true;
-    const w = (1 - dr) * dc;
-    num += q01 * w;
-    den += w;
-  }
-  const q10 = getFineCell(fr0 + 1, fc0);
-  if (q10 !== 255) {
-    hasFine = true;
-    const w = dr * (1 - dc);
-    num += q10 * w;
-    den += w;
-  }
-  const q11 = getFineCell(fr0 + 1, fc0 + 1);
-  if (q11 !== 255) {
-    hasFine = true;
-    const w = dr * dc;
-    num += q11 * w;
-    den += w;
-  }
-  // In a patched region, fine is authoritative: if it says no data (water),
-  // stay transparent rather than smearing the bright coarse mean over it.
-  if (hasFine) return den > 0 ? num / den : 255;
-
-  // Coarse grid, bilinear between cell centers (25km cells).
-  const cellM = g.cellM;
-  const cols = g.cols;
-  const rows = g.rows;
-  const bytes = gridBytes();
-  const lastR = rows - 1;
-  const lastC = cols - 1;
-  let cr = (g.yMax - y) / cellM - 0.5;
-  let cc = (x - g.xMin) / cellM - 0.5;
-  cr = cr < 0 ? 0 : cr > lastR ? lastR : cr;
-  cc = cc < 0 ? 0 : cc > lastC ? lastC : cc;
-  const r0 = cr >= lastR ? lastR - 1 : Math.floor(cr);
-  const c0 = cc >= lastC ? lastC - 1 : Math.floor(cc);
-  const cdr = cr - r0;
-  const cdc = cc - c0;
-  const b00 = bytes[r0 * cols + c0];
-  const b01 = bytes[r0 * cols + c0 + 1];
-  const b10 = bytes[(r0 + 1) * cols + c0];
-  const b11 = bytes[(r0 + 1) * cols + c0 + 1];
-  let cnum = 0;
-  let cden = 0;
-  if (b00 !== 255) {
-    const w = (1 - cdr) * (1 - cdc);
-    cnum += b00 * w;
-    cden += w;
-  }
-  if (b01 !== 255) {
-    const w = (1 - cdr) * cdc;
-    cnum += b01 * w;
-    cden += w;
-  }
-  if (b10 !== 255) {
-    const w = cdr * (1 - cdc);
-    cnum += b10 * w;
-    cden += w;
-  }
-  if (b11 !== 255) {
-    const w = cdr * cdc;
-    cnum += b11 * w;
-    cden += w;
-  }
-  return cden > 0 ? cnum / cden : 255;
-}
-
-/* Sample the SQM byte at lat/lon (converts to Web-Mercator meters first).
-   Used for point estimates (popups). For tile rendering, use
-   sampleBortleByteMerc directly. */
-function sampleBortleByte(lat, lon) {
-  const { x, y } = latLonToMerc(lat, lon);
-  return sampleBortleByteMerc(x, y);
+  return [...ids];
 }
 
 /* Paint one Web-Mercator tile (x, y, z) into the given square canvas.
-   Samples the grid directly in meters — no lat/lon conversion needed,
-   since both the tile and the grid are in Web Mercator. */
+   Returns true if the tile was fully painted, false if some regions are
+   still loading (caller should retry when they arrive). */
 export function paintBortleTile(x, y, z, canvas) {
   const size = canvas.width;
   const ctx = canvas.getContext('2d');
@@ -258,14 +104,64 @@ export function paintBortleTile(x, y, z, canvas) {
   const yTop = MERC_LIMIT - (y / n) * MERC_WORLD;
   const tileSpan = MERC_WORLD / n;
 
+  // Tile bounds in lat/lon
+  const west = mercToLon(xLeft);
+  const east = mercToLon(xLeft + tileSpan);
+  const north = mercToLat(yTop);
+  const south = mercToLat(yTop - tileSpan);
+
+  // Find regions, ensure they're loaded
+  const rids = regionsForBounds(south, west, north, east);
+  let allLoaded = true;
+  const regions = new Map();
+  for (const rid of rids) {
+    // We need lat/lon to get the region; use the center
+    const centerLat = (south + north) / 2;
+    const centerLon = (west + east) / 2;
+    // Actually, getRegionSync needs lat/lon; we'll use a representative point
+    // For simplicity, ensure by rid directly via a helper
+    // (We'll add a ensureRegionById to bortleRegions.js)
+    const region = getRegionByIdSync(rid);
+    if (region) {
+      regions.set(rid, region);
+    } else {
+      allLoaded = false;
+      ensureRegionById(rid);
+    }
+  }
+
+  if (!allLoaded) {
+    // Not all regions loaded yet; return false so caller can retry
+    return false;
+  }
+
+  // Paint the tile
+  // Cache the last used region to avoid repeated lookups
+  let lastRid = null;
+  let lastRegion = null;
   for (let j = 0; j < size; j++) {
     const yM = yTop - ((j + 0.5) / size) * tileSpan;
+    const lat = mercToLat(yM);
     const rowOff = j * size;
     for (let i = 0; i < size; i++) {
       const xM = xLeft + ((i + 0.5) / size) * tileSpan;
-      const q = sampleBortleByteMerc(xM, yM);
+      const lon = mercToLon(xM);
+      const rid = regionIdFor(lat, lon);
+      let region = null;
+      if (rid === lastRid) {
+        region = lastRegion;
+      } else if (rid) {
+        region = regions.get(rid) || getRegionByIdSync(rid);
+        lastRid = rid;
+        lastRegion = region;
+      }
       const o = (rowOff + i) * 4;
-      if (q === 255) {
+      if (!region) {
+        d[o + 3] = 0;
+        continue;
+      }
+      const q = sampleRegionByte(region, lat, lon);
+      if (q == null) {
         d[o + 3] = 0;
       } else {
         const [r, g, b, a] = byteColor(q);
@@ -277,30 +173,46 @@ export function paintBortleTile(x, y, z, canvas) {
     }
   }
   ctx.putImageData(img, 0, 0);
+  return true;
 }
 
-/* Leaflet tile layer for the heatmap. */
+/* Leaflet tile layer for the heatmap. Handles async region loading by
+   re-requesting tiles when their regions arrive. */
 export function createBortleTileLayer(L) {
-  const b = bortleOverlayBounds();
   const BortleTiles = L.GridLayer.extend({
-    createTile(coords) {
+    createTile(coords, done) {
       const tile = document.createElement('canvas');
       const size = this.getTileSize();
       tile.width = size.x;
       tile.height = size.y;
-      paintBortleTile(coords.x, coords.y, coords.z, tile);
+      const painted = paintBortleTile(coords.x, coords.y, coords.z, tile);
+      if (!painted) {
+        // Regions are loading; when they arrive, redraw this tile
+        // We'll use a simple approach: set a timeout to retry
+        // (A more robust approach would subscribe to region load events)
+        const layer = this;
+        const retry = () => {
+          const ok = paintBortleTile(coords.x, coords.y, coords.z, tile);
+          if (ok) {
+            done(null, tile);
+          } else {
+            setTimeout(retry, 200);
+          }
+        };
+        setTimeout(retry, 200);
+        // Return the (empty) tile immediately; done() will be called when painted
+        return tile;
+      }
+      // Synchronous path: already painted
+      if (done) done(null, tile);
       return tile;
     },
   });
   return new BortleTiles({
     tileSize: TILE_SIZE,
-    bounds: L.latLngBounds(b[0], b[1]),
     maxZoom: TILE_MAX_ZOOM,
     opacity: 0.85,
     interactive: false,
     pane: 'overlayPane',
   });
 }
-
-// Re-export for astro.js point estimates
-export { sampleBortleByte, latLonToMerc };

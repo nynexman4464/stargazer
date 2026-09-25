@@ -6,8 +6,7 @@ import {
   eciToEcf,
   ecfToLookAngles,
 } from 'satellite.js';
-import { BORTLE_GRID } from '../data/bortleGrid.js';
-import { BORTLE_FINE } from '../data/bortleFine.js';
+import { getRegionSync, ensureRegion, sampleRegionByte } from './bortleRegions.js';
 
 /* ============================== config ============================== */
 export const DEFAULT_LOC = { name: 'Medford, MA', lat: 42.4184, lon: -71.1062 };
@@ -31,71 +30,10 @@ export function sqmToBortle(sqm) {
   return 9;
 }
 
-/* Estimated Bortle class from the bundled Black Marble 2025 satellite grid.
-   The grid stores zenith SQM as 0.05-mag bytes (255 = unknown); the byte is
-   decoded lazily once. Returns { value, sqm, estimated: true, source }, or
-   null when the coordinates fall outside the grid or on an unknown cell. */
-let _gridBytes = null;
-function gridBytes() {
-  if (!_gridBytes) {
-    const bin = atob(BORTLE_GRID.data);
-    const bytes = new Uint8Array(bin.length);
-    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
-    _gridBytes = bytes;
-  }
-  return _gridBytes;
-}
-/* Fine 5km Bortle patches (BORTLE_FINE): a 5x5 patch of fine cells for
-   every coarse cell at SQM <= 21.0 (plus a 1-cell halo). The coarse grid
-   fills in everywhere else. Decoded lazily once, like the coarse grid. */
-let _fine = null;
-function finePatch() {
-  if (!_fine) {
-    const f = BORTLE_FINE;
-    const n = f.count;
-    const idxBin = atob(f.index);
-    const idxBytes = new Uint8Array(idxBin.length);
-    for (let i = 0; i < idxBin.length; i++) idxBytes[i] = idxBin.charCodeAt(i);
-    const keys = new Uint32Array(idxBytes.buffer); // little-endian, matches <u4
-    const datBin = atob(f.data);
-    const bytes = new Uint8Array(datBin.length);
-    for (let i = 0; i < datBin.length; i++) bytes[i] = datBin.charCodeAt(i);
-    const map = new Map();
-    for (let i = 0; i < n; i++) map.set(keys[i], i);
-    _fine = { per: f.per, cellM: f.cellM, map, bytes };
-  }
-  return _fine;
-}
-/* Web-Mercator projection (matches bortleOverlay.js). */
-const MERC_R = 6378137;
-function latLonToMerc(lat, lon) {
-  const x = (lon * Math.PI) / 180 * MERC_R;
-  const s = Math.sin((lat * Math.PI) / 180);
-  const sc = Math.max(-0.9999999, Math.min(0.9999999, s));
-  const y = (MERC_R * Math.log((1 + sc) / (1 - sc))) / 2;
-  return { x, y };
-}
-/* Fine-patch SQM byte at lat/lon, or null when the coarse cell has no patch
-   or the fine cell has no coverage (falls back to the coarse grid). */
-function sampleFineByte(lat, lon) {
-  const g = BORTLE_GRID;
-  const { x, y } = latLonToMerc(lat, lon);
-  const c = Math.floor((x - g.xMin) / g.cellM);
-  const r = Math.floor((g.yMax - y) / g.cellM);
-  if (c < 0 || c >= g.cols || r < 0 || r >= g.rows) return null;
-  const f = finePatch();
-  const pi = f.map.get(r * g.cols + c);
-  if (pi === undefined) return null;
-  const per = f.per;
-  const cm = g.cellM; // 25000
-  const fm = f.cellM; // 5000
-  // Fine cell within the patch: offset from the coarse cell's SW corner
-  const fr = Math.floor((g.yMax - r * cm - y) / fm);
-  const fc = Math.floor((x - (g.xMin + c * cm)) / fm);
-  if (fr < 0 || fr >= per || fc < 0 || fc >= per) return null;
-  const q = f.bytes[pi * per * per + fr * per + fc];
-  return q === 255 ? null : q;
-}
+/* Estimated Bortle class from the Black Marble 2025 satellite grid, split into
+   32 lazy-loaded regions (see bortleRegions.js). The grid stores zenith SQM
+   as 0.05-mag bytes (255 = unknown). Returns { value, sqm, estimated: true,
+   source }, or null when the region isn't loaded yet or the cell is unknown. */
 function bortleResult(q, source) {
   /* Classify from the exact stored quantum (16 + q*0.05), not the rounded
      display value: rounding 17.45 to 17.5 first would flip borderline cells
@@ -109,18 +47,30 @@ function bortleResult(q, source) {
     source: `${source || 'Estimated Bortle class from satellite data.'} A planning guide, not a measurement.`,
   };
 }
+
 export function estimateBortle(lat, lon) {
-  const g = BORTLE_GRID;
-  if (!g || !g.data || typeof lat !== 'number' || typeof lon !== 'number') return null;
-  const fq = sampleFineByte(lat, lon);
-  if (fq != null) return bortleResult(fq, g.source);
-  const { x, y } = latLonToMerc(lat, lon);
-  const c = Math.floor((x - g.xMin) / g.cellM);
-  const r = Math.floor((g.yMax - y) / g.cellM);
-  if (c < 0 || c >= g.cols || r < 0 || r >= g.rows) return null;
-  const q = gridBytes()[r * g.cols + c];
-  if (q === 255) return null;
-  return bortleResult(q, g.source);
+  if (typeof lat !== 'number' || typeof lon !== 'number') return null;
+  // Try the sync cache first; if the region isn't loaded, trigger the load
+  // in the background and return null (caller should use the async version
+  // or subscribe to region updates for a live value).
+  let region = getRegionSync(lat, lon);
+  if (!region) {
+    ensureRegion(lat, lon);
+    return null;
+  }
+  const q = sampleRegionByte(region, lat, lon);
+  if (q == null) return null;
+  return bortleResult(q, 'Black Marble 2025');
+}
+
+/* Async version: ensures the region is loaded before sampling. */
+export async function estimateBortleAsync(lat, lon) {
+  if (typeof lat !== 'number' || typeof lon !== 'number') return null;
+  const region = await ensureRegion(lat, lon);
+  if (!region) return null;
+  const q = sampleRegionByte(region, lat, lon);
+  if (q == null) return null;
+  return bortleResult(q, 'Black Marble 2025');
 }
 
 /* Short display label for a bortleForLoc result: 'Bortle 8', or

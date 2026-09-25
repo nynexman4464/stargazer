@@ -12,7 +12,8 @@ import { List } from '@astryxdesign/core/List';
 import { Item } from '@astryxdesign/core/Item';
 import { Icon } from '@astryxdesign/core/Icon';
 import { Search, LocateFixed, House, Undo2 } from 'lucide-react';
-import { bortleForLoc, bortleLabel, haversine } from '../lib/astro.js';
+import { bortleLabel, haversine } from '../lib/astro.js';
+import { useBortleForLoc } from '../hooks/useBortleEstimate.js';
 import { reverseGeocode } from '../lib/geo.js';
 
 /* US state/territory abbreviations, so a trailing hint like "ca" or "tx" can
@@ -141,7 +142,7 @@ export default function LocationDialog({
 
   const away = haversine(home.lat, home.lon, loc.lat, loc.lon) > 50;
   const miFromHome = Math.round(haversine(home.lat, home.lon, loc.lat, loc.lon));
-  const homeBortle = bortleForLoc(home);
+  const homeBortle = useBortleForLoc(home);
 
   return (
     <Dialog
