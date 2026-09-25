@@ -160,26 +160,27 @@ export default function DarkSkyMap({ spots, loc, onPickLocation, mode, onModeCha
   // Swap the glow overlay between NASA city lights and our Bortle heatmap.
   // The heatmap is a tile layer rendered on demand at the map's zoom, so
   // zooming in reveals true 0.05-degree fine detail.
+  // NOTE: We create a fresh Bortle layer instance on each toggle to 'bortle'
+  // rather than caching it. Re-adding a cached GridLayer with async tiles
+  // leaves Leaflet holding stale tile state, and the heatmap stops painting.
   useEffect(() => {
     const map = mapRef.current;
     const lights = lightsRef.current;
     if (!map || !lights) return;
     if (mode === 'bortle') {
-      if (!bortleRef.current) {
-        bortleRef.current = createBortleTileLayer(L);
+      // Drop any cached instance to avoid stale async tile state
+      if (bortleRef.current && map.hasLayer(bortleRef.current)) {
+        map.removeLayer(bortleRef.current);
       }
-      const bortle = bortleRef.current;
-      if (!map.hasLayer(bortle)) {
-        map.addLayer(bortle);
-        // Force fresh tiles: Leaflet can hold stale async tile state
-        // when a GridLayer is removed and re-added.
-        bortle.redraw();
-      }
+      bortleRef.current = createBortleTileLayer(L);
+      map.addLayer(bortleRef.current);
       if (map.hasLayer(lights)) map.removeLayer(lights);
     } else {
       if (!map.hasLayer(lights)) map.addLayer(lights);
-      if (bortleRef.current && map.hasLayer(bortleRef.current))
+      if (bortleRef.current && map.hasLayer(bortleRef.current)) {
         map.removeLayer(bortleRef.current);
+        bortleRef.current = null;
+      }
     }
   }, [mode]);
 
