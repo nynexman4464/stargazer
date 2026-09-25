@@ -269,10 +269,25 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
         {!loaded ? (
           <Grid columns={isNarrow ? 1 : { minWidth: 300 }} gap={3}>
             {[0, 1, 2].map((i) => (
-              <VStack key={i} gap={2}>
-                <Skeleton height={20} width="70%" />
-                <Skeleton height={16} width="95%" />
-                <Skeleton height={16} width="80%" />
+              <VStack key={i} gap={2} aria-hidden="true">
+                <HStack gap={2}>
+                  <Skeleton height={22} width={88} />
+                  <Skeleton height={22} width={76} />
+                </HStack>
+                <HStack gap={3} vAlign="center">
+                  <Skeleton height={48} width={48} />
+                  <VStack gap={1} style={{ flex: 1 }}>
+                    <Skeleton height={16} width="45%" />
+                    <Skeleton height={20} width="85%" />
+                  </VStack>
+                </HStack>
+                <Skeleton height={14} width="100%" />
+                <Skeleton height={14} width="92%" />
+                <Skeleton height={14} width="60%" />
+                <VStack gap={1}>
+                  <Skeleton height={14} width="35%" />
+                  <Skeleton height={8} width="100%" />
+                </VStack>
               </VStack>
             ))}
           </Grid>

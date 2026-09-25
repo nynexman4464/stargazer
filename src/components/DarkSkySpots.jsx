@@ -3,6 +3,7 @@ import { Card } from '@astryxdesign/core/Card';
 import { Heading } from '@astryxdesign/core/Text';
 import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
+import { HStack } from '@astryxdesign/core/HStack';
 import { Token } from '@astryxdesign/core/Token';
 import { Tooltip } from '@astryxdesign/core/Tooltip';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
@@ -63,8 +64,17 @@ export default function DarkSkySpots({ spots, loc, away, onPickLocation }) {
         )}
         {!spots.length ? (
           <VStack gap={2}>
-            <Skeleton height={64} />
-            <Skeleton height={64} />
+            <Skeleton height={300} />
+            <Skeleton height={14} width="90%" />
+            {[0, 1, 2].map((i) => (
+              <HStack key={i} gap={2} vAlign="center" aria-hidden="true">
+                <VStack gap={1} style={{ flex: 1 }}>
+                  <Skeleton height={16} width="55%" />
+                  <Skeleton height={13} width="85%" />
+                </VStack>
+                <Skeleton height={22} width={72} />
+              </HStack>
+            ))}
           </VStack>
         ) : !hasLocal ? (
           <Text type="supporting">
