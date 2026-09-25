@@ -187,6 +187,48 @@ body {
   height: calc(var(--spacing-12) * 1.25);
 }
 
+/* Fullscreen expanded map. The map node is portaled here (same DOM element,
+   so the Leaflet instance survives); the overlay dims the page behind it. */
+.sg-map-fullscreen {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  background: rgba(8, 10, 24, 0.92);
+  padding: var(--spacing-4);
+  display: flex;
+}
+.sg-darksky-map-expanded {
+  flex: 1;
+  height: auto;
+  border-radius: var(--radius-element);
+}
+/* Expand/collapse button, top-left of the map. Same dark treatment as the
+   mode toggle so it stays readable over the tiles. */
+.sg-map-expand {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  z-index: 800;
+  background: rgba(20, 23, 46, 0.92);
+  border: 1px solid #4a5178;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+}
+.sg-map-expand button {
+  border: 0;
+  background: transparent;
+  color: #9aa0c3;
+  padding: 6px 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+.sg-map-expand button:hover {
+  color: #ffffff;
+  background: #2b3160;
+}
+
 /* Dark-sky drives map (Leaflet). Own stacking context so its panes stay under
    the app chrome; height fixed so the map has a box to render into. */
 .sg-darksky-map {
