@@ -66,12 +66,12 @@
   </div>
   <div class="panel">
     <h2>Bakken, ND &mdash; mid-res (1km)</h2>
-    <div class="tag">Flares still read bright at 1km (SQM ~16.8&ndash;18.2), less extreme than 500m.</div>
+    <div class="tag">Flares still read bright at 1km (SQM ~18.7&ndash;18.8), less extreme than 500m.</div>
     <div class="map" id="map-bakken-1km"></div>
   </div>
   <div class="panel">
     <h2>Bakken, ND &mdash; full-res (500m)</h2>
-    <div class="tag">Gas flares resolve as intense dots (SQM ~16.6) &mdash; indistinguishable from a city core.</div>
+    <div class="tag">Gas flares resolve as intense dots (SQM ~16.7) &mdash; indistinguishable from a city core.</div>
     <div class="map" id="map-bakken-full"></div>
   </div>
 </div>
@@ -79,28 +79,31 @@
 <h2 style="margin-top:20px">Probe values (SQM, lower = brighter)</h2>
 <table class="probes">
   <tr><th>Location</th><th>Current (4km)</th><th>Mid-res (1km)</th><th>Full-res (500m)</th></tr>
-  <tr><td>Potsdam center</td><td>21.40</td><td><b>19.37</b></td><td><b>19.22</b></td></tr>
-  <tr><td>10km north of Potsdam</td><td>21.25</td><td>21.94</td><td>21.92</td></tr>
-  <tr><td>Parishville</td><td>&mdash;</td><td>21.03</td><td>20.98</td></tr>
-  <tr><td>Bakken flare A</td><td>20.85</td><td><b>16.81</b></td><td><b>16.57</b></td></tr>
-  <tr><td>Bakken flare B</td><td>20.85</td><td><b>18.18</b></td><td><b>16.74</b></td></tr>
-  <tr><td>Bakken dark spot</td><td>20.55</td><td>20.60</td><td>20.44</td></tr>
+  <tr><td>Potsdam center</td><td>21.40</td><td><b>19.36</b></td><td><b>19.22</b></td></tr>
+  <tr><td>10km north of Potsdam</td><td>21.25</td><td>21.84</td><td>21.93</td></tr>
+  <tr><td>Parishville</td><td>21.26</td><td>21.18</td><td>20.97</td></tr>
+  <tr><td>Bakken flare A</td><td>20.85</td><td><b>18.66</b></td><td><b>20.93</b></td></tr>
+  <tr><td>Bakken flare B</td><td>20.87</td><td><b>18.83</b></td><td><b>16.74</b></td></tr>
+  <tr><td>Bakken dark spot</td><td>20.62</td><td>20.79</td><td>20.83</td></tr>
 </table>
 
 <div class="notes">
   <p><b>Why 1km.</b> Going from 4km to 500m is 64x more cells; 4km to 1km is only 16x.
   The question is whether 1km is enough to rescue small-city cores. At Potsdam the answer
-  looks like yes: 1km reads SQM 19.37 at the center vs 19.22 at 500m and 21.40 at 4km &mdash;
-  the core is recovered, and the 10km-north and Parishville probes agree with 500m to 0.06 mag.
-  Flares stay bright at 1km (16.8/18.2) but are less extreme than at 500m. The 1km panels
+  looks like yes: 1km reads SQM 19.36 at the center vs 19.22 at 500m and 21.40 at 4km &mdash;
+  the core is recovered, and the 10km-north and Parishville probes agree with 500m to 0.1 mag.
+  Flares stay bright at 1km (18.7/18.8) but are less extreme than at 500m. The 1km panels
   aggregate native VIIRS 2x2 before applying the identical skyglow model.</p>
   <p><b>What this shows.</b> At 4km the Potsdam core is averaged away (21.4 everywhere &mdash; the halo
   is a flat overestimate of the surroundings with no bright center). At 500m the core is obvious
-  (19.2, a 2.7-mag gradient). But the same 500m view turns Bakken gas flares into blazing SQM 16.6
+  (19.2, a 2.7-mag gradient). But the same 500m view turns Bakken gas flares into blazing SQM 16.7
   dots that no radiance-only algorithm can tell apart from a small city.</p>
-  <p><b>Method.</b> Full-res: VIIRS VJ146A4 2025 AllAngle Snow-Free sampled at native 15 arc-sec;
-  art = 0.11 &times; local radiance + 0.05 &times; sqrt(Walker d<sup>-3</sup> sum to 125km, computed on a
-  4km grid and bilinearly interpolated); SQM = 22 &minus; 2.5&middot;log10(1 + art/0.174). Current: the
+  <p><b>Method.</b> All six panels were rendered by one script
+  (tools/bortle-grid/halo-test/render_all.py) so colors and transparency match exactly.
+  Full-res: VIIRS VJ146A4 2025 AllAngle Snow-Free at native 15 arc-sec; 1km: 2x2 mean of native
+  before the model; art = 0.11 &times; local radiance + 0.05 &times; sqrt(Walker d<sup>-3</sup> sum to
+  125km, computed on a 4km grid and bilinearly interpolated);
+  SQM = 22 &minus; 2.5&middot;log10(1 + art/0.174). Current: the
   app's own tile renderer (src/lib/bortleOverlay.js) against the shipped region data. Colors use the
   app's exact Bortle ramp. This page is a visual test only &mdash; no pipeline or shipped data was changed.</p>
   <p>Population data: European Commission, Joint Research Centre (GHS-POP) was evaluated as a flare/city
@@ -120,8 +123,10 @@ function sqmIcon(label) {
 }
 function makeMap(id, bounds, img, pixelated, markers) {
   const m = L.map(id, { scrollWheelZoom: false }).fitBounds(bounds);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-    { attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19 }).addTo(m);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}',
+    { attribution: '&copy; Esri &copy; OpenStreetMap contributors', maxZoom: 19 }).addTo(m);
+  L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Reference/MapServer/tile/{z}/{y}/{x}',
+    { maxZoom: 19 }).addTo(m);
   L.imageOverlay(img, bounds, pixelated ? { className: 'pixelated' } : {}).addTo(m);
   for (const [lat, lon, label] of markers) L.marker([lat, lon], { icon: sqmIcon(label) }).addTo(m);
   return m;
@@ -129,17 +134,17 @@ function makeMap(id, bounds, img, pixelated, markers) {
 const P = [[43.85,-75.95],[45.55,-73.95]];
 const B = [[47.05,-104.5],[49.05,-101.8]];
 makeMap('map-potsdam-cur', P, 'potsdam_current.png', false, [
-  [44.6699,-74.9813,'21.4'], [44.76,-74.9813,'21.25']]);
+  [44.6699,-74.9813,'21.40'], [44.76,-74.9813,'21.25'], [44.628,-74.814,'21.26']]);
 makeMap('map-potsdam-1km', P, 'potsdam_1km.png', true, [
-  [44.6699,-74.9813,'19.37'], [44.76,-74.9813,'21.94'], [44.628,-74.814,'21.03']]);
+  [44.6699,-74.9813,'19.36'], [44.76,-74.9813,'21.84'], [44.628,-74.814,'21.18']]);
 makeMap('map-potsdam-full', P, 'potsdam_fullres.png', true, [
-  [44.6699,-74.9813,'19.22'], [44.76,-74.9813,'21.92'], [44.628,-74.814,'20.98']]);
+  [44.6699,-74.9813,'19.22'], [44.76,-74.9813,'21.93'], [44.628,-74.814,'20.97']]);
 makeMap('map-bakken-cur', B, 'bakken_current.png', false, [
-  [48.042,-103.463,'20.85'], [48.229,-103.375,'20.85'], [47.85,-102.85,'20.55']]);
+  [48.042,-103.463,'20.85'], [48.229,-103.375,'20.87'], [47.85,-102.85,'20.62']]);
 makeMap('map-bakken-1km', B, 'bakken_1km.png', true, [
-  [48.042,-103.463,'16.81'], [48.229,-103.375,'18.18'], [47.85,-102.85,'20.60']]);
+  [48.042,-103.463,'18.66'], [48.229,-103.375,'18.83'], [47.85,-102.85,'20.79']]);
 makeMap('map-bakken-full', B, 'bakken_fullres.png', true, [
-  [48.042,-103.463,'16.57'], [48.229,-103.375,'16.74'], [47.85,-102.85,'20.44']]);
+  [48.042,-103.463,'20.93'], [48.229,-103.375,'16.74'], [47.85,-102.85,'20.83']]);
 </script>
 </body>
 </html>
