@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Halo test: 4km vs full-res VIIRS</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+  body { font-family: system-ui, sans-serif; background: #0b0e17; color: #dfe5f2; margin: 0; padding: 16px; }
+  h1 { font-size: 1.3rem; margin: 0 0 4px; }
+  p.sub { color: #9aa4bd; max-width: 72ch; line-height: 1.45; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  .panel { background: #111624; border: 1px solid #232c47; border-radius: 10px; padding: 10px; }
+  .panel h2 { font-size: 1rem; margin: 0 0 2px; }
+  .panel .tag { font-size: 0.8rem; color: #9aa4bd; margin-bottom: 8px; }
+  .map { height: 420px; border-radius: 6px; background: #05070d; }
+  img.pixelated { image-rendering: pixelated; }
+  .sqm-label { background: rgba(5,8,15,0.85); color: #fff; border: 1px solid #4a5878;
+    border-radius: 4px; padding: 1px 5px; font-size: 11px; font-weight: 600; white-space: nowrap; }
+  .legend { display: flex; gap: 4px; align-items: center; margin: 14px 0 4px; flex-wrap: wrap; }
+  .legend span.sw { width: 26px; height: 16px; border-radius: 3px; display: inline-block; }
+  .legend small { color: #9aa4bd; margin-left: 8px; }
+  .notes { max-width: 78ch; color: #9aa4bd; font-size: 0.9rem; line-height: 1.5; }
+  .notes b { color: #dfe5f2; }
+  table.probes { border-collapse: collapse; margin: 8px 0 16px; font-size: 0.85rem; }
+  table.probes th, table.probes td { border: 1px solid #232c47; padding: 4px 10px; text-align: left; }
+  table.probes th { background: #151b30; }
+</style>
+</head>
+<body>
+<h1>Small-city halo test: current 4km grid vs full-resolution (500m) VIIRS</h1>
+<p class="sub">
+  The left maps use the exact rendering code and data shipped in the app today (4km fine patches).
+  The right maps sample the same VIIRS Black Marble 2025 data at its native ~500m resolution with the
+  same K1/K2/Walker skyglow model (K1=0.11, K2=0.05, d<sup>-3</sup>, 125km).
+  Potsdam NY shows the halo problem; the Bakken oil fields in North Dakota show why naive
+  full-resolution amplification is dangerous: gas flares look exactly like city cores.
+</p>
+
+<div class="legend" id="legend"></div>
+
+<div class="grid">
+  <div class="panel">
+    <h2>Potsdam, NY &mdash; current (4km)</h2>
+    <div class="tag">Shipped grid. The city is a flat blue wash; no core, no gradient.</div>
+    <div class="map" id="map-potsdam-cur"></div>
+  </div>
+  <div class="panel">
+    <h2>Potsdam, NY &mdash; full-res (500m)</h2>
+    <div class="tag">Same data, native VIIRS resolution. The core appears: SQM 19.2 at center.</div>
+    <div class="map" id="map-potsdam-full"></div>
+  </div>
+  <div class="panel">
+    <h2>Bakken, ND &mdash; current (4km)</h2>
+    <div class="tag">Shipped grid. Flares smeared into a broad B4/B5 regional glow.</div>
+    <div class="map" id="map-bakken-cur"></div>
+  </div>
+  <div class="panel">
+    <h2>Bakken, ND &mdash; full-res (500m)</h2>
+    <div class="tag">Gas flares resolve as intense dots (SQM ~16.6) &mdash; indistinguishable from a city core.</div>
+    <div class="map" id="map-bakken-full"></div>
+  </div>
+</div>
+
+<h2 style="margin-top:20px">Probe values (SQM, lower = brighter)</h2>
+<table class="probes">
+  <tr><th>Location</th><th>Current (4km)</th><th>Full-res (500m)</th></tr>
+  <tr><td>Potsdam center</td><td>21.40</td><td><b>19.22</b></td></tr>
+  <tr><td>10km north of Potsdam</td><td>21.25</td><td>21.92</td></tr>
+  <tr><td>Parishville</td><td>&mdash;</td><td>20.98</td></tr>
+  <tr><td>Bakken flare A</td><td>20.85</td><td><b>16.57</b></td></tr>
+  <tr><td>Bakken flare B</td><td>20.85</td><td><b>16.74</b></td></tr>
+  <tr><td>Bakken dark spot</td><td>20.55</td><td>20.44</td></tr>
+</table>
+
+<div class="notes">
+  <p><b>What this shows.</b> At 4km the Potsdam core is averaged away (21.4 everywhere &mdash; the halo
+  is a flat overestimate of the surroundings with no bright center). At 500m the core is obvious
+  (19.2, a 2.7-mag gradient). But the same 500m view turns Bakken gas flares into blazing SQM 16.6
+  dots that no radiance-only algorithm can tell apart from a small city.</p>
+  <p><b>Method.</b> Full-res: VIIRS VJ146A4 2025 AllAngle Snow-Free sampled at native 15 arc-sec;
+  art = 0.11 &times; local radiance + 0.05 &times; sqrt(Walker d<sup>-3</sup> sum to 125km, computed on a
+  4km grid and bilinearly interpolated); SQM = 22 &minus; 2.5&middot;log10(1 + art/0.174). Current: the
+  app's own tile renderer (src/lib/bortleOverlay.js) against the shipped region data. Colors use the
+  app's exact Bortle ramp. This page is a visual test only &mdash; no pipeline or shipped data was changed.</p>
+  <p>Population data: European Commission, Joint Research Centre (GHS-POP) was evaluated as a flare/city
+  gate in earlier experiments but is not used in these renders.</p>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const RAMP = {1:'#3046aa',2:'#3046aa',3:'#2482cd',4:'#24afaa',5:'#69c35f',6:'#e1d24b',7:'#f2962d',8:'#ec5532',9:'#ffeeee'};
+const legend = document.getElementById('legend');
+legend.innerHTML = 'Bortle: ' + [1,2,3,4,5,6,7,8,9].map(c =>
+  `<span class="sw" style="background:${RAMP[c]}"></span><span>${c}</span>`).join('') +
+  '<small>transparent at B1 &middot; same ramp as the app</small>';
+
+function sqmIcon(label) {
+  return L.divIcon({ className: '', html: `<div class="sqm-label">${label}</div>`, iconSize: null });
+}
+function makeMap(id, bounds, img, pixelated, markers) {
+  const m = L.map(id, { scrollWheelZoom: false }).fitBounds(bounds);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+    { attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19 }).addTo(m);
+  L.imageOverlay(img, bounds, pixelated ? { className: 'pixelated' } : {}).addTo(m);
+  for (const [lat, lon, label] of markers) L.marker([lat, lon], { icon: sqmIcon(label) }).addTo(m);
+  return m;
+}
+const P = [[44.4,-75.3],[45.0,-74.6]];
+const B = [[47.7,-103.6],[48.4,-102.7]];
+makeMap('map-potsdam-cur', P, 'potsdam_current.png', false, [
+  [44.6699,-74.9813,'21.4'], [44.76,-74.9813,'21.25']]);
+makeMap('map-potsdam-full', P, 'potsdam_fullres.png', true, [
+  [44.6699,-74.9813,'19.22'], [44.76,-74.9813,'21.92'], [44.628,-74.814,'20.98']]);
+makeMap('map-bakken-cur', B, 'bakken_current.png', false, [
+  [48.042,-103.463,'20.85'], [48.229,-103.375,'20.85'], [47.85,-102.85,'20.55']]);
+makeMap('map-bakken-full', B, 'bakken_fullres.png', true, [
+  [48.042,-103.463,'16.57'], [48.229,-103.375,'16.74'], [47.85,-102.85,'20.44']]);
+</script>
+</body>
+</html>
