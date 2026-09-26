@@ -9,8 +9,9 @@
   body { font-family: system-ui, sans-serif; background: #0b0e17; color: #dfe5f2; margin: 0; padding: 16px; }
   h1 { font-size: 1.3rem; margin: 0 0 4px; }
   p.sub { color: #9aa4bd; max-width: 72ch; line-height: 1.45; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
-  @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+  .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; margin-top: 12px; }
+  @media (max-width: 1100px) { .grid { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } }
   .panel { background: #111624; border: 1px solid #232c47; border-radius: 10px; padding: 10px; }
   .panel h2 { font-size: 1rem; margin: 0 0 2px; }
   .panel .tag { font-size: 0.8rem; color: #9aa4bd; margin-bottom: 8px; }
@@ -49,6 +50,11 @@
     <div class="map" id="map-potsdam-cur"></div>
   </div>
   <div class="panel">
+    <h2>Potsdam, NY &mdash; mid-res (1km)</h2>
+    <div class="tag">Same model, local radiance aggregated to 1km. The core survives: SQM 19.4 at center.</div>
+    <div class="map" id="map-potsdam-1km"></div>
+  </div>
+  <div class="panel">
     <h2>Potsdam, NY &mdash; full-res (500m)</h2>
     <div class="tag">Same data, native VIIRS resolution. The core appears: SQM 19.2 at center.</div>
     <div class="map" id="map-potsdam-full"></div>
@@ -59,6 +65,11 @@
     <div class="map" id="map-bakken-cur"></div>
   </div>
   <div class="panel">
+    <h2>Bakken, ND &mdash; mid-res (1km)</h2>
+    <div class="tag">Flares still read bright at 1km (SQM ~16.8&ndash;18.2), less extreme than 500m.</div>
+    <div class="map" id="map-bakken-1km"></div>
+  </div>
+  <div class="panel">
     <h2>Bakken, ND &mdash; full-res (500m)</h2>
     <div class="tag">Gas flares resolve as intense dots (SQM ~16.6) &mdash; indistinguishable from a city core.</div>
     <div class="map" id="map-bakken-full"></div>
@@ -67,16 +78,22 @@
 
 <h2 style="margin-top:20px">Probe values (SQM, lower = brighter)</h2>
 <table class="probes">
-  <tr><th>Location</th><th>Current (4km)</th><th>Full-res (500m)</th></tr>
-  <tr><td>Potsdam center</td><td>21.40</td><td><b>19.22</b></td></tr>
-  <tr><td>10km north of Potsdam</td><td>21.25</td><td>21.92</td></tr>
-  <tr><td>Parishville</td><td>&mdash;</td><td>20.98</td></tr>
-  <tr><td>Bakken flare A</td><td>20.85</td><td><b>16.57</b></td></tr>
-  <tr><td>Bakken flare B</td><td>20.85</td><td><b>16.74</b></td></tr>
-  <tr><td>Bakken dark spot</td><td>20.55</td><td>20.44</td></tr>
+  <tr><th>Location</th><th>Current (4km)</th><th>Mid-res (1km)</th><th>Full-res (500m)</th></tr>
+  <tr><td>Potsdam center</td><td>21.40</td><td><b>19.37</b></td><td><b>19.22</b></td></tr>
+  <tr><td>10km north of Potsdam</td><td>21.25</td><td>21.94</td><td>21.92</td></tr>
+  <tr><td>Parishville</td><td>&mdash;</td><td>21.03</td><td>20.98</td></tr>
+  <tr><td>Bakken flare A</td><td>20.85</td><td><b>16.81</b></td><td><b>16.57</b></td></tr>
+  <tr><td>Bakken flare B</td><td>20.85</td><td><b>18.18</b></td><td><b>16.74</b></td></tr>
+  <tr><td>Bakken dark spot</td><td>20.55</td><td>20.60</td><td>20.44</td></tr>
 </table>
 
 <div class="notes">
+  <p><b>Why 1km.</b> Going from 4km to 500m is 64x more cells; 4km to 1km is only 16x.
+  The question is whether 1km is enough to rescue small-city cores. At Potsdam the answer
+  looks like yes: 1km reads SQM 19.37 at the center vs 19.22 at 500m and 21.40 at 4km &mdash;
+  the core is recovered, and the 10km-north and Parishville probes agree with 500m to 0.06 mag.
+  Flares stay bright at 1km (16.8/18.2) but are less extreme than at 500m. The 1km panels
+  aggregate native VIIRS 2x2 before applying the identical skyglow model.</p>
   <p><b>What this shows.</b> At 4km the Potsdam core is averaged away (21.4 everywhere &mdash; the halo
   is a flat overestimate of the surroundings with no bright center). At 500m the core is obvious
   (19.2, a 2.7-mag gradient). But the same 500m view turns Bakken gas flares into blazing SQM 16.6
@@ -113,10 +130,14 @@ const P = [[43.85,-75.95],[45.55,-73.95]];
 const B = [[47.05,-104.5],[49.05,-101.8]];
 makeMap('map-potsdam-cur', P, 'potsdam_current.png', false, [
   [44.6699,-74.9813,'21.4'], [44.76,-74.9813,'21.25']]);
+makeMap('map-potsdam-1km', P, 'potsdam_1km.png', true, [
+  [44.6699,-74.9813,'19.37'], [44.76,-74.9813,'21.94'], [44.628,-74.814,'21.03']]);
 makeMap('map-potsdam-full', P, 'potsdam_fullres.png', true, [
   [44.6699,-74.9813,'19.22'], [44.76,-74.9813,'21.92'], [44.628,-74.814,'20.98']]);
 makeMap('map-bakken-cur', B, 'bakken_current.png', false, [
   [48.042,-103.463,'20.85'], [48.229,-103.375,'20.85'], [47.85,-102.85,'20.55']]);
+makeMap('map-bakken-1km', B, 'bakken_1km.png', true, [
+  [48.042,-103.463,'16.81'], [48.229,-103.375,'18.18'], [47.85,-102.85,'20.60']]);
 makeMap('map-bakken-full', B, 'bakken_fullres.png', true, [
   [48.042,-103.463,'16.57'], [48.229,-103.375,'16.74'], [47.85,-102.85,'20.44']]);
 </script>
