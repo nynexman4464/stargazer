@@ -36,6 +36,8 @@
   same K1/K2/Walker skyglow model (K1=0.11, K2=0.05, d<sup>-3</sup>, 125km).
   Potsdam NY shows the halo problem; the Bakken oil fields in North Dakota show why naive
   full-resolution amplification is dangerous: gas flares look exactly like city cores.
+  Each view is ~2.8x wider than the first version so the 4km halo can be judged in context
+  (Potsdam spans 1.7&deg; lat &times; 2.0&deg; lon; Bakken 2.0&deg; &times; 2.7&deg;).
 </p>
 
 <div class="legend" id="legend"></div>
@@ -107,8 +109,8 @@ function makeMap(id, bounds, img, pixelated, markers) {
   for (const [lat, lon, label] of markers) L.marker([lat, lon], { icon: sqmIcon(label) }).addTo(m);
   return m;
 }
-const P = [[44.4,-75.3],[45.0,-74.6]];
-const B = [[47.7,-103.6],[48.4,-102.7]];
+const P = [[43.85,-75.95],[45.55,-73.95]];
+const B = [[47.05,-104.5],[49.05,-101.8]];
 makeMap('map-potsdam-cur', P, 'potsdam_current.png', false, [
   [44.6699,-74.9813,'21.4'], [44.76,-74.9813,'21.25']]);
 makeMap('map-potsdam-full', P, 'potsdam_fullres.png', true, [
