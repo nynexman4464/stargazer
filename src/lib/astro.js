@@ -7,6 +7,7 @@ import {
   ecfToLookAngles,
 } from 'satellite.js';
 import { getRegionSync, ensureRegion, sampleRegionByte } from './bortleRegions.js';
+import { sample1kmByte, sample1kmByteAsync } from './bortle1km.js';
 
 /* ============================== config ============================== */
 export const DEFAULT_LOC = { name: 'Medford, MA', lat: 42.4184, lon: -71.1062 };
@@ -61,6 +62,9 @@ export function estimateBortle(lat, lon) {
     ensureRegion(lat, lon);
     return null;
   }
+  // 1km refinement first (DreamHost backend), then 4km fine -> coarse.
+  const q1k = sample1kmByte(lat, lon);
+  if (q1k != null) return bortleResult(Math.round(q1k), 'Black Marble 2025');
   const q = sampleRegionByte(region, lat, lon);
   if (q == null) return null;
   return bortleResult(q, 'Black Marble 2025');
@@ -71,6 +75,9 @@ export async function estimateBortleAsync(lat, lon) {
   if (typeof lat !== 'number' || typeof lon !== 'number') return null;
   const region = await ensureRegion(lat, lon);
   if (!region) return null;
+  // 1km refinement first (DreamHost backend), then 4km fine -> coarse.
+  const q1k = await sample1kmByteAsync(lat, lon);
+  if (q1k != null) return bortleResult(Math.round(q1k), 'Black Marble 2025');
   const q = sampleRegionByte(region, lat, lon);
   if (q == null) return null;
   return bortleResult(q, 'Black Marble 2025');
