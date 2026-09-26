@@ -1,0 +1,778 @@
+[
+ {
+  "id": "frosty-drew",
+  "known": 4,
+  "byte": 109,
+  "sqm": 21.45,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "myles-standish",
+  "known": 4,
+  "byte": 106,
+  "sqm": 21.3,
+  "pred": 4,
+  "ok": true
+ },
+ {
+  "id": "race-point",
+  "known": 4,
+  "byte": 113,
+  "sqm": 21.65,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "heins-farm",
+  "known": 4,
+  "byte": 101,
+  "sqm": 21.05,
+  "pred": 4,
+  "ok": true
+ },
+ {
+  "id": "kancamagus",
+  "known": 2,
+  "byte": 118,
+  "sqm": 21.9,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "kd-dubuque",
+  "known": 3,
+  "byte": 109,
+  "sqm": 21.45,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "death-valley",
+  "known": 2,
+  "byte": 120,
+  "sqm": 22.0,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "joshua-tree",
+  "known": 2,
+  "byte": 113,
+  "sqm": 21.65,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "anza-borrego",
+  "known": 2,
+  "byte": 112,
+  "sqm": 21.6,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "lassen-volcanic",
+  "known": 2,
+  "byte": 117,
+  "sqm": 21.85,
+  "pred": 2,
+  "ok": true
+ },
+ {
+  "id": "great-basin",
+  "known": 2,
+  "byte": 120,
+  "sqm": 22.0,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "massacre-rim",
+  "known": 1,
+  "byte": 120,
+  "sqm": 22.0,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "bryce-canyon",
+  "known": 2,
+  "byte": 117,
+  "sqm": 21.85,
+  "pred": 2,
+  "ok": true
+ },
+ {
+  "id": "arches",
+  "known": 2,
+  "byte": 118,
+  "sqm": 21.9,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "canyonlands",
+  "known": 2,
+  "byte": 119,
+  "sqm": 21.95,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "capitol-reef",
+  "known": 2,
+  "byte": 120,
+  "sqm": 22.0,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "zion",
+  "known": 3,
+  "byte": 112,
+  "sqm": 21.6,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "natural-bridges",
+  "known": 2,
+  "byte": 120,
+  "sqm": 22.0,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "dead-horse-point",
+  "known": 2,
+  "byte": 118,
+  "sqm": 21.9,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "goblin-valley",
+  "known": 2,
+  "byte": 120,
+  "sqm": 22.0,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "antelope-island",
+  "known": 3,
+  "byte": 101,
+  "sqm": 21.05,
+  "pred": 4,
+  "ok": true
+ },
+ {
+  "id": "kodachrome-basin",
+  "known": 2,
+  "byte": 119,
+  "sqm": 21.95,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "dinosaur",
+  "known": 2,
+  "byte": 119,
+  "sqm": 21.95,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "black-canyon-gunnison",
+  "known": 2,
+  "byte": 111,
+  "sqm": 21.55,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "great-sand-dunes",
+  "known": 2,
+  "byte": 120,
+  "sqm": 22.0,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "florissant",
+  "known": 3,
+  "byte": 106,
+  "sqm": 21.3,
+  "pred": 4,
+  "ok": true
+ },
+ {
+  "id": "chaco",
+  "known": 2,
+  "byte": 119,
+  "sqm": 21.95,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "cosmic-campground",
+  "known": 2,
+  "byte": 120,
+  "sqm": 22.0,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "valles-caldera",
+  "known": 2,
+  "byte": 113,
+  "sqm": 21.65,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "clayton-lake",
+  "known": 2,
+  "byte": 118,
+  "sqm": 21.9,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "petrified-forest",
+  "known": 2,
+  "byte": 118,
+  "sqm": 21.9,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "grand-canyon",
+  "known": 2,
+  "byte": 118,
+  "sqm": 21.9,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "kartchner-caverns",
+  "known": 2,
+  "byte": 114,
+  "sqm": 21.7,
+  "pred": 2,
+  "ok": true
+ },
+ {
+  "id": "oracle",
+  "known": 3,
+  "byte": 109,
+  "sqm": 21.45,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "big-bend",
+  "known": 1,
+  "byte": 120,
+  "sqm": 22.0,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "davis-mountains",
+  "known": 2,
+  "byte": 118,
+  "sqm": 21.9,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "enchanted-rock",
+  "known": 3,
+  "byte": 115,
+  "sqm": 21.75,
+  "pred": 2,
+  "ok": true
+ },
+ {
+  "id": "south-llano-river",
+  "known": 3,
+  "byte": 119,
+  "sqm": 21.95,
+  "pred": 1,
+  "ok": false
+ },
+ {
+  "id": "cherry-springs",
+  "known": 2,
+  "byte": 118,
+  "sqm": 21.9,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "watoga",
+  "known": 2,
+  "byte": 117,
+  "sqm": 21.85,
+  "pred": 2,
+  "ok": true
+ },
+ {
+  "id": "staunton-river",
+  "known": 3,
+  "byte": 113,
+  "sqm": 21.65,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "kissimmee-prairie",
+  "known": 2,
+  "byte": 111,
+  "sqm": 21.55,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "stephen-foster",
+  "known": 2,
+  "byte": 113,
+  "sqm": 21.65,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "pickett",
+  "known": 3,
+  "byte": 106,
+  "sqm": 21.3,
+  "pred": 4,
+  "ok": true
+ },
+ {
+  "id": "buffalo-river",
+  "known": 2,
+  "byte": 105,
+  "sqm": 21.25,
+  "pred": 4,
+  "ok": false
+ },
+ {
+  "id": "petit-jean",
+  "known": 3,
+  "byte": 109,
+  "sqm": 21.45,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "merritt-reservoir",
+  "known": 2,
+  "byte": 119,
+  "sqm": 21.95,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "theodore-roosevelt",
+  "known": 2,
+  "byte": 115,
+  "sqm": 21.75,
+  "pred": 2,
+  "ok": true
+ },
+ {
+  "id": "newport",
+  "known": 3,
+  "byte": 118,
+  "sqm": 21.9,
+  "pred": 1,
+  "ok": false
+ },
+ {
+  "id": "headlands",
+  "known": 2,
+  "byte": 114,
+  "sqm": 21.7,
+  "pred": 2,
+  "ok": true
+ },
+ {
+  "id": "keweenaw",
+  "known": 2,
+  "byte": 120,
+  "sqm": 22.0,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "craters-of-the-moon",
+  "known": 2,
+  "byte": 118,
+  "sqm": 21.9,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "central-idaho",
+  "known": 2,
+  "byte": 119,
+  "sqm": 21.95,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "glacier",
+  "known": 2,
+  "byte": 115,
+  "sqm": 21.75,
+  "pred": 2,
+  "ok": true
+ },
+ {
+  "id": "boundary-waters",
+  "known": 1,
+  "byte": 113,
+  "sqm": 21.65,
+  "pred": 3,
+  "ok": false
+ },
+ {
+  "id": "voyageurs",
+  "known": 2,
+  "byte": 119,
+  "sqm": 21.95,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "prineville-reservoir",
+  "known": 2,
+  "byte": 113,
+  "sqm": 21.65,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "oregon-outback",
+  "known": 1,
+  "byte": 120,
+  "sqm": 22.0,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "katahdin",
+  "known": 2,
+  "byte": 120,
+  "sqm": 22.0,
+  "pred": 1,
+  "ok": true
+ },
+ {
+  "id": "medford-ma",
+  "known": 8,
+  "byte": 50,
+  "sqm": 18.5,
+  "pred": 7,
+  "ok": true
+ },
+ {
+  "id": "new-york-ny",
+  "known": 9,
+  "byte": 41,
+  "sqm": 18.05,
+  "pred": 8,
+  "ok": true
+ },
+ {
+  "id": "san-jose-ca",
+  "known": 8,
+  "byte": 46,
+  "sqm": 18.3,
+  "pred": 7,
+  "ok": true
+ },
+ {
+  "id": "ifa-vienna",
+  "known": 6,
+  "byte": 75,
+  "sqm": 19.75,
+  "pred": 5,
+  "ok": true
+ },
+ {
+  "id": "lsm-linz",
+  "known": 6,
+  "byte": 76,
+  "sqm": 19.8,
+  "pred": 5,
+  "ok": true
+ },
+ {
+  "id": "lgo-linz",
+  "known": 6,
+  "byte": 70,
+  "sqm": 19.5,
+  "pred": 5,
+  "ok": true
+ },
+ {
+  "id": "wel-wels",
+  "known": 6,
+  "byte": 90,
+  "sqm": 20.5,
+  "pred": 5,
+  "ok": true
+ },
+ {
+  "id": "tra-traun",
+  "known": 5,
+  "byte": 81,
+  "sqm": 20.05,
+  "pred": 5,
+  "ok": true
+ },
+ {
+  "id": "sty-steyr",
+  "known": 5,
+  "byte": 107,
+  "sqm": 21.35,
+  "pred": 4,
+  "ok": true
+ },
+ {
+  "id": "pas-pashing",
+  "known": 5,
+  "byte": 101,
+  "sqm": 21.05,
+  "pred": 4,
+  "ok": true
+ },
+ {
+  "id": "bra-braunau",
+  "known": 5,
+  "byte": 108,
+  "sqm": 21.4,
+  "pred": 3,
+  "ok": false
+ },
+ {
+  "id": "gri-grieskirchen",
+  "known": 5,
+  "byte": 114,
+  "sqm": 21.7,
+  "pred": 2,
+  "ok": false
+ },
+ {
+  "id": "fre-freistadt",
+  "known": 5,
+  "byte": 108,
+  "sqm": 21.4,
+  "pred": 3,
+  "ok": false
+ },
+ {
+  "id": "voe-voecklabruck",
+  "known": 5,
+  "byte": 101,
+  "sqm": 21.05,
+  "pred": 4,
+  "ok": true
+ },
+ {
+  "id": "mat-mattighofen",
+  "known": 5,
+  "byte": 105,
+  "sqm": 21.25,
+  "pred": 4,
+  "ok": true
+ },
+ {
+  "id": "leiden-nl",
+  "known": 6,
+  "byte": 62,
+  "sqm": 19.1,
+  "pred": 6,
+  "ok": true
+ },
+ {
+  "id": "rijswijk-nl",
+  "known": 8,
+  "byte": 51,
+  "sqm": 18.55,
+  "pred": 7,
+  "ok": true
+ },
+ {
+  "id": "zernike-nl",
+  "known": 5,
+  "byte": 79,
+  "sqm": 19.95,
+  "pred": 5,
+  "ok": true
+ },
+ {
+  "id": "deheld-nl",
+  "known": 5,
+  "byte": 77,
+  "sqm": 19.85,
+  "pred": 5,
+  "ok": true
+ },
+ {
+  "id": "dezilk-nl",
+  "known": 5,
+  "byte": 88,
+  "sqm": 20.4,
+  "pred": 5,
+  "ok": true
+ },
+ {
+  "id": "boston-common",
+  "known": 9,
+  "byte": 32,
+  "sqm": 17.6,
+  "pred": 9,
+  "ok": true
+ },
+ {
+  "id": "cambridge-common",
+  "known": 9,
+  "byte": 31,
+  "sqm": 17.55,
+  "pred": 9,
+  "ok": true
+ },
+ {
+  "id": "danehy-park",
+  "known": 9,
+  "byte": 46,
+  "sqm": 18.3,
+  "pred": 7,
+  "ok": false
+ },
+ {
+  "id": "arlington-ma",
+  "known": 8,
+  "byte": 71,
+  "sqm": 19.55,
+  "pred": 5,
+  "ok": false
+ },
+ {
+  "id": "lincoln-ma",
+  "known": 7,
+  "byte": 79,
+  "sqm": 19.95,
+  "pred": 5,
+  "ok": false
+ },
+ {
+  "id": "potsdam-babelsberg",
+  "known": 5,
+  "byte": 80,
+  "sqm": 20.0,
+  "pred": 5,
+  "ok": true
+ },
+ {
+  "id": "badajoz-es",
+  "known": 7,
+  "byte": 90,
+  "sqm": 20.5,
+  "pred": 5,
+  "ok": false
+ },
+ {
+  "id": "berlin-steglitz",
+  "known": 6,
+  "byte": 61,
+  "sqm": 19.05,
+  "pred": 6,
+  "ok": true
+ },
+ {
+  "id": "bod-at",
+  "known": 2,
+  "byte": 112,
+  "sqm": 21.6,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "zoe-at",
+  "known": 1,
+  "byte": 114,
+  "sqm": 21.7,
+  "pred": 2,
+  "ok": true
+ },
+ {
+  "id": "los-at",
+  "known": 2,
+  "byte": 111,
+  "sqm": 21.55,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "kri-at",
+  "known": 1,
+  "byte": 116,
+  "sqm": 21.8,
+  "pred": 2,
+  "ok": true
+ },
+ {
+  "id": "feu-at",
+  "known": 2,
+  "byte": 111,
+  "sqm": 21.55,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "gru-at",
+  "known": 3,
+  "byte": 107,
+  "sqm": 21.35,
+  "pred": 4,
+  "ok": true
+ },
+ {
+  "id": "kid-at",
+  "known": 3,
+  "byte": 107,
+  "sqm": 21.35,
+  "pred": 4,
+  "ok": true
+ },
+ {
+  "id": "uli-at",
+  "known": 3,
+  "byte": 112,
+  "sqm": 21.6,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "gis-at",
+  "known": 4,
+  "byte": 108,
+  "sqm": 21.4,
+  "pred": 3,
+  "ok": true
+ },
+ {
+  "id": "mun-at",
+  "known": 4,
+  "byte": 114,
+  "sqm": 21.7,
+  "pred": 2,
+  "ok": false
+ }
+]
