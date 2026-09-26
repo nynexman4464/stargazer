@@ -1,0 +1,436 @@
+[
+ {
+  "id": "frosty-drew",
+  "known": 4,
+  "pred": 3,
+  "ok": true,
+  "sqm": 21.45
+ },
+ {
+  "id": "myles-standish",
+  "known": 4,
+  "pred": 4,
+  "ok": true,
+  "sqm": 20.91
+ },
+ {
+  "id": "race-point",
+  "known": 4,
+  "pred": 5,
+  "ok": true,
+  "sqm": 20.54
+ },
+ {
+  "id": "heins-farm",
+  "known": 4,
+  "pred": 4,
+  "ok": true,
+  "sqm": 21.28
+ },
+ {
+  "id": "kancamagus",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 21.9
+ },
+ {
+  "id": "kd-dubuque",
+  "known": 3,
+  "pred": 3,
+  "ok": true,
+  "sqm": 21.43
+ },
+ {
+  "id": "death-valley",
+  "known": 2,
+  "pred": 3,
+  "ok": true,
+  "sqm": 21.53
+ },
+ {
+  "id": "joshua-tree",
+  "known": 2,
+  "pred": 3,
+  "ok": true,
+  "sqm": 21.62
+ },
+ {
+  "id": "anza-borrego",
+  "known": 2,
+  "pred": 5,
+  "ok": false,
+  "sqm": 20.4
+ },
+ {
+  "id": "lassen-volcanic",
+  "known": 2,
+  "pred": 2,
+  "ok": true,
+  "sqm": 21.83
+ },
+ {
+  "id": "great-basin",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 22.0
+ },
+ {
+  "id": "massacre-rim",
+  "known": 1,
+  "pred": 1,
+  "ok": true,
+  "sqm": 22.0
+ },
+ {
+  "id": "bryce-canyon",
+  "known": 2,
+  "pred": 2,
+  "ok": true,
+  "sqm": 21.86
+ },
+ {
+  "id": "arches",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 21.92
+ },
+ {
+  "id": "canyonlands",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 21.98
+ },
+ {
+  "id": "capitol-reef",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 22.0
+ },
+ {
+  "id": "zion",
+  "known": 3,
+  "pred": 5,
+  "ok": false,
+  "sqm": 20.58
+ },
+ {
+  "id": "natural-bridges",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 22.0
+ },
+ {
+  "id": "dead-horse-point",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 21.92
+ },
+ {
+  "id": "goblin-valley",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 22.0
+ },
+ {
+  "id": "antelope-island",
+  "known": 3,
+  "pred": 4,
+  "ok": true,
+  "sqm": 21.08
+ },
+ {
+  "id": "kodachrome-basin",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 21.96
+ },
+ {
+  "id": "dinosaur",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 21.94
+ },
+ {
+  "id": "black-canyon-gunnison",
+  "known": 2,
+  "pred": 3,
+  "ok": true,
+  "sqm": 21.55
+ },
+ {
+  "id": "great-sand-dunes",
+  "known": 2,
+  "pred": 5,
+  "ok": false,
+  "sqm": 19.57
+ },
+ {
+  "id": "florissant",
+  "known": 3,
+  "pred": 4,
+  "ok": true,
+  "sqm": 21.36
+ },
+ {
+  "id": "chaco",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 21.94
+ },
+ {
+  "id": "cosmic-campground",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 21.99
+ },
+ {
+  "id": "valles-caldera",
+  "known": 2,
+  "pred": 4,
+  "ok": false,
+  "sqm": 21.36
+ },
+ {
+  "id": "clayton-lake",
+  "known": 2,
+  "pred": 2,
+  "ok": true,
+  "sqm": 21.9
+ },
+ {
+  "id": "petrified-forest",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 21.91
+ },
+ {
+  "id": "grand-canyon",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 21.92
+ },
+ {
+  "id": "kartchner-caverns",
+  "known": 2,
+  "pred": 2,
+  "ok": true,
+  "sqm": 21.7
+ },
+ {
+  "id": "oracle",
+  "known": 3,
+  "pred": 5,
+  "ok": false,
+  "sqm": 20.56
+ },
+ {
+  "id": "big-bend",
+  "known": 1,
+  "pred": 1,
+  "ok": true,
+  "sqm": 22.0
+ },
+ {
+  "id": "davis-mountains",
+  "known": 2,
+  "pred": 4,
+  "ok": false,
+  "sqm": 21.16
+ },
+ {
+  "id": "enchanted-rock",
+  "known": 3,
+  "pred": 2,
+  "ok": true,
+  "sqm": 21.76
+ },
+ {
+  "id": "south-llano-river",
+  "known": 3,
+  "pred": 1,
+  "ok": false,
+  "sqm": 21.96
+ },
+ {
+  "id": "cherry-springs",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 21.93
+ },
+ {
+  "id": "watoga",
+  "known": 2,
+  "pred": 2,
+  "ok": true,
+  "sqm": 21.82
+ },
+ {
+  "id": "staunton-river",
+  "known": 3,
+  "pred": 4,
+  "ok": true,
+  "sqm": 21.25
+ },
+ {
+  "id": "kissimmee-prairie",
+  "known": 2,
+  "pred": 3,
+  "ok": true,
+  "sqm": 21.56
+ },
+ {
+  "id": "stephen-foster",
+  "known": 2,
+  "pred": 4,
+  "ok": false,
+  "sqm": 20.94
+ },
+ {
+  "id": "pickett",
+  "known": 3,
+  "pred": 4,
+  "ok": true,
+  "sqm": 21.29
+ },
+ {
+  "id": "buffalo-river",
+  "known": 2,
+  "pred": 8,
+  "ok": false,
+  "sqm": 18.19
+ },
+ {
+  "id": "petit-jean",
+  "known": 3,
+  "pred": 3,
+  "ok": true,
+  "sqm": 21.45
+ },
+ {
+  "id": "merritt-reservoir",
+  "known": 2,
+  "pred": 1,
+  "ok": true,
+  "sqm": 21.94
+ },
+ {
+  "id": "theodore-roosevelt",
+  "known": 2,
+  "pred": 5,
+  "ok": false,
+  "sqm": 20.07
+ },
+ {
+  "id": "newport",
+  "known": 3,
+  "pred": 2,
+  "ok": true,
+  "sqm": 21.88
+ },
+ {
+  "id": "headlands",
+  "known": 2,
+  "pred": 3,
+  "ok": true,
+  "sqm": 21.53
+ },
+ {
+  "id": "keweenaw",
+  "known": 2,
+  "pred": 3,
+  "ok": true,
+  "sqm": 21.5
+ },
+ {
+  "id": "craters-of-the-moon",
+  "known": 2,
+  "pred": 2,
+  "ok": true,
+  "sqm": 21.89
+ },
+ {
+  "id": "central-idaho",
+  "known": 2,
+  "pred": 5,
+  "ok": false,
+  "sqm": 19.99
+ },
+ {
+  "id": "glacier",
+  "known": 2,
+  "pred": 2,
+  "ok": true,
+  "sqm": 21.76
+ },
+ {
+  "id": "boundary-waters",
+  "known": 1,
+  "pred": 5,
+  "ok": false,
+  "sqm": 19.5
+ },
+ {
+  "id": "voyageurs",
+  "known": 2,
+  "pred": 3,
+  "ok": true,
+  "sqm": 21.62
+ },
+ {
+  "id": "prineville-reservoir",
+  "known": 2,
+  "pred": 3,
+  "ok": true,
+  "sqm": 21.67
+ },
+ {
+  "id": "oregon-outback",
+  "known": 1,
+  "pred": 6,
+  "ok": false,
+  "sqm": 19.44
+ },
+ {
+  "id": "katahdin",
+  "known": 2,
+  "pred": 5,
+  "ok": false,
+  "sqm": 20.57
+ },
+ {
+  "id": "medford-ma",
+  "known": 8,
+  "pred": 7,
+  "ok": true,
+  "sqm": 18.28
+ },
+ {
+  "id": "new-york-ny",
+  "known": 9,
+  "pred": 9,
+  "ok": true,
+  "sqm": 16.85
+ },
+ {
+  "id": "san-jose-ca",
+  "known": 8,
+  "pred": 9,
+  "ok": true,
+  "sqm": 17.32
+ }
+]
