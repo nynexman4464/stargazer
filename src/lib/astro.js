@@ -6,8 +6,8 @@ import {
   eciToEcf,
   ecfToLookAngles,
 } from 'satellite.js';
-import { getRegionSync, ensureRegion, sampleRegionByte } from './bortleRegions.js';
-import { sample1kmByte, sample1kmByteAsync } from './bortle1km.js';
+import { getRegionSync, ensureRegion, sampleRegionByte, regionIdFor } from './bortleRegions.js';
+import { sample1kmByte, sample1kmByteAsync, get1kmRegionSync } from './bortle1km.js';
 
 /* ============================== config ============================== */
 export const DEFAULT_LOC = { name: 'Medford, MA', lat: 42.4184, lon: -71.1062 };
@@ -70,14 +70,22 @@ export function estimateBortle(lat, lon) {
   return bortleResult(q, 'Black Marble 2025');
 }
 
-/* Async version: ensures the region is loaded before sampling. */
+/* Async version: ensures the region is loaded before sampling.
+   Uses 1km only if already cached (from map tiles); never blocks the
+   popup on a multi-MB chunk download. Falls back to 4km immediately. */
 export async function estimateBortleAsync(lat, lon) {
   if (typeof lat !== 'number' || typeof lon !== 'number') return null;
   const region = await ensureRegion(lat, lon);
   if (!region) return null;
-  // 1km refinement first (DreamHost backend), then 4km fine -> coarse.
-  const q1k = await sample1kmByteAsync(lat, lon);
-  if (q1k != null) return bortleResult(Math.round(q1k), 'Black Marble 2025');
+  // 1km refinement only if already in memory; do not trigger download.
+  try {
+    const rid = regionIdFor(lat, lon);
+    const reg1k = rid ? get1kmRegionSync(rid) : null;
+    if (reg1k) {
+      const q1k = sample1kmByte(lat, lon);
+      if (q1k != null) return bortleResult(Math.round(q1k), 'Black Marble 2025');
+    }
+  } catch { /* fall through to 4km */ }
   const q = sampleRegionByte(region, lat, lon);
   if (q == null) return null;
   return bortleResult(q, 'Black Marble 2025');
