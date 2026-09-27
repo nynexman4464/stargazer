@@ -57,7 +57,8 @@ if (isset($_GET['manifest'])) {
 // Chunk upload mode.
 $chunkId  = isset($_GET['chunk_id'])  ? $_GET['chunk_id']  : '';
 $regionId = isset($_GET['region_id']) ? $_GET['region_id'] : '';
-if (!preg_match('/^r[0-3][0-7]_q\d+$/', $chunkId) ||
+// Allow version suffix for A/B testing (e.g. r01_q15_v2)
+if (!preg_match('/^r[0-3][0-7]_q\d+(_v\d+)?$/', $chunkId) ||
     !preg_match('/^r[0-3][0-7]$/', $regionId)) {
     http_response_code(400);
     echo json_encode(['error' => 'bad chunk_id or region_id']);
