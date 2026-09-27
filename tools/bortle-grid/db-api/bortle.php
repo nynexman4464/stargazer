@@ -4,9 +4,9 @@
 //   GET ?manifest=1        -> manifest JSON {version, cellM, per, regions: {...}}
 //   GET ?region=<chunkId>  -> raw chunk bytes (application/octet-stream)
 //
-// chunkId looks like "r00_q0" (region r00, chunk 0). Chunks are immutable:
-// the filename encodes the data version, so responses carry a 1-year
-// immutable cache header.
+// chunkId looks like "r00_q0" (region r00, chunk 0). Chunk IDs are stable
+// across data rebuilds; responses use short cache lifetimes so updates
+// propagate within minutes.
 //
 // Deploy: copy this file, config.php, and manifest.json to the DreamHost
 // web directory serving /api/ (e.g. public_html/api/).
@@ -53,7 +53,7 @@ if (isset($_GET['manifest'])) {
         $manifest = file_get_contents($path);
     }
     header('Content-Type: application/json');
-    header('Cache-Control: public, max-age=3600'); // manifest may gain regions
+    header('Cache-Control: public, max-age=60'); // short: model updates must propagate
     echo $manifest;
     exit;
 }
@@ -89,6 +89,8 @@ if (!$row) {
 
 header('Content-Type: application/octet-stream');
 header('Content-Length: ' . $row['nbytes']);
-header('Cache-Control: public, max-age=31536000, immutable');
+// Chunk IDs are stable across rebuilds, so do NOT cache immutably.
+// Short max-age so model updates propagate within minutes.
+header('Cache-Control: public, max-age=300, must-revalidate');
 header('Accept-Ranges: bytes');
 echo $row['data'];
