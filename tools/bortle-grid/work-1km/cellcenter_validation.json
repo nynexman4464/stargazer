@@ -1,0 +1,1166 @@
+[
+ {
+  "id": "lassen-volcanic",
+  "known": 2,
+  "cell_2x2": [
+   21.83,
+   2
+  ],
+  "cell_med7": [
+   21.83,
+   2
+  ]
+ },
+ {
+  "id": "prineville-reservoir",
+  "known": 2,
+  "cell_2x2": [
+   21.67,
+   3
+  ],
+  "cell_med7": [
+   21.67,
+   3
+  ]
+ },
+ {
+  "id": "oregon-outback",
+  "known": 1,
+  "cell_2x2": [
+   19.71,
+   5
+  ],
+  "cell_med7": [
+   20.64,
+   5
+  ]
+ },
+ {
+  "id": "san-jose-ca",
+  "known": 8,
+  "cell_2x2": [
+   17.28,
+   9
+  ],
+  "cell_med7": [
+   18.01,
+   8
+  ]
+ },
+ {
+  "id": "massacre-rim",
+  "known": 1,
+  "cell_2x2": [
+   22.0,
+   1
+  ],
+  "cell_med7": [
+   22.0,
+   1
+  ]
+ },
+ {
+  "id": "antelope-island",
+  "known": 3,
+  "cell_2x2": [
+   21.08,
+   4
+  ],
+  "cell_med7": [
+   21.08,
+   4
+  ]
+ },
+ {
+  "id": "craters-of-the-moon",
+  "known": 2,
+  "cell_2x2": [
+   21.89,
+   2
+  ],
+  "cell_med7": [
+   21.89,
+   2
+  ]
+ },
+ {
+  "id": "central-idaho",
+  "known": 2,
+  "cell_2x2": [
+   20.27,
+   5
+  ],
+  "cell_med7": [
+   21.11,
+   4
+  ]
+ },
+ {
+  "id": "glacier",
+  "known": 2,
+  "cell_2x2": [
+   21.76,
+   2
+  ],
+  "cell_med7": [
+   21.76,
+   2
+  ]
+ },
+ {
+  "id": "death-valley",
+  "known": 2,
+  "cell_2x2": [
+   21.28,
+   4
+  ],
+  "cell_med7": [
+   22.0,
+   1
+  ]
+ },
+ {
+  "id": "joshua-tree",
+  "known": 2,
+  "cell_2x2": [
+   21.62,
+   3
+  ],
+  "cell_med7": [
+   21.62,
+   3
+  ]
+ },
+ {
+  "id": "anza-borrego",
+  "known": 2,
+  "cell_2x2": [
+   20.44,
+   5
+  ],
+  "cell_med7": [
+   21.3,
+   4
+  ]
+ },
+ {
+  "id": "great-basin",
+  "known": 2,
+  "cell_2x2": [
+   22.0,
+   1
+  ],
+  "cell_med7": [
+   22.0,
+   1
+  ]
+ },
+ {
+  "id": "bryce-canyon",
+  "known": 2,
+  "cell_2x2": [
+   21.86,
+   2
+  ],
+  "cell_med7": [
+   21.86,
+   2
+  ]
+ },
+ {
+  "id": "capitol-reef",
+  "known": 2,
+  "cell_2x2": [
+   22.0,
+   1
+  ],
+  "cell_med7": [
+   22.0,
+   1
+  ]
+ },
+ {
+  "id": "zion",
+  "known": 3,
+  "cell_2x2": [
+   20.65,
+   5
+  ],
+  "cell_med7": [
+   21.63,
+   3
+  ]
+ },
+ {
+  "id": "goblin-valley",
+  "known": 2,
+  "cell_2x2": [
+   22.0,
+   1
+  ],
+  "cell_med7": [
+   22.0,
+   1
+  ]
+ },
+ {
+  "id": "kodachrome-basin",
+  "known": 2,
+  "cell_2x2": [
+   21.96,
+   1
+  ],
+  "cell_med7": [
+   21.96,
+   1
+  ]
+ },
+ {
+  "id": "grand-canyon",
+  "known": 2,
+  "cell_2x2": [
+   21.92,
+   1
+  ],
+  "cell_med7": [
+   21.92,
+   1
+  ]
+ },
+ {
+  "id": "kartchner-caverns",
+  "known": 2,
+  "cell_2x2": [
+   21.7,
+   2
+  ],
+  "cell_med7": [
+   21.7,
+   2
+  ]
+ },
+ {
+  "id": "oracle",
+  "known": 3,
+  "cell_2x2": [
+   20.74,
+   5
+  ],
+  "cell_med7": [
+   21.16,
+   4
+  ]
+ },
+ {
+  "id": "dinosaur",
+  "known": 2,
+  "cell_2x2": [
+   21.94,
+   1
+  ],
+  "cell_med7": [
+   21.94,
+   1
+  ]
+ },
+ {
+  "id": "merritt-reservoir",
+  "known": 2,
+  "cell_2x2": [
+   21.94,
+   1
+  ],
+  "cell_med7": [
+   21.94,
+   1
+  ]
+ },
+ {
+  "id": "theodore-roosevelt",
+  "known": 2,
+  "cell_2x2": [
+   19.57,
+   5
+  ],
+  "cell_med7": [
+   21.47,
+   3
+  ]
+ },
+ {
+  "id": "arches",
+  "known": 2,
+  "cell_2x2": [
+   21.92,
+   1
+  ],
+  "cell_med7": [
+   21.92,
+   1
+  ]
+ },
+ {
+  "id": "canyonlands",
+  "known": 2,
+  "cell_2x2": [
+   21.98,
+   1
+  ],
+  "cell_med7": [
+   21.98,
+   1
+  ]
+ },
+ {
+  "id": "natural-bridges",
+  "known": 2,
+  "cell_2x2": [
+   22.0,
+   1
+  ],
+  "cell_med7": [
+   22.0,
+   1
+  ]
+ },
+ {
+  "id": "dead-horse-point",
+  "known": 2,
+  "cell_2x2": [
+   21.92,
+   1
+  ],
+  "cell_med7": [
+   21.92,
+   1
+  ]
+ },
+ {
+  "id": "black-canyon-gunnison",
+  "known": 2,
+  "cell_2x2": [
+   21.55,
+   3
+  ],
+  "cell_med7": [
+   21.55,
+   3
+  ]
+ },
+ {
+  "id": "great-sand-dunes",
+  "known": 2,
+  "cell_2x2": [
+   19.47,
+   5
+  ],
+  "cell_med7": [
+   19.58,
+   5
+  ]
+ },
+ {
+  "id": "florissant",
+  "known": 3,
+  "cell_2x2": [
+   21.36,
+   4
+  ],
+  "cell_med7": [
+   21.36,
+   4
+  ]
+ },
+ {
+  "id": "chaco",
+  "known": 2,
+  "cell_2x2": [
+   21.94,
+   1
+  ],
+  "cell_med7": [
+   21.94,
+   1
+  ]
+ },
+ {
+  "id": "cosmic-campground",
+  "known": 2,
+  "cell_2x2": [
+   21.99,
+   1
+  ],
+  "cell_med7": [
+   21.99,
+   1
+  ]
+ },
+ {
+  "id": "valles-caldera",
+  "known": 2,
+  "cell_2x2": [
+   21.34,
+   4
+  ],
+  "cell_med7": [
+   21.69,
+   3
+  ]
+ },
+ {
+  "id": "clayton-lake",
+  "known": 2,
+  "cell_2x2": [
+   21.9,
+   2
+  ],
+  "cell_med7": [
+   21.9,
+   2
+  ]
+ },
+ {
+  "id": "petrified-forest",
+  "known": 2,
+  "cell_2x2": [
+   21.91,
+   1
+  ],
+  "cell_med7": [
+   21.91,
+   1
+  ]
+ },
+ {
+  "id": "davis-mountains",
+  "known": 2,
+  "cell_2x2": [
+   21.4,
+   3
+  ],
+  "cell_med7": [
+   21.92,
+   1
+  ]
+ },
+ {
+  "id": "big-bend",
+  "known": 1,
+  "cell_2x2": [
+   22.0,
+   1
+  ],
+  "cell_med7": [
+   22.0,
+   1
+  ]
+ },
+ {
+  "id": "boundary-waters",
+  "known": 1,
+  "cell_2x2": [
+   19.45,
+   6
+  ],
+  "cell_med7": [
+   20.64,
+   5
+  ]
+ },
+ {
+  "id": "voyageurs",
+  "known": 2,
+  "cell_2x2": [
+   21.66,
+   3
+  ],
+  "cell_med7": [
+   21.93,
+   1
+  ]
+ },
+ {
+  "id": "enchanted-rock",
+  "known": 3,
+  "cell_2x2": [
+   21.76,
+   2
+  ],
+  "cell_med7": [
+   21.76,
+   2
+  ]
+ },
+ {
+  "id": "south-llano-river",
+  "known": 3,
+  "cell_2x2": [
+   21.96,
+   1
+  ],
+  "cell_med7": [
+   21.96,
+   1
+  ]
+ },
+ {
+  "id": "buffalo-river",
+  "known": 2,
+  "cell_2x2": [
+   18.41,
+   7
+  ],
+  "cell_med7": [
+   19.41,
+   6
+  ]
+ },
+ {
+  "id": "petit-jean",
+  "known": 3,
+  "cell_2x2": [
+   21.45,
+   3
+  ],
+  "cell_med7": [
+   21.45,
+   3
+  ]
+ },
+ {
+  "id": "newport",
+  "known": 3,
+  "cell_2x2": [
+   21.88,
+   2
+  ],
+  "cell_med7": [
+   21.88,
+   2
+  ]
+ },
+ {
+  "id": "headlands",
+  "known": 2,
+  "cell_2x2": [
+   21.54,
+   3
+  ],
+  "cell_med7": [
+   21.91,
+   1
+  ]
+ },
+ {
+  "id": "keweenaw",
+  "known": 2,
+  "cell_2x2": [
+   21.48,
+   3
+  ],
+  "cell_med7": [
+   22.0,
+   1
+  ]
+ },
+ {
+  "id": "watoga",
+  "known": 2,
+  "cell_2x2": [
+   21.82,
+   2
+  ],
+  "cell_med7": [
+   21.83,
+   2
+  ]
+ },
+ {
+  "id": "stephen-foster",
+  "known": 2,
+  "cell_2x2": [
+   20.92,
+   4
+  ],
+  "cell_med7": [
+   21.68,
+   3
+  ]
+ },
+ {
+  "id": "pickett",
+  "known": 3,
+  "cell_2x2": [
+   21.29,
+   4
+  ],
+  "cell_med7": [
+   21.29,
+   4
+  ]
+ },
+ {
+  "id": "kissimmee-prairie",
+  "known": 2,
+  "cell_2x2": [
+   21.56,
+   3
+  ],
+  "cell_med7": [
+   21.56,
+   3
+  ]
+ },
+ {
+  "id": "frosty-drew",
+  "known": 4,
+  "cell_2x2": [
+   21.33,
+   4
+  ],
+  "cell_med7": [
+   21.48,
+   3
+  ]
+ },
+ {
+  "id": "myles-standish",
+  "known": 4,
+  "cell_2x2": [
+   20.98,
+   4
+  ],
+  "cell_med7": [
+   21.3,
+   4
+  ]
+ },
+ {
+  "id": "race-point",
+  "known": 4,
+  "cell_2x2": [
+   20.73,
+   5
+  ],
+  "cell_med7": [
+   20.88,
+   5
+  ]
+ },
+ {
+  "id": "heins-farm",
+  "known": 4,
+  "cell_2x2": [
+   21.27,
+   4
+  ],
+  "cell_med7": [
+   21.13,
+   4
+  ]
+ },
+ {
+  "id": "kancamagus",
+  "known": 2,
+  "cell_2x2": [
+   21.9,
+   1
+  ],
+  "cell_med7": [
+   21.9,
+   1
+  ]
+ },
+ {
+  "id": "kd-dubuque",
+  "known": 3,
+  "cell_2x2": [
+   21.43,
+   3
+  ],
+  "cell_med7": [
+   21.43,
+   3
+  ]
+ },
+ {
+  "id": "cherry-springs",
+  "known": 2,
+  "cell_2x2": [
+   21.93,
+   1
+  ],
+  "cell_med7": [
+   21.93,
+   1
+  ]
+ },
+ {
+  "id": "medford-ma",
+  "known": 8,
+  "cell_2x2": [
+   18.51,
+   7
+  ],
+  "cell_med7": [
+   18.63,
+   7
+  ]
+ },
+ {
+  "id": "new-york-ny",
+  "known": 9,
+  "cell_2x2": [
+   16.95,
+   9
+  ],
+  "cell_med7": [
+   17.33,
+   9
+  ]
+ },
+ {
+  "id": "boston-common",
+  "known": 9,
+  "cell_2x2": [
+   17.13,
+   9
+  ],
+  "cell_med7": [
+   17.25,
+   9
+  ]
+ },
+ {
+  "id": "cambridge-common",
+  "known": 9,
+  "cell_2x2": [
+   18.1,
+   8
+  ],
+  "cell_med7": [
+   18.1,
+   8
+  ]
+ },
+ {
+  "id": "danehy-park",
+  "known": 9,
+  "cell_2x2": [
+   18.34,
+   7
+  ],
+  "cell_med7": [
+   18.46,
+   7
+  ]
+ },
+ {
+  "id": "arlington-ma",
+  "known": 8,
+  "cell_2x2": [
+   18.89,
+   6
+  ],
+  "cell_med7": [
+   19.09,
+   6
+  ]
+ },
+ {
+  "id": "lincoln-ma",
+  "known": 7,
+  "cell_2x2": [
+   20.37,
+   5
+  ],
+  "cell_med7": [
+   20.37,
+   5
+  ]
+ },
+ {
+  "id": "staunton-river",
+  "known": 3,
+  "cell_2x2": [
+   21.22,
+   4
+  ],
+  "cell_med7": [
+   21.41,
+   3
+  ]
+ },
+ {
+  "id": "katahdin",
+  "known": 2,
+  "cell_2x2": [
+   20.76,
+   5
+  ],
+  "cell_med7": [
+   21.98,
+   1
+  ]
+ },
+ {
+  "id": "badajoz-es",
+  "known": 7,
+  "cell_2x2": [
+   18.06,
+   8
+  ],
+  "cell_med7": [
+   18.37,
+   7
+  ]
+ },
+ {
+  "id": "leiden-nl",
+  "known": 6,
+  "cell_2x2": [
+   18.78,
+   6
+  ],
+  "cell_med7": [
+   18.8,
+   6
+  ]
+ },
+ {
+  "id": "rijswijk-nl",
+  "known": 8,
+  "cell_2x2": [
+   18.84,
+   6
+  ],
+  "cell_med7": [
+   18.68,
+   7
+  ]
+ },
+ {
+  "id": "zernike-nl",
+  "known": 5,
+  "cell_2x2": [
+   19.88,
+   5
+  ],
+  "cell_med7": [
+   19.58,
+   5
+  ]
+ },
+ {
+  "id": "deheld-nl",
+  "known": 5,
+  "cell_2x2": [
+   20.33,
+   5
+  ],
+  "cell_med7": [
+   20.11,
+   5
+  ]
+ },
+ {
+  "id": "dezilk-nl",
+  "known": 5,
+  "cell_2x2": [
+   19.97,
+   5
+  ],
+  "cell_med7": [
+   20.27,
+   5
+  ]
+ },
+ {
+  "id": "potsdam-babelsberg",
+  "known": 5,
+  "cell_2x2": [
+   19.23,
+   6
+  ],
+  "cell_med7": [
+   19.33,
+   6
+  ]
+ },
+ {
+  "id": "berlin-steglitz",
+  "known": 6,
+  "cell_2x2": [
+   18.76,
+   6
+  ],
+  "cell_med7": [
+   19.19,
+   6
+  ]
+ },
+ {
+  "id": "ifa-vienna",
+  "known": 6,
+  "cell_2x2": [
+   19.03,
+   6
+  ],
+  "cell_med7": [
+   19.07,
+   6
+  ]
+ },
+ {
+  "id": "lsm-linz",
+  "known": 6,
+  "cell_2x2": [
+   18.66,
+   7
+  ],
+  "cell_med7": [
+   18.92,
+   6
+  ]
+ },
+ {
+  "id": "lgo-linz",
+  "known": 6,
+  "cell_2x2": [
+   18.7,
+   7
+  ],
+  "cell_med7": [
+   18.8,
+   6
+  ]
+ },
+ {
+  "id": "wel-wels",
+  "known": 6,
+  "cell_2x2": [
+   18.73,
+   6
+  ],
+  "cell_med7": [
+   19.33,
+   6
+  ]
+ },
+ {
+  "id": "tra-traun",
+  "known": 5,
+  "cell_2x2": [
+   20.02,
+   5
+  ],
+  "cell_med7": [
+   20.02,
+   5
+  ]
+ },
+ {
+  "id": "sty-steyr",
+  "known": 5,
+  "cell_2x2": [
+   19.33,
+   6
+  ],
+  "cell_med7": [
+   20.02,
+   5
+  ]
+ },
+ {
+  "id": "pas-pashing",
+  "known": 5,
+  "cell_2x2": [
+   20.64,
+   5
+  ],
+  "cell_med7": [
+   21.05,
+   4
+  ]
+ },
+ {
+  "id": "bra-braunau",
+  "known": 5,
+  "cell_2x2": [
+   19.51,
+   5
+  ],
+  "cell_med7": [
+   19.91,
+   5
+  ]
+ },
+ {
+  "id": "gri-grieskirchen",
+  "known": 5,
+  "cell_2x2": [
+   19.71,
+   5
+  ],
+  "cell_med7": [
+   21.36,
+   4
+  ]
+ },
+ {
+  "id": "fre-freistadt",
+  "known": 5,
+  "cell_2x2": [
+   19.75,
+   5
+  ],
+  "cell_med7": [
+   20.44,
+   5
+  ]
+ },
+ {
+  "id": "voe-voecklabruck",
+  "known": 5,
+  "cell_2x2": [
+   19.92,
+   5
+  ],
+  "cell_med7": [
+   20.41,
+   5
+  ]
+ },
+ {
+  "id": "mat-mattighofen",
+  "known": 5,
+  "cell_2x2": [
+   19.83,
+   5
+  ],
+  "cell_med7": [
+   20.74,
+   5
+  ]
+ },
+ {
+  "id": "bod-at",
+  "known": 2,
+  "cell_2x2": [
+   21.66,
+   3
+  ],
+  "cell_med7": [
+   21.66,
+   3
+  ]
+ },
+ {
+  "id": "zoe-at",
+  "known": 1,
+  "cell_2x2": [
+   21.67,
+   3
+  ],
+  "cell_med7": [
+   21.67,
+   3
+  ]
+ },
+ {
+  "id": "los-at",
+  "known": 2,
+  "cell_2x2": [
+   21.57,
+   3
+  ],
+  "cell_med7": [
+   21.57,
+   3
+  ]
+ },
+ {
+  "id": "kri-at",
+  "known": 1,
+  "cell_2x2": [
+   21.78,
+   2
+  ],
+  "cell_med7": [
+   21.78,
+   2
+  ]
+ },
+ {
+  "id": "feu-at",
+  "known": 2,
+  "cell_2x2": [
+   21.57,
+   3
+  ],
+  "cell_med7": [
+   21.57,
+   3
+  ]
+ },
+ {
+  "id": "gru-at",
+  "known": 3,
+  "cell_2x2": [
+   21.43,
+   3
+  ],
+  "cell_med7": [
+   21.43,
+   3
+  ]
+ },
+ {
+  "id": "kid-at",
+  "known": 3,
+  "cell_2x2": [
+   21.37,
+   4
+  ],
+  "cell_med7": [
+   21.37,
+   4
+  ]
+ },
+ {
+  "id": "uli-at",
+  "known": 3,
+  "cell_2x2": [
+   21.62,
+   3
+  ],
+  "cell_med7": [
+   21.62,
+   3
+  ]
+ },
+ {
+  "id": "gis-at",
+  "known": 4,
+  "cell_2x2": [
+   21.4,
+   3
+  ],
+  "cell_med7": [
+   21.4,
+   3
+  ]
+ },
+ {
+  "id": "mun-at",
+  "known": 4,
+  "cell_2x2": [
+   21.34,
+   4
+  ],
+  "cell_med7": [
+   21.71,
+   2
+  ]
+ }
+]

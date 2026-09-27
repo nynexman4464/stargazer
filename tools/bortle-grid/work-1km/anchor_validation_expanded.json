@@ -1,0 +1,2136 @@
+[
+ {
+  "id": "lassen-volcanic",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 2,
+   "1km_2x2mean": 2,
+   "1km_med3": 2,
+   "1km_med5": 2,
+   "1km_med7": 2,
+   "1km_med9": 2
+  },
+  "sqm": {
+   "4km_shipped": 21.83,
+   "1km_2x2mean": 21.83,
+   "1km_med3": 21.83,
+   "1km_med5": 21.83,
+   "1km_med7": 21.83,
+   "1km_med9": 21.83
+  }
+ },
+ {
+  "id": "prineville-reservoir",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.67,
+   "1km_2x2mean": 21.67,
+   "1km_med3": 21.67,
+   "1km_med5": 21.67,
+   "1km_med7": 21.67,
+   "1km_med9": 21.67
+  }
+ },
+ {
+  "id": "oregon-outback",
+  "known": 1,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 6,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 5,
+   "1km_med9": 4
+  },
+  "sqm": {
+   "4km_shipped": 19.81,
+   "1km_2x2mean": 19.44,
+   "1km_med3": 20.33,
+   "1km_med5": 20.33,
+   "1km_med7": 20.64,
+   "1km_med9": 21.07
+  }
+ },
+ {
+  "id": "san-jose-ca",
+  "known": 8,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 9,
+   "1km_2x2mean": 9,
+   "1km_med3": 9,
+   "1km_med5": 9,
+   "1km_med7": 8,
+   "1km_med9": 8
+  },
+  "sqm": {
+   "4km_shipped": 17.22,
+   "1km_2x2mean": 17.32,
+   "1km_med3": 17.32,
+   "1km_med5": 17.5,
+   "1km_med7": 17.98,
+   "1km_med9": 18.02
+  }
+ },
+ {
+  "id": "massacre-rim",
+  "known": 1,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 22.0,
+   "1km_2x2mean": 22.0,
+   "1km_med3": 22.0,
+   "1km_med5": 22.0,
+   "1km_med7": 22.0,
+   "1km_med9": 22.0
+  }
+ },
+ {
+  "id": "antelope-island",
+  "known": 3,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 4,
+   "1km_2x2mean": 4,
+   "1km_med3": 4,
+   "1km_med5": 4,
+   "1km_med7": 4,
+   "1km_med9": 4
+  },
+  "sqm": {
+   "4km_shipped": 21.08,
+   "1km_2x2mean": 21.08,
+   "1km_med3": 21.08,
+   "1km_med5": 21.08,
+   "1km_med7": 21.08,
+   "1km_med9": 21.08
+  }
+ },
+ {
+  "id": "craters-of-the-moon",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 2,
+   "1km_2x2mean": 2,
+   "1km_med3": 2,
+   "1km_med5": 2,
+   "1km_med7": 2,
+   "1km_med9": 2
+  },
+  "sqm": {
+   "4km_shipped": 21.89,
+   "1km_2x2mean": 21.89,
+   "1km_med3": 21.89,
+   "1km_med5": 21.89,
+   "1km_med7": 21.89,
+   "1km_med9": 21.89
+  }
+ },
+ {
+  "id": "central-idaho",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 4,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 19.88,
+   "1km_2x2mean": 19.99,
+   "1km_med3": 20.32,
+   "1km_med5": 20.87,
+   "1km_med7": 21.11,
+   "1km_med9": 21.49
+  }
+ },
+ {
+  "id": "glacier",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 2,
+   "1km_2x2mean": 2,
+   "1km_med3": 2,
+   "1km_med5": 2,
+   "1km_med7": 2,
+   "1km_med9": 2
+  },
+  "sqm": {
+   "4km_shipped": 21.76,
+   "1km_2x2mean": 21.76,
+   "1km_med3": 21.76,
+   "1km_med5": 21.76,
+   "1km_med7": 21.76,
+   "1km_med9": 21.76
+  }
+ },
+ {
+  "id": "death-valley",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 4,
+   "1km_2x2mean": 3,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.28,
+   "1km_2x2mean": 21.53,
+   "1km_med3": 22.0,
+   "1km_med5": 22.0,
+   "1km_med7": 22.0,
+   "1km_med9": 22.0
+  }
+ },
+ {
+  "id": "joshua-tree",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.62,
+   "1km_2x2mean": 21.62,
+   "1km_med3": 21.62,
+   "1km_med5": 21.62,
+   "1km_med7": 21.62,
+   "1km_med9": 21.62
+  }
+ },
+ {
+  "id": "anza-borrego",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 4,
+   "1km_med7": 4,
+   "1km_med9": 4
+  },
+  "sqm": {
+   "4km_shipped": 20.26,
+   "1km_2x2mean": 20.4,
+   "1km_med3": 20.51,
+   "1km_med5": 21.09,
+   "1km_med7": 21.31,
+   "1km_med9": 21.35
+  }
+ },
+ {
+  "id": "great-basin",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 22.0,
+   "1km_2x2mean": 22.0,
+   "1km_med3": 22.0,
+   "1km_med5": 22.0,
+   "1km_med7": 22.0,
+   "1km_med9": 22.0
+  }
+ },
+ {
+  "id": "bryce-canyon",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 2,
+   "1km_2x2mean": 2,
+   "1km_med3": 2,
+   "1km_med5": 2,
+   "1km_med7": 2,
+   "1km_med9": 2
+  },
+  "sqm": {
+   "4km_shipped": 21.86,
+   "1km_2x2mean": 21.86,
+   "1km_med3": 21.86,
+   "1km_med5": 21.86,
+   "1km_med7": 21.86,
+   "1km_med9": 21.86
+  }
+ },
+ {
+  "id": "capitol-reef",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 22.0,
+   "1km_2x2mean": 22.0,
+   "1km_med3": 22.0,
+   "1km_med5": 22.0,
+   "1km_med7": 22.0,
+   "1km_med9": 22.0
+  }
+ },
+ {
+  "id": "zion",
+  "known": 3,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 4,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 20.57,
+   "1km_2x2mean": 20.58,
+   "1km_med3": 20.82,
+   "1km_med5": 21.28,
+   "1km_med7": 21.63,
+   "1km_med9": 21.63
+  }
+ },
+ {
+  "id": "goblin-valley",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 22.0,
+   "1km_2x2mean": 22.0,
+   "1km_med3": 22.0,
+   "1km_med5": 22.0,
+   "1km_med7": 22.0,
+   "1km_med9": 22.0
+  }
+ },
+ {
+  "id": "kodachrome-basin",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.96,
+   "1km_2x2mean": 21.96,
+   "1km_med3": 21.96,
+   "1km_med5": 21.96,
+   "1km_med7": 21.96,
+   "1km_med9": 21.96
+  }
+ },
+ {
+  "id": "grand-canyon",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.92,
+   "1km_2x2mean": 21.92,
+   "1km_med3": 21.92,
+   "1km_med5": 21.92,
+   "1km_med7": 21.92,
+   "1km_med9": 21.92
+  }
+ },
+ {
+  "id": "kartchner-caverns",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 2,
+   "1km_2x2mean": 2,
+   "1km_med3": 2,
+   "1km_med5": 2,
+   "1km_med7": 2,
+   "1km_med9": 2
+  },
+  "sqm": {
+   "4km_shipped": 21.7,
+   "1km_2x2mean": 21.7,
+   "1km_med3": 21.7,
+   "1km_med5": 21.7,
+   "1km_med7": 21.7,
+   "1km_med9": 21.7
+  }
+ },
+ {
+  "id": "oracle",
+  "known": 3,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 4,
+   "1km_med7": 4,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 20.56,
+   "1km_2x2mean": 20.56,
+   "1km_med3": 20.58,
+   "1km_med5": 21.02,
+   "1km_med7": 21.19,
+   "1km_med9": 21.47
+  }
+ },
+ {
+  "id": "dinosaur",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.94,
+   "1km_2x2mean": 21.94,
+   "1km_med3": 21.94,
+   "1km_med5": 21.94,
+   "1km_med7": 21.94,
+   "1km_med9": 21.94
+  }
+ },
+ {
+  "id": "merritt-reservoir",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.94,
+   "1km_2x2mean": 21.94,
+   "1km_med3": 21.94,
+   "1km_med5": 21.94,
+   "1km_med7": 21.94,
+   "1km_med9": 21.94
+  }
+ },
+ {
+  "id": "theodore-roosevelt",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 4,
+   "1km_med7": 3,
+   "1km_med9": 2
+  },
+  "sqm": {
+   "4km_shipped": 19.5,
+   "1km_2x2mean": 20.07,
+   "1km_med3": 19.64,
+   "1km_med5": 20.93,
+   "1km_med7": 21.42,
+   "1km_med9": 21.79
+  }
+ },
+ {
+  "id": "arches",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.92,
+   "1km_2x2mean": 21.92,
+   "1km_med3": 21.92,
+   "1km_med5": 21.92,
+   "1km_med7": 21.92,
+   "1km_med9": 21.92
+  }
+ },
+ {
+  "id": "canyonlands",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.98,
+   "1km_2x2mean": 21.98,
+   "1km_med3": 21.98,
+   "1km_med5": 21.98,
+   "1km_med7": 21.98,
+   "1km_med9": 21.98
+  }
+ },
+ {
+  "id": "natural-bridges",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 22.0,
+   "1km_2x2mean": 22.0,
+   "1km_med3": 22.0,
+   "1km_med5": 22.0,
+   "1km_med7": 22.0,
+   "1km_med9": 22.0
+  }
+ },
+ {
+  "id": "dead-horse-point",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.92,
+   "1km_2x2mean": 21.92,
+   "1km_med3": 21.92,
+   "1km_med5": 21.92,
+   "1km_med7": 21.92,
+   "1km_med9": 21.92
+  }
+ },
+ {
+  "id": "black-canyon-gunnison",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.55,
+   "1km_2x2mean": 21.55,
+   "1km_med3": 21.55,
+   "1km_med5": 21.55,
+   "1km_med7": 21.55,
+   "1km_med9": 21.55
+  }
+ },
+ {
+  "id": "great-sand-dunes",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 6,
+   "1km_2x2mean": 5,
+   "1km_med3": 6,
+   "1km_med5": 6,
+   "1km_med7": 5,
+   "1km_med9": 5
+  },
+  "sqm": {
+   "4km_shipped": 19.4,
+   "1km_2x2mean": 19.57,
+   "1km_med3": 19.2,
+   "1km_med5": 19.2,
+   "1km_med7": 19.58,
+   "1km_med9": 20.39
+  }
+ },
+ {
+  "id": "florissant",
+  "known": 3,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 4,
+   "1km_2x2mean": 4,
+   "1km_med3": 4,
+   "1km_med5": 4,
+   "1km_med7": 4,
+   "1km_med9": 4
+  },
+  "sqm": {
+   "4km_shipped": 21.36,
+   "1km_2x2mean": 21.36,
+   "1km_med3": 21.36,
+   "1km_med5": 21.36,
+   "1km_med7": 21.36,
+   "1km_med9": 21.36
+  }
+ },
+ {
+  "id": "chaco",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.94,
+   "1km_2x2mean": 21.94,
+   "1km_med3": 21.94,
+   "1km_med5": 21.94,
+   "1km_med7": 21.94,
+   "1km_med9": 21.94
+  }
+ },
+ {
+  "id": "cosmic-campground",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.99,
+   "1km_2x2mean": 21.99,
+   "1km_med3": 21.99,
+   "1km_med5": 21.99,
+   "1km_med7": 21.99,
+   "1km_med9": 21.99
+  }
+ },
+ {
+  "id": "valles-caldera",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 4,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.52,
+   "1km_2x2mean": 21.36,
+   "1km_med3": 21.69,
+   "1km_med5": 21.69,
+   "1km_med7": 21.69,
+   "1km_med9": 21.69
+  }
+ },
+ {
+  "id": "clayton-lake",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 2,
+   "1km_2x2mean": 2,
+   "1km_med3": 2,
+   "1km_med5": 2,
+   "1km_med7": 2,
+   "1km_med9": 2
+  },
+  "sqm": {
+   "4km_shipped": 21.9,
+   "1km_2x2mean": 21.9,
+   "1km_med3": 21.9,
+   "1km_med5": 21.9,
+   "1km_med7": 21.9,
+   "1km_med9": 21.9
+  }
+ },
+ {
+  "id": "petrified-forest",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.91,
+   "1km_2x2mean": 21.91,
+   "1km_med3": 21.91,
+   "1km_med5": 21.91,
+   "1km_med7": 21.91,
+   "1km_med9": 21.91
+  }
+ },
+ {
+  "id": "davis-mountains",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 4,
+   "1km_2x2mean": 4,
+   "1km_med3": 4,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.14,
+   "1km_2x2mean": 21.16,
+   "1km_med3": 21.35,
+   "1km_med5": 21.92,
+   "1km_med7": 21.92,
+   "1km_med9": 21.92
+  }
+ },
+ {
+  "id": "big-bend",
+  "known": 1,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 22.0,
+   "1km_2x2mean": 22.0,
+   "1km_med3": 22.0,
+   "1km_med5": 22.0,
+   "1km_med7": 22.0,
+   "1km_med9": 22.0
+  }
+ },
+ {
+  "id": "boundary-waters",
+  "known": 1,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 6,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 5,
+   "1km_med9": 4
+  },
+  "sqm": {
+   "4km_shipped": 19.34,
+   "1km_2x2mean": 19.5,
+   "1km_med3": 19.66,
+   "1km_med5": 19.92,
+   "1km_med7": 20.64,
+   "1km_med9": 21.18
+  }
+ },
+ {
+  "id": "voyageurs",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.64,
+   "1km_2x2mean": 21.62,
+   "1km_med3": 21.93,
+   "1km_med5": 21.93,
+   "1km_med7": 21.93,
+   "1km_med9": 21.93
+  }
+ },
+ {
+  "id": "enchanted-rock",
+  "known": 3,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 2,
+   "1km_2x2mean": 2,
+   "1km_med3": 2,
+   "1km_med5": 2,
+   "1km_med7": 2,
+   "1km_med9": 2
+  },
+  "sqm": {
+   "4km_shipped": 21.76,
+   "1km_2x2mean": 21.76,
+   "1km_med3": 21.76,
+   "1km_med5": 21.76,
+   "1km_med7": 21.76,
+   "1km_med9": 21.76
+  }
+ },
+ {
+  "id": "south-llano-river",
+  "known": 3,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.96,
+   "1km_2x2mean": 21.96,
+   "1km_med3": 21.96,
+   "1km_med5": 21.96,
+   "1km_med7": 21.96,
+   "1km_med9": 21.96
+  }
+ },
+ {
+  "id": "buffalo-river",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 7,
+   "1km_2x2mean": 8,
+   "1km_med3": 7,
+   "1km_med5": 6,
+   "1km_med7": 6,
+   "1km_med9": 5
+  },
+  "sqm": {
+   "4km_shipped": 18.25,
+   "1km_2x2mean": 18.19,
+   "1km_med3": 18.44,
+   "1km_med5": 19.07,
+   "1km_med7": 19.33,
+   "1km_med9": 19.55
+  }
+ },
+ {
+  "id": "petit-jean",
+  "known": 3,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.45,
+   "1km_2x2mean": 21.45,
+   "1km_med3": 21.45,
+   "1km_med5": 21.45,
+   "1km_med7": 21.45,
+   "1km_med9": 21.45
+  }
+ },
+ {
+  "id": "newport",
+  "known": 3,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 2,
+   "1km_2x2mean": 2,
+   "1km_med3": 2,
+   "1km_med5": 2,
+   "1km_med7": 2,
+   "1km_med9": 2
+  },
+  "sqm": {
+   "4km_shipped": 21.88,
+   "1km_2x2mean": 21.88,
+   "1km_med3": 21.88,
+   "1km_med5": 21.88,
+   "1km_med7": 21.88,
+   "1km_med9": 21.88
+  }
+ },
+ {
+  "id": "headlands",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.53,
+   "1km_2x2mean": 21.53,
+   "1km_med3": 21.62,
+   "1km_med5": 21.91,
+   "1km_med7": 21.91,
+   "1km_med9": 21.91
+  }
+ },
+ {
+  "id": "keweenaw",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.41,
+   "1km_2x2mean": 21.5,
+   "1km_med3": 21.61,
+   "1km_med5": 22.0,
+   "1km_med7": 22.0,
+   "1km_med9": 22.0
+  }
+ },
+ {
+  "id": "watoga",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 2,
+   "1km_2x2mean": 2,
+   "1km_med3": 2,
+   "1km_med5": 2,
+   "1km_med7": 2,
+   "1km_med9": 2
+  },
+  "sqm": {
+   "4km_shipped": 21.83,
+   "1km_2x2mean": 21.82,
+   "1km_med3": 21.83,
+   "1km_med5": 21.83,
+   "1km_med7": 21.83,
+   "1km_med9": 21.83
+  }
+ },
+ {
+  "id": "stephen-foster",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 4,
+   "1km_2x2mean": 4,
+   "1km_med3": 4,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.07,
+   "1km_2x2mean": 20.94,
+   "1km_med3": 21.19,
+   "1km_med5": 21.41,
+   "1km_med7": 21.68,
+   "1km_med9": 21.68
+  }
+ },
+ {
+  "id": "pickett",
+  "known": 3,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 4,
+   "1km_2x2mean": 4,
+   "1km_med3": 4,
+   "1km_med5": 4,
+   "1km_med7": 4,
+   "1km_med9": 4
+  },
+  "sqm": {
+   "4km_shipped": 21.29,
+   "1km_2x2mean": 21.29,
+   "1km_med3": 21.29,
+   "1km_med5": 21.29,
+   "1km_med7": 21.29,
+   "1km_med9": 21.29
+  }
+ },
+ {
+  "id": "kissimmee-prairie",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.56,
+   "1km_2x2mean": 21.56,
+   "1km_med3": 21.56,
+   "1km_med5": 21.56,
+   "1km_med7": 21.56,
+   "1km_med9": 21.56
+  }
+ },
+ {
+  "id": "frosty-drew",
+  "known": 4,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.48,
+   "1km_2x2mean": 21.45,
+   "1km_med3": 21.48,
+   "1km_med5": 21.48,
+   "1km_med7": 21.48,
+   "1km_med9": 21.48
+  }
+ },
+ {
+  "id": "myles-standish",
+  "known": 4,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 4,
+   "1km_med3": 4,
+   "1km_med5": 4,
+   "1km_med7": 4,
+   "1km_med9": 4
+  },
+  "sqm": {
+   "4km_shipped": 20.89,
+   "1km_2x2mean": 20.91,
+   "1km_med3": 21.08,
+   "1km_med5": 21.3,
+   "1km_med7": 21.3,
+   "1km_med9": 21.3
+  }
+ },
+ {
+  "id": "race-point",
+  "known": 4,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 4,
+   "1km_med9": 4
+  },
+  "sqm": {
+   "4km_shipped": 20.04,
+   "1km_2x2mean": 20.54,
+   "1km_med3": 20.69,
+   "1km_med5": 20.71,
+   "1km_med7": 21.32,
+   "1km_med9": 21.38
+  }
+ },
+ {
+  "id": "heins-farm",
+  "known": 4,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 4,
+   "1km_2x2mean": 4,
+   "1km_med3": 4,
+   "1km_med5": 4,
+   "1km_med7": 4,
+   "1km_med9": 4
+  },
+  "sqm": {
+   "4km_shipped": 21.31,
+   "1km_2x2mean": 21.28,
+   "1km_med3": 21.31,
+   "1km_med5": 21.31,
+   "1km_med7": 21.31,
+   "1km_med9": 21.13
+  }
+ },
+ {
+  "id": "kancamagus",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.9,
+   "1km_2x2mean": 21.9,
+   "1km_med3": 21.9,
+   "1km_med5": 21.9,
+   "1km_med7": 21.9,
+   "1km_med9": 21.9
+  }
+ },
+ {
+  "id": "kd-dubuque",
+  "known": 3,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.43,
+   "1km_2x2mean": 21.43,
+   "1km_med3": 21.43,
+   "1km_med5": 21.43,
+   "1km_med7": 21.43,
+   "1km_med9": 21.43
+  }
+ },
+ {
+  "id": "cherry-springs",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 1,
+   "1km_2x2mean": 1,
+   "1km_med3": 1,
+   "1km_med5": 1,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 21.93,
+   "1km_2x2mean": 21.93,
+   "1km_med3": 21.93,
+   "1km_med5": 21.93,
+   "1km_med7": 21.93,
+   "1km_med9": 21.93
+  }
+ },
+ {
+  "id": "medford-ma",
+  "known": 8,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 8,
+   "1km_2x2mean": 7,
+   "1km_med3": 7,
+   "1km_med5": 7,
+   "1km_med7": 7,
+   "1km_med9": 7
+  },
+  "sqm": {
+   "4km_shipped": 18.19,
+   "1km_2x2mean": 18.28,
+   "1km_med3": 18.35,
+   "1km_med5": 18.39,
+   "1km_med7": 18.5,
+   "1km_med9": 18.51
+  }
+ },
+ {
+  "id": "new-york-ny",
+  "known": 9,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 9,
+   "1km_2x2mean": 9,
+   "1km_med3": 9,
+   "1km_med5": 9,
+   "1km_med7": 9,
+   "1km_med9": 9
+  },
+  "sqm": {
+   "4km_shipped": 16.89,
+   "1km_2x2mean": 16.85,
+   "1km_med3": 17.08,
+   "1km_med5": 17.27,
+   "1km_med7": 17.33,
+   "1km_med9": 17.41
+  }
+ },
+ {
+  "id": "boston-common",
+  "known": 9,
+  "set": "new",
+  "sqm_meas": 16.6,
+  "pred": {
+   "4km_shipped": 9,
+   "1km_2x2mean": 9,
+   "1km_med3": 9,
+   "1km_med5": 9,
+   "1km_med7": 9,
+   "1km_med9": 9
+  },
+  "sqm": {
+   "4km_shipped": 17.07,
+   "1km_2x2mean": 17.2,
+   "1km_med3": 17.06,
+   "1km_med5": 17.12,
+   "1km_med7": 17.25,
+   "1km_med9": 17.31
+  }
+ },
+ {
+  "id": "cambridge-common",
+  "known": 9,
+  "set": "new",
+  "sqm_meas": 17.3,
+  "pred": {
+   "4km_shipped": 8,
+   "1km_2x2mean": 8,
+   "1km_med3": 8,
+   "1km_med5": 8,
+   "1km_med7": 8,
+   "1km_med9": 8
+  },
+  "sqm": {
+   "4km_shipped": 18.02,
+   "1km_2x2mean": 18.02,
+   "1km_med3": 18.12,
+   "1km_med5": 18.13,
+   "1km_med7": 18.12,
+   "1km_med9": 18.13
+  }
+ },
+ {
+  "id": "danehy-park",
+  "known": 9,
+  "set": "new",
+  "sqm_meas": 17.4,
+  "pred": {
+   "4km_shipped": 7,
+   "1km_2x2mean": 7,
+   "1km_med3": 7,
+   "1km_med5": 7,
+   "1km_med7": 7,
+   "1km_med9": 7
+  },
+  "sqm": {
+   "4km_shipped": 18.56,
+   "1km_2x2mean": 18.37,
+   "1km_med3": 18.58,
+   "1km_med5": 18.46,
+   "1km_med7": 18.41,
+   "1km_med9": 18.44
+  }
+ },
+ {
+  "id": "arlington-ma",
+  "known": 8,
+  "set": "new",
+  "sqm_meas": 17.9,
+  "pred": {
+   "4km_shipped": 7,
+   "1km_2x2mean": 7,
+   "1km_med3": 7,
+   "1km_med5": 6,
+   "1km_med7": 6,
+   "1km_med9": 6
+  },
+  "sqm": {
+   "4km_shipped": 18.7,
+   "1km_2x2mean": 18.64,
+   "1km_med3": 18.6,
+   "1km_med5": 19.22,
+   "1km_med7": 19.32,
+   "1km_med9": 19.32
+  }
+ },
+ {
+  "id": "lincoln-ma",
+  "known": 7,
+  "set": "new",
+  "sqm_meas": 18.6,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 5,
+   "1km_med9": 5
+  },
+  "sqm": {
+   "4km_shipped": 20.36,
+   "1km_2x2mean": 20.33,
+   "1km_med3": 20.37,
+   "1km_med5": 20.39,
+   "1km_med7": 20.38,
+   "1km_med9": 20.37
+  }
+ },
+ {
+  "id": "staunton-river",
+  "known": 3,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 4,
+   "1km_2x2mean": 4,
+   "1km_med3": 4,
+   "1km_med5": 4,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.07,
+   "1km_2x2mean": 21.25,
+   "1km_med3": 21.18,
+   "1km_med5": 21.35,
+   "1km_med7": 21.63,
+   "1km_med9": 21.63
+  }
+ },
+ {
+  "id": "katahdin",
+  "known": 2,
+  "set": "orig",
+  "sqm_meas": null,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 4,
+   "1km_med5": 3,
+   "1km_med7": 1,
+   "1km_med9": 1
+  },
+  "sqm": {
+   "4km_shipped": 20.56,
+   "1km_2x2mean": 20.57,
+   "1km_med3": 20.95,
+   "1km_med5": 21.4,
+   "1km_med7": 21.98,
+   "1km_med9": 21.98
+  }
+ },
+ {
+  "id": "badajoz-es",
+  "known": 7,
+  "set": "new",
+  "sqm_meas": 18.24,
+  "pred": {
+   "4km_shipped": 8,
+   "1km_2x2mean": 8,
+   "1km_med3": 8,
+   "1km_med5": 8,
+   "1km_med7": 7,
+   "1km_med9": 7
+  },
+  "sqm": {
+   "4km_shipped": 18.04,
+   "1km_2x2mean": 18.05,
+   "1km_med3": 18.11,
+   "1km_med5": 18.19,
+   "1km_med7": 18.35,
+   "1km_med9": 18.43
+  }
+ },
+ {
+  "id": "leiden-nl",
+  "known": 6,
+  "set": "new",
+  "sqm_meas": 18.91,
+  "pred": {
+   "4km_shipped": 6,
+   "1km_2x2mean": 6,
+   "1km_med3": 6,
+   "1km_med5": 6,
+   "1km_med7": 6,
+   "1km_med9": 6
+  },
+  "sqm": {
+   "4km_shipped": 18.72,
+   "1km_2x2mean": 18.71,
+   "1km_med3": 18.74,
+   "1km_med5": 18.77,
+   "1km_med7": 18.8,
+   "1km_med9": 18.89
+  }
+ },
+ {
+  "id": "rijswijk-nl",
+  "known": 8,
+  "set": "new",
+  "sqm_meas": 18.16,
+  "pred": {
+   "4km_shipped": 6,
+   "1km_2x2mean": 6,
+   "1km_med3": 6,
+   "1km_med5": 6,
+   "1km_med7": 7,
+   "1km_med9": 7
+  },
+  "sqm": {
+   "4km_shipped": 18.9,
+   "1km_2x2mean": 18.85,
+   "1km_med3": 18.87,
+   "1km_med5": 18.75,
+   "1km_med7": 18.68,
+   "1km_med9": 18.65
+  }
+ },
+ {
+  "id": "zernike-nl",
+  "known": 5,
+  "set": "new",
+  "sqm_meas": 19.882,
+  "pred": {
+   "4km_shipped": 6,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 5,
+   "1km_med9": 5
+  },
+  "sqm": {
+   "4km_shipped": 19.44,
+   "1km_2x2mean": 19.51,
+   "1km_med3": 19.54,
+   "1km_med5": 19.54,
+   "1km_med7": 19.57,
+   "1km_med9": 19.64
+  }
+ },
+ {
+  "id": "deheld-nl",
+  "known": 5,
+  "set": "new",
+  "sqm_meas": 19.695,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 5,
+   "1km_med9": 5
+  },
+  "sqm": {
+   "4km_shipped": 20.25,
+   "1km_2x2mean": 20.38,
+   "1km_med3": 20.26,
+   "1km_med5": 20.23,
+   "1km_med7": 20.11,
+   "1km_med9": 20.1
+  }
+ },
+ {
+  "id": "dezilk-nl",
+  "known": 5,
+  "set": "new",
+  "sqm_meas": 19.514,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 5,
+   "1km_med9": 5
+  },
+  "sqm": {
+   "4km_shipped": 20.01,
+   "1km_2x2mean": 20.04,
+   "1km_med3": 20.09,
+   "1km_med5": 20.29,
+   "1km_med7": 20.39,
+   "1km_med9": 20.4
+  }
+ },
+ {
+  "id": "potsdam-babelsberg",
+  "known": 5,
+  "set": "new",
+  "sqm_meas": 20.3,
+  "pred": {
+   "4km_shipped": 6,
+   "1km_2x2mean": 6,
+   "1km_med3": 6,
+   "1km_med5": 6,
+   "1km_med7": 6,
+   "1km_med9": 6
+  },
+  "sqm": {
+   "4km_shipped": 19.13,
+   "1km_2x2mean": 19.22,
+   "1km_med3": 19.35,
+   "1km_med5": 19.43,
+   "1km_med7": 19.36,
+   "1km_med9": 19.35
+  }
+ },
+ {
+  "id": "berlin-steglitz",
+  "known": 6,
+  "set": "new",
+  "sqm_meas": 19.0,
+  "pred": {
+   "4km_shipped": 6,
+   "1km_2x2mean": 6,
+   "1km_med3": 6,
+   "1km_med5": 6,
+   "1km_med7": 6,
+   "1km_med9": 6
+  },
+  "sqm": {
+   "4km_shipped": 18.84,
+   "1km_2x2mean": 18.89,
+   "1km_med3": 19.08,
+   "1km_med5": 19.12,
+   "1km_med7": 19.22,
+   "1km_med9": 19.23
+  }
+ },
+ {
+  "id": "ifa-vienna",
+  "known": 6,
+  "set": "new",
+  "sqm_meas": 19.1,
+  "pred": {
+   "4km_shipped": 6,
+   "1km_2x2mean": 6,
+   "1km_med3": 6,
+   "1km_med5": 6,
+   "1km_med7": 6,
+   "1km_med9": 6
+  },
+  "sqm": {
+   "4km_shipped": 19.1,
+   "1km_2x2mean": 19.06,
+   "1km_med3": 19.1,
+   "1km_med5": 19.07,
+   "1km_med7": 19.07,
+   "1km_med9": 19.06
+  }
+ },
+ {
+  "id": "lsm-linz",
+  "known": 6,
+  "set": "new",
+  "sqm_meas": 19.2,
+  "pred": {
+   "4km_shipped": 7,
+   "1km_2x2mean": 7,
+   "1km_med3": 7,
+   "1km_med5": 6,
+   "1km_med7": 6,
+   "1km_med9": 6
+  },
+  "sqm": {
+   "4km_shipped": 18.55,
+   "1km_2x2mean": 18.7,
+   "1km_med3": 18.65,
+   "1km_med5": 18.8,
+   "1km_med7": 18.92,
+   "1km_med9": 18.96
+  }
+ },
+ {
+  "id": "lgo-linz",
+  "known": 6,
+  "set": "new",
+  "sqm_meas": 19.0,
+  "pred": {
+   "4km_shipped": 7,
+   "1km_2x2mean": 7,
+   "1km_med3": 7,
+   "1km_med5": 6,
+   "1km_med7": 6,
+   "1km_med9": 6
+  },
+  "sqm": {
+   "4km_shipped": 18.6,
+   "1km_2x2mean": 18.69,
+   "1km_med3": 18.65,
+   "1km_med5": 18.8,
+   "1km_med7": 18.8,
+   "1km_med9": 18.8
+  }
+ },
+ {
+  "id": "wel-wels",
+  "known": 6,
+  "set": "new",
+  "sqm_meas": 19.4,
+  "pred": {
+   "4km_shipped": 6,
+   "1km_2x2mean": 6,
+   "1km_med3": 6,
+   "1km_med5": 6,
+   "1km_med7": 6,
+   "1km_med9": 6
+  },
+  "sqm": {
+   "4km_shipped": 18.98,
+   "1km_2x2mean": 18.74,
+   "1km_med3": 18.91,
+   "1km_med5": 19.11,
+   "1km_med7": 19.22,
+   "1km_med9": 19.44
+  }
+ },
+ {
+  "id": "tra-traun",
+  "known": 5,
+  "set": "new",
+  "sqm_meas": 19.8,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 5,
+   "1km_med9": 5
+  },
+  "sqm": {
+   "4km_shipped": 20.02,
+   "1km_2x2mean": 20.03,
+   "1km_med3": 20.02,
+   "1km_med5": 20.02,
+   "1km_med7": 20.01,
+   "1km_med9": 19.99
+  }
+ },
+ {
+  "id": "sty-steyr",
+  "known": 5,
+  "set": "new",
+  "sqm_meas": 20.3,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 5,
+   "1km_med9": 5
+  },
+  "sqm": {
+   "4km_shipped": 19.54,
+   "1km_2x2mean": 19.61,
+   "1km_med3": 19.83,
+   "1km_med5": 19.9,
+   "1km_med7": 19.95,
+   "1km_med9": 20.16
+  }
+ },
+ {
+  "id": "pas-pashing",
+  "known": 5,
+  "set": "new",
+  "sqm_meas": 20.1,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 4,
+   "1km_med7": 4,
+   "1km_med9": 4
+  },
+  "sqm": {
+   "4km_shipped": 20.66,
+   "1km_2x2mean": 20.6,
+   "1km_med3": 20.73,
+   "1km_med5": 20.96,
+   "1km_med7": 20.96,
+   "1km_med9": 20.95
+  }
+ },
+ {
+  "id": "bra-braunau",
+  "known": 5,
+  "set": "new",
+  "sqm_meas": 20.2,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 5,
+   "1km_med9": 5
+  },
+  "sqm": {
+   "4km_shipped": 19.57,
+   "1km_2x2mean": 19.86,
+   "1km_med3": 19.69,
+   "1km_med5": 19.91,
+   "1km_med7": 20.2,
+   "1km_med9": 20.32
+  }
+ },
+ {
+  "id": "gri-grieskirchen",
+  "known": 5,
+  "set": "new",
+  "sqm_meas": 20.2,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 4,
+   "1km_med9": 2
+  },
+  "sqm": {
+   "4km_shipped": 19.51,
+   "1km_2x2mean": 19.68,
+   "1km_med3": 19.65,
+   "1km_med5": 20.42,
+   "1km_med7": 21.36,
+   "1km_med9": 21.71
+  }
+ },
+ {
+  "id": "fre-freistadt",
+  "known": 5,
+  "set": "new",
+  "sqm_meas": 20.2,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 5,
+   "1km_med9": 5
+  },
+  "sqm": {
+   "4km_shipped": 19.66,
+   "1km_2x2mean": 19.6,
+   "1km_med3": 19.83,
+   "1km_med5": 20.0,
+   "1km_med7": 20.44,
+   "1km_med9": 20.6
+  }
+ },
+ {
+  "id": "voe-voecklabruck",
+  "known": 5,
+  "set": "new",
+  "sqm_meas": 20.4,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 5,
+   "1km_med9": 5
+  },
+  "sqm": {
+   "4km_shipped": 19.67,
+   "1km_2x2mean": 19.87,
+   "1km_med3": 19.67,
+   "1km_med5": 20.05,
+   "1km_med7": 20.41,
+   "1km_med9": 20.74
+  }
+ },
+ {
+  "id": "mat-mattighofen",
+  "known": 5,
+  "set": "new",
+  "sqm_meas": 20.8,
+  "pred": {
+   "4km_shipped": 5,
+   "1km_2x2mean": 5,
+   "1km_med3": 5,
+   "1km_med5": 5,
+   "1km_med7": 5,
+   "1km_med9": 5
+  },
+  "sqm": {
+   "4km_shipped": 19.79,
+   "1km_2x2mean": 19.75,
+   "1km_med3": 20.21,
+   "1km_med5": 20.43,
+   "1km_med7": 20.74,
+   "1km_med9": 20.89
+  }
+ },
+ {
+  "id": "bod-at",
+  "known": 2,
+  "set": "new",
+  "sqm_meas": 21.8,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.66,
+   "1km_2x2mean": 21.66,
+   "1km_med3": 21.66,
+   "1km_med5": 21.66,
+   "1km_med7": 21.66,
+   "1km_med9": 21.66
+  }
+ },
+ {
+  "id": "zoe-at",
+  "known": 1,
+  "set": "new",
+  "sqm_meas": 21.9,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.67,
+   "1km_2x2mean": 21.67,
+   "1km_med3": 21.67,
+   "1km_med5": 21.67,
+   "1km_med7": 21.67,
+   "1km_med9": 21.67
+  }
+ },
+ {
+  "id": "los-at",
+  "known": 2,
+  "set": "new",
+  "sqm_meas": 21.8,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.57,
+   "1km_2x2mean": 21.57,
+   "1km_med3": 21.57,
+   "1km_med5": 21.57,
+   "1km_med7": 21.57,
+   "1km_med9": 21.57
+  }
+ },
+ {
+  "id": "kri-at",
+  "known": 1,
+  "set": "new",
+  "sqm_meas": 21.9,
+  "pred": {
+   "4km_shipped": 2,
+   "1km_2x2mean": 2,
+   "1km_med3": 2,
+   "1km_med5": 2,
+   "1km_med7": 2,
+   "1km_med9": 2
+  },
+  "sqm": {
+   "4km_shipped": 21.78,
+   "1km_2x2mean": 21.78,
+   "1km_med3": 21.78,
+   "1km_med5": 21.78,
+   "1km_med7": 21.78,
+   "1km_med9": 21.78
+  }
+ },
+ {
+  "id": "feu-at",
+  "known": 2,
+  "set": "new",
+  "sqm_meas": 21.8,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.57,
+   "1km_2x2mean": 21.57,
+   "1km_med3": 21.57,
+   "1km_med5": 21.57,
+   "1km_med7": 21.57,
+   "1km_med9": 21.57
+  }
+ },
+ {
+  "id": "gru-at",
+  "known": 3,
+  "set": "new",
+  "sqm_meas": 21.6,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.43,
+   "1km_2x2mean": 21.43,
+   "1km_med3": 21.43,
+   "1km_med5": 21.43,
+   "1km_med7": 21.43,
+   "1km_med9": 21.43
+  }
+ },
+ {
+  "id": "kid-at",
+  "known": 3,
+  "set": "new",
+  "sqm_meas": 21.6,
+  "pred": {
+   "4km_shipped": 4,
+   "1km_2x2mean": 4,
+   "1km_med3": 4,
+   "1km_med5": 4,
+   "1km_med7": 4,
+   "1km_med9": 4
+  },
+  "sqm": {
+   "4km_shipped": 21.37,
+   "1km_2x2mean": 21.37,
+   "1km_med3": 21.37,
+   "1km_med5": 21.37,
+   "1km_med7": 21.37,
+   "1km_med9": 21.37
+  }
+ },
+ {
+  "id": "uli-at",
+  "known": 3,
+  "set": "new",
+  "sqm_meas": 21.6,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.62,
+   "1km_2x2mean": 21.62,
+   "1km_med3": 21.62,
+   "1km_med5": 21.62,
+   "1km_med7": 21.62,
+   "1km_med9": 21.62
+  }
+ },
+ {
+  "id": "gis-at",
+  "known": 4,
+  "set": "new",
+  "sqm_meas": 21.3,
+  "pred": {
+   "4km_shipped": 3,
+   "1km_2x2mean": 3,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 3,
+   "1km_med9": 3
+  },
+  "sqm": {
+   "4km_shipped": 21.4,
+   "1km_2x2mean": 21.4,
+   "1km_med3": 21.4,
+   "1km_med5": 21.4,
+   "1km_med7": 21.4,
+   "1km_med9": 21.4
+  }
+ },
+ {
+  "id": "mun-at",
+  "known": 4,
+  "set": "new",
+  "sqm_meas": 21.2,
+  "pred": {
+   "4km_shipped": 4,
+   "1km_2x2mean": 4,
+   "1km_med3": 3,
+   "1km_med5": 3,
+   "1km_med7": 2,
+   "1km_med9": 2
+  },
+  "sqm": {
+   "4km_shipped": 21.38,
+   "1km_2x2mean": 21.24,
+   "1km_med3": 21.41,
+   "1km_med5": 21.47,
+   "1km_med7": 21.71,
+   "1km_med9": 21.71
+  }
+ }
+]

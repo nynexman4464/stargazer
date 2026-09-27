@@ -1,0 +1,282 @@
+[
+ {
+  "id": "ifa-vienna",
+  "lat": 48.231667,
+  "lon": 16.334167,
+  "known_bortle": 6,
+  "sqm": 19.1,
+  "source": "Puschnig et al. 2014: clear-sky mean 19.1 mag/arcsec2 at Univ. of Vienna Institute for Astronomy, ~3 km from city center (Unihedron SQM)."
+ },
+ {
+  "id": "lsm-linz",
+  "lat": 48.305278,
+  "lon": 14.282778,
+  "known_bortle": 6,
+  "sqm": 19.2,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Schlossmuseum Linz, urban (200k pop.), multi-year Unihedron SQM."
+ },
+ {
+  "id": "lgo-linz",
+  "lat": 48.305278,
+  "lon": 14.308333,
+  "known_bortle": 6,
+  "sqm": 19.0,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Linz Goethestrasse, urban (200k pop.), multi-year Unihedron SQM."
+ },
+ {
+  "id": "wel-wels",
+  "lat": 48.156389,
+  "lon": 14.024722,
+  "known_bortle": 6,
+  "sqm": 19.4,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Wels Rathaus, urban (60k pop.), multi-year Unihedron SQM."
+ },
+ {
+  "id": "tra-traun",
+  "lat": 48.235556,
+  "lon": 14.253056,
+  "known_bortle": 5,
+  "sqm": 19.8,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Traun, urban (24k pop.), multi-year Unihedron SQM."
+ },
+ {
+  "id": "sty-steyr",
+  "lat": 48.049167,
+  "lon": 14.442222,
+  "known_bortle": 5,
+  "sqm": 20.3,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Steyr, urban (38k pop.), multi-year Unihedron SQM."
+ },
+ {
+  "id": "pas-pashing",
+  "lat": 48.258611,
+  "lon": 14.21,
+  "known_bortle": 5,
+  "sqm": 20.1,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Pasching, intermediate (7.5k pop.), multi-year Unihedron SQM."
+ },
+ {
+  "id": "bra-braunau",
+  "lat": 48.261111,
+  "lon": 13.044722,
+  "known_bortle": 5,
+  "sqm": 20.2,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Braunau, urban (16.9k pop.), multi-year Unihedron SQM."
+ },
+ {
+  "id": "gri-grieskirchen",
+  "lat": 48.234444,
+  "lon": 13.825833,
+  "known_bortle": 5,
+  "sqm": 20.2,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Grieskirchen, urban (5k pop.), multi-year Unihedron SQM."
+ },
+ {
+  "id": "fre-freistadt",
+  "lat": 48.509167,
+  "lon": 14.501944,
+  "known_bortle": 5,
+  "sqm": 20.2,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Freistadt, urban (7.8k pop.), multi-year Unihedron SQM."
+ },
+ {
+  "id": "voe-voecklabruck",
+  "lat": 48.005833,
+  "lon": 13.645278,
+  "known_bortle": 5,
+  "sqm": 20.4,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Voecklabruck, urban, multi-year Unihedron SQM."
+ },
+ {
+  "id": "mat-mattighofen",
+  "lat": 48.097222,
+  "lon": 13.151667,
+  "known_bortle": 5,
+  "sqm": 20.8,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Mattighofen, intermediate (6.5k pop.), multi-year Unihedron SQM."
+ },
+ {
+  "id": "leiden-nl",
+  "lat": 52.155,
+  "lon": 4.483,
+  "known_bortle": 6,
+  "sqm": 18.91,
+  "source": "Shah et al. 2025 (Dutch Was-het-donker SQM network): Leiden station, Jan-2020 filtered NSB."
+ },
+ {
+  "id": "rijswijk-nl",
+  "lat": 52.026,
+  "lon": 4.314,
+  "known_bortle": 8,
+  "sqm": 18.16,
+  "source": "Shah et al. 2025 (Dutch Was-het-donker SQM network): Rijswijk station, Jan-2020 filtered NSB."
+ },
+ {
+  "id": "zernike-nl",
+  "lat": 53.24,
+  "lon": 6.536,
+  "known_bortle": 5,
+  "sqm": 19.882,
+  "source": "Shah et al. 2025 (Dutch Was-het-donker SQM network): Zernike (Groningen) station, Jan-2020 filtered NSB."
+ },
+ {
+  "id": "deheld-nl",
+  "lat": 53.228,
+  "lon": 6.512,
+  "known_bortle": 5,
+  "sqm": 19.695,
+  "source": "Shah et al. 2025 (Dutch Was-het-donker SQM network): DeHeld (Groningen) station, Jan-2020 filtered NSB."
+ },
+ {
+  "id": "dezilk-nl",
+  "lat": 52.301,
+  "lon": 4.542,
+  "known_bortle": 5,
+  "sqm": 19.514,
+  "source": "Shah et al. 2025 (Dutch Was-het-donker SQM network): DeZilk station, Jan-2020 filtered NSB."
+ },
+ {
+  "id": "boston-common",
+  "lat": 42.3551,
+  "lon": -71.0656,
+  "known_bortle": 9,
+  "sqm": 16.6,
+  "source": "Sky & Telescope 2018 (measuring-skyglow): Boston Common zenith SQM 16.6. CAVEAT: measured with snow cover; typical ~0.5 mag darker."
+ },
+ {
+  "id": "cambridge-common",
+  "lat": 42.3751,
+  "lon": -71.1139,
+  "known_bortle": 9,
+  "sqm": 17.3,
+  "source": "Sky & Telescope 2018: Cambridge Common zenith SQM 17.3. CAVEAT: snow cover; typical ~0.5 mag darker."
+ },
+ {
+  "id": "danehy-park",
+  "lat": 42.3875,
+  "lon": -71.135,
+  "known_bortle": 9,
+  "sqm": 17.4,
+  "source": "Sky & Telescope 2018: Danehy Park, Cambridge zenith SQM 17.4. CAVEAT: snow cover; typical ~0.5 mag darker."
+ },
+ {
+  "id": "arlington-ma",
+  "lat": 42.4154,
+  "lon": -71.1565,
+  "known_bortle": 8,
+  "sqm": 17.9,
+  "source": "Sky & Telescope 2018: Arlington MA zenith SQM 17.9 (town-center coords approx). CAVEAT: snow cover; typical ~0.5 mag darker."
+ },
+ {
+  "id": "lincoln-ma",
+  "lat": 42.4258,
+  "lon": -71.303,
+  "known_bortle": 7,
+  "sqm": 18.6,
+  "source": "Sky & Telescope 2018: Lincoln MA zenith SQM 18.6 (town-center coords approx). CAVEAT: snow cover; typical ~0.5 mag darker."
+ },
+ {
+  "id": "potsdam-babelsberg",
+  "lat": 52.38,
+  "lon": 13.106111,
+  "known_bortle": 5,
+  "sqm": 20.3,
+  "source": "Puschnig et al. 2013 (arXiv:1307.2038): clear-night best value 20.3 from 2011-2012 Unihedron SQM at AIP, 22 km SW of Berlin center."
+ },
+ {
+  "id": "badajoz-es",
+  "lat": 38.875,
+  "lon": -6.975,
+  "known_bortle": 7,
+  "sqm": 18.24,
+  "source": "Sustainability 2023 (SW Spain urban/rural): Badajoz urban clear-sky mean NSB 18.24 (city coords approx)."
+ },
+ {
+  "id": "berlin-steglitz",
+  "lat": 52.456,
+  "lon": 13.318,
+  "known_bortle": 6,
+  "sqm": 19.0,
+  "source": "Hanel et al. (SQM temperature stability, PMC): 'typical cloud-free' value ~19 mag/arcsec2 above lab in Steglitz, Berlin. APPROXIMATE value and coords."
+ },
+ {
+  "id": "bod-at",
+  "lat": 47.791944,
+  "lon": 14.393889,
+  "known_bortle": 2,
+  "sqm": 21.8,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Nationalpark Bodinggraben, rural, multi-year Unihedron SQM."
+ },
+ {
+  "id": "zoe-at",
+  "lat": 47.838333,
+  "lon": 14.441111,
+  "known_bortle": 1,
+  "sqm": 21.9,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Nationalpark Zoeblodon, rural, multi-year Unihedron SQM."
+ },
+ {
+  "id": "los-at",
+  "lat": 47.906111,
+  "lon": 14.411111,
+  "known_bortle": 2,
+  "sqm": 21.8,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Losenstein Hohe Dirn, rural, multi-year Unihedron SQM."
+ },
+ {
+  "id": "kri-at",
+  "lat": 47.523056,
+  "lon": 13.693333,
+  "known_bortle": 1,
+  "sqm": 21.9,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Krippenstein, rural, multi-year Unihedron SQM."
+ },
+ {
+  "id": "feu-at",
+  "lat": 47.815833,
+  "lon": 13.720833,
+  "known_bortle": 2,
+  "sqm": 21.8,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Feuerkogel, rural, multi-year Unihedron SQM."
+ },
+ {
+  "id": "gru-at",
+  "lat": 48.530556,
+  "lon": 14.575,
+  "known_bortle": 3,
+  "sqm": 21.6,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Gruenbach, rural, multi-year Unihedron SQM."
+ },
+ {
+  "id": "kid-at",
+  "lat": 48.441944,
+  "lon": 14.273889,
+  "known_bortle": 3,
+  "sqm": 21.6,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Kirchschlag-Davidschlag, rural, multi-year Unihedron SQM."
+ },
+ {
+  "id": "uli-at",
+  "lat": 48.705556,
+  "lon": 13.945556,
+  "known_bortle": 3,
+  "sqm": 21.6,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Ulrichsberg Schoeneben, rural, multi-year Unihedron SQM."
+ },
+ {
+  "id": "gis-at",
+  "lat": 48.384167,
+  "lon": 14.253056,
+  "known_bortle": 4,
+  "sqm": 21.3,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Giselawarte, intermediate, multi-year Unihedron SQM."
+ },
+ {
+  "id": "mun-at",
+  "lat": 48.479167,
+  "lon": 13.558056,
+  "known_bortle": 4,
+  "sqm": 21.2,
+  "source": "Posch et al. 2018 Tab.2 <NSB>(clear): Muenzkirchen, intermediate, multi-year Unihedron SQM."
+ }
+]

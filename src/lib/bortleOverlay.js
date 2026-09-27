@@ -7,6 +7,10 @@ import {
   ensureRegionById,
   sampleRegionByte,
 } from './bortleRegions.js';
+import {
+  preload1kmForBounds,
+  sample1kmBilinear,
+} from './bortle1km.js';
 
 /* Preload all regions intersecting a lat/lon bounding box (with a small halo
    so edge tiles have their neighbors). Returns a promise that resolves when
@@ -15,7 +19,11 @@ export function preloadRegionsForBounds(south, west, north, east) {
   // Expand by ~0.5 degrees to cover tiles straddling the edge
   const pad = 0.5;
   const rids = regionsForBounds(south - pad, west - pad, north + pad, east + pad);
-  return Promise.all(rids.map((rid) => ensureRegionById(rid).catch(() => null)));
+  return Promise.all([
+    ...rids.map((rid) => ensureRegionById(rid).catch(() => null)),
+    // 1km refinement layer (DreamHost backend); failures fall back to 4km
+    preload1kmForBounds(south, west, north, east).catch(() => null),
+  ]);
 }
 
 /* Bortle heatmap as a Leaflet tile layer. Tiles (256px) are rendered on
@@ -113,6 +121,12 @@ function sampleBortleByte(xM, yM, regions) {
   const region = regions.get(rid);
   if (!region) return null;
   const { coarse, fine } = region;
+
+  // 1km refinement (DreamHost backend): authoritative where its chunks are
+  // loaded; falls back to 4km -> coarse below when unavailable.
+  const v1k = sample1kmBilinear(xM, yM);
+  if (v1k != null) return v1k;
+
   const cm = coarse.cellM;
   const fm = fine.cellM;
   const per = fine.per;
