@@ -92,7 +92,12 @@ export function ensure1kmRegion(rid) {
       for (const ch of reg.chunks) {
         // Cache-buster: manifest version changes when data is rebuilt,
         // so clients fetch fresh chunks instead of stale HTTP cache.
-        const v = manifest?.version ?? 1;
+        // Override via ?bortle_v=2 URL param for A/B testing new models.
+        let v = manifest?.version ?? 1;
+        try {
+          const uv = new URLSearchParams(window.location.search).get('bortle_v');
+          if (uv && /^\d+$/.test(uv)) v = parseInt(uv, 10);
+        } catch { /* ignore */ }
         const url = `${apiBase()}?region=${encodeURIComponent(ch.id)}&v=${v}`;
         const r = await fetch(url);
         if (!r.ok) throw new Error(`chunk ${ch.id} ${r.status}`);

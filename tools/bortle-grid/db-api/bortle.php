@@ -88,6 +88,12 @@ if (!preg_match('/^r[0-3][0-7]_q\d+$/', $chunkId)) {
     echo json_encode(['error' => 'bad chunk id']);
     exit;
 }
+// Version suffix: ?region=r01_q15&v=2 serves chunk_id 'r01_q15_v2'.
+// Used for A/B testing new models without overwriting the live data.
+$version = isset($_GET['v']) ? intval($_GET['v']) : 1;
+if ($version > 1) {
+    $chunkId .= '_v' . $version;
+}
 
 try {
     $stmt = db($config)->prepare(
