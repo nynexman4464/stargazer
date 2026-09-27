@@ -45,7 +45,9 @@ function latLonToMerc(lat, lon) {
 let _manifestPromise = null;
 function fetchManifest() {
   if (!_manifestPromise) {
-    _manifestPromise = fetch(`${apiBase()}?manifest=1`)
+    // Never HTTP-cache the manifest: it carries the data version used
+    // to bust the chunk cache below.
+    _manifestPromise = fetch(`${apiBase()}?manifest=1`, { cache: 'no-store' })
       .then((r) => {
         if (!r.ok) throw new Error(`manifest ${r.status}`);
         return r.json();
@@ -88,7 +90,10 @@ export function ensure1kmRegion(rid) {
       if (!reg || !reg.chunks?.length) return null;
       const parts = [];
       for (const ch of reg.chunks) {
-        const url = `${apiBase()}?region=${encodeURIComponent(ch.id)}`;
+        // Cache-buster: manifest version changes when data is rebuilt,
+        // so clients fetch fresh chunks instead of stale HTTP cache.
+        const v = manifest?.version ?? 1;
+        const url = `${apiBase()}?region=${encodeURIComponent(ch.id)}&v=${v}`;
         const r = await fetch(url);
         if (!r.ok) throw new Error(`chunk ${ch.id} ${r.status}`);
         parts.push(decodeChunk(await r.arrayBuffer()));
