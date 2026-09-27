@@ -5,8 +5,9 @@
 //   GET ?region=<chunkId>  -> raw chunk bytes (application/octet-stream)
 //
 // chunkId looks like "r00_q0" (region r00, chunk 0). Chunk IDs are stable
-// across data rebuilds; responses use short cache lifetimes so updates
-// propagate within minutes.
+// across data rebuilds; responses carry Last-Modified from the DB
+// updated_at timestamp and honor If-Modified-Since, so clients cache
+// efficiently but always get fresh data after an upload.
 //
 // Deploy: copy this file, config.php, and manifest.json to the DreamHost
 // web directory serving /api/ (e.g. public_html/api/).
@@ -33,14 +34,29 @@ function db($config) {
     return $pdo;
 }
 
+// Return 304 if the client already has this version.
+function not_modified_since($updatedAt) {
+    if (empty($updatedAt)) return false;
+    $mtime = strtotime($updatedAt . ' UTC');
+    if ($mtime === false) return false;
+    $ims = isset($_SERVER['HTTP_IF_MODIFIED_SINCE'])
+        ? strtotime($_SERVER['HTTP_IF_MODIFIED_SINCE']) : false;
+    if ($ims !== false && $ims >= $mtime) {
+        http_response_code(304);
+        exit;
+    }
+    return $mtime;
+}
+
 // ---- manifest ----
 if (isset($_GET['manifest'])) {
     // Prefer the DB copy when present; fall back to manifest.json on disk.
     $manifest = null;
+    $updatedAt = null;
     try {
         $row = db($config)->query(
-            "SELECT manifest FROM bortle_manifest WHERE id = 1")->fetch();
-        if ($row) $manifest = $row['manifest'];
+            "SELECT manifest, updated_at FROM bortle_manifest WHERE id = 1")->fetch();
+        if ($row) { $manifest = $row['manifest']; $updatedAt = $row['updated_at']; }
     } catch (Exception $e) { /* table may not exist yet */ }
     if ($manifest === null) {
         $path = __DIR__ . '/manifest.json';
@@ -51,9 +67,14 @@ if (isset($_GET['manifest'])) {
             exit;
         }
         $manifest = file_get_contents($path);
+        $mtime = filemtime($path);
+    } else {
+        $mtime = not_modified_since($updatedAt);
+        if ($mtime === false) $mtime = time();
     }
     header('Content-Type: application/json');
-    header('Cache-Control: public, max-age=60'); // short: model updates must propagate
+    header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $mtime) . ' GMT');
+    header('Cache-Control: public, max-age=60, must-revalidate');
     echo $manifest;
     exit;
 }
@@ -70,7 +91,7 @@ if (!preg_match('/^r[0-3][0-7]_q\d+$/', $chunkId)) {
 
 try {
     $stmt = db($config)->prepare(
-        "SELECT data, nbytes FROM bortle_chunks WHERE chunk_id = ?");
+        "SELECT data, nbytes, updated_at FROM bortle_chunks WHERE chunk_id = ?");
     $stmt->execute([$chunkId]);
     $row = $stmt->fetch();
 } catch (Exception $e) {
@@ -87,10 +108,12 @@ if (!$row) {
     exit;
 }
 
+$mtime = not_modified_since($row['updated_at']);
+if ($mtime === false) $mtime = time();
+
 header('Content-Type: application/octet-stream');
 header('Content-Length: ' . $row['nbytes']);
-// Chunk IDs are stable across rebuilds, so do NOT cache immutably.
-// Short max-age so model updates propagate within minutes.
-header('Cache-Control: public, max-age=300, must-revalidate');
+header('Last-Modified: ' . gmdate('D, d M Y H:i:s', $mtime) . ' GMT');
+header('Cache-Control: public, max-age=3600, must-revalidate');
 header('Accept-Ranges: bytes');
 echo $row['data'];
