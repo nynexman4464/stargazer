@@ -52,7 +52,9 @@ PER1K = 20  # 1km cells per 20km coarse cell
 OUT_DIR = "/home/hatch/workspace/data/bortle-1km"
 REPO = "/home/hatch/workspace/stargazer"
 MAX_CHUNK = 2 * 1024 * 1024  # 2MB per chunk file
-MED_K = 3          # 7x7 window
+MED_K = 5          # 11x11 window (was 7x7): covers ~11km to bridge the gap
+                   # between local median and Walker start (10km), eliminating
+                   # the dark ring without double-counting the center.
 MED_MIN_VALID = 25  # >= n*n/2 valid pixels (matches validation)
 
 LON_BANDS = [-180, -135, -90, -45, 0, 45, 90, 135, 180]
@@ -101,6 +103,8 @@ def build_walker(coarse_mean):
     yy, xx = np.mgrid[-r:r+1, -r:r+1]
     d = np.sqrt(xx**2 + yy**2)
     kernel = np.zeros((2*r+1, 2*r+1))
+    # SHIPPED Walker: 0.5 < d <= 5 (hole prevents double-counting local).
+    # The 11x11 local median now covers ~11km, bridging to the Walker's 10km start.
     m = (d > 0.5) & (d <= WALKER_RMAX_CELLS)
     kernel[m] = d[m] ** (-WALKER_P)
     filled = np.nan_to_num(coarse_mean, nan=0.0)
