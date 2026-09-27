@@ -41,8 +41,12 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, os.path.join(HERE, '..', 'mercator-2025'))
 from merc_grid import (
     XMIN, YMAX, COLS, ROWS, COARSE_M, R_MERC,
-    K1, K2, WALKER_P, WALKER_RMAX_CELLS, WALKER_SQRT,
+    K1, K2 as K2_SHIPPED, WALKER_P, WALKER_RMAX_CELLS, WALKER_SQRT,
 )
+# 1km tuning (2026-09-27): the filled Walker kernel is 2.03x stronger than the
+# shipped hollow kernel, so halve K2 to keep the total regional contribution
+# calibrated. Prevents over-brightening while eliminating the donut halo.
+K2 = K2_SHIPPED / 2.03
 
 TILE_DIR = "/home/hatch/workspace/data/blackmarble/tiles_2025"
 LAYER = "AllAngle_Composite_Snow_Free"
@@ -52,9 +56,8 @@ PER1K = 20  # 1km cells per 20km coarse cell
 OUT_DIR = "/home/hatch/workspace/data/bortle-1km"
 REPO = "/home/hatch/workspace/stargazer"
 MAX_CHUNK = 2 * 1024 * 1024  # 2MB per chunk file
-MED_K = 5          # 11x11 window (was 7x7): covers ~11km to bridge the gap
-                   # between local median and Walker start (10km), eliminating
-                   # the dark ring without double-counting the center.
+MED_K = 3          # 7x7 window (reverted from 11x11 2026-09-27: the 11x11
+                   # spread town brightness over 11km creating visible halos)
 MED_MIN_VALID = 25  # >= n*n/2 valid pixels (matches validation)
 
 LON_BANDS = [-180, -135, -90, -45, 0, 45, 90, 135, 180]
@@ -103,10 +106,17 @@ def build_walker(coarse_mean):
     yy, xx = np.mgrid[-r:r+1, -r:r+1]
     d = np.sqrt(xx**2 + yy**2)
     kernel = np.zeros((2*r+1, 2*r+1))
-    # SHIPPED Walker: 0.5 < d <= 5 (hole prevents double-counting local).
-    # The 11x11 local median now covers ~11km, bridging to the Walker's 10km start.
-    m = (d > 0.5) & (d <= WALKER_RMAX_CELLS)
-    kernel[m] = d[m] ** (-WALKER_P)
+    # FIX (2026-09-27): fill the center hole for 1km. The 0.5-cell hole created
+    # a donut: 7x7 median fills 0-7km, Walker starts at 10km, leaving a visible
+    # ring at 20km (d=1). Filling the hole eliminates the donut. The kernel
+    # is 2.03x stronger, so K2 is halved to 0.025 to compensate (see below).
+    # Center capped at d=0.5 to avoid the d^-3 singularity.
+    m = (d <= WALKER_RMAX_CELLS)
+    kernel[m] = np.maximum(d[m], 0.5) ** (-WALKER_P)
+    # Cosine taper from d=4 to d=5 (fades to zero at the 100km edge)
+    taper_m = (d > 4.0) & (d <= WALKER_RMAX_CELLS)
+    taper = 0.5 * (1 + np.cos(np.pi * (d[taper_m] - 4.0) / 1.0))
+    kernel[taper_m] *= taper
     filled = np.nan_to_num(coarse_mean, nan=0.0)
     w = convolve(filled, kernel, mode='constant', cval=0.0)
     if WALKER_SQRT:
@@ -278,7 +288,7 @@ def main():
     manifest = {
         "version": 1, "magic": "B1K1", "per": PER1K, "cellM": int(FINE1K_M),
         "quantum": 0.05, "sqmBase": 16.0,
-        "model": "7x7 median VIIRS 2025 + shipped Walker (K1=0.11 K2=0.05 p=3 rmax=5 sqrt)",
+        "model": "7x7 median VIIRS 2025 + filled Walker (K1=0.11 K2=0.0246 p=3 rmax=5 sqrt, cosine taper)",
         "regions": {},
     }
     total_bytes = 0
