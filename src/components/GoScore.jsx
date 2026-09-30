@@ -17,30 +17,26 @@ export default function GoScore({ score, exclude }) {
   if (!score) return null;
   const label = score.estimated ? 'Est. go score' : 'Go score';
   return (
-    <VStack gap={1}>
-      <Text type="label" color="secondary">
-        {label}
-      </Text>
-      <HoverCard
-        label={`${label}: score breakdown`}
-        content={
-          <VStack gap={2}>
-            <Text weight="semibold">
-              {label}: {score.score}%
-            </Text>
-            <ScoreBreakdown score={score} exclude={exclude} />
-          </VStack>
-        }
-        placement="above"
-        hasHoverIndication={false}
-        touchTrigger="tap"
-      >
-        <ProgressBar
-          value={score.score}
-          hasValueLabel
-          variant={scoreVariant(score.label)}
-        />
-      </HoverCard>
-    </VStack>
+    <HoverCard
+      label={`${label}: score breakdown`}
+      content={
+        <VStack gap={2}>
+          <Text weight="semibold">
+            {label}: {score.score}%
+          </Text>
+          <ScoreBreakdown score={score} exclude={exclude} />
+        </VStack>
+      }
+      placement="above"
+      hasHoverIndication={false}
+      touchTrigger="tap"
+    >
+      <ProgressBar
+        label={label}
+        value={score.score}
+        hasValueLabel
+        variant={scoreVariant(score.label)}
+      />
+    </HoverCard>
   );
 }
