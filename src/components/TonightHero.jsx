@@ -103,7 +103,7 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc, pla
                       <GoScore score={score} exclude={pick.bodies} />
                     ) : notVisible ? (
                       <Text type="supporting">
-                        Not visible from {loc?.name || 'your location'} — worth traveling for.
+                        {`Not visible from ${loc?.name || 'your location'} — worth traveling for.`}
                       </Text>
                     ) : beyondForecast ? (
                       <Text type="supporting">Too far out — forecasts only reach about two weeks.</Text>

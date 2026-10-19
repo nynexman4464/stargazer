@@ -131,7 +131,7 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
         )}
         {!score && notVisible && (
           <Text type="supporting">
-            Not visible from {loc?.name || 'your location'} — worth traveling for.
+            {`Not visible from ${loc?.name || 'your location'} — worth traveling for.`}
           </Text>
         )}
       </VStack>
