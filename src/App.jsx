@@ -255,10 +255,11 @@ export default function App() {
   // getting labeled "Tonight's sky". Anything further out is "Coming up".
   const pickIsTonight = (() => {
     if (anchorDay || !pick) return false;
-    const todayStart = startOfDay(new Date()).getTime();
+    const now = new Date();
+    const todayStart = startOfDay(now).getTime();
     const pickDay = startOfDay(pick.date).getTime();
     if (pickDay === todayStart) return true;
-    return pickDay === todayStart - DAY && Date.now() < todayStart + 6 * 3600000;
+    return pickDay === todayStart - DAY && now.getTime() < todayStart + 6 * 3600000;
   })();
 
   return (
