@@ -248,7 +248,18 @@ export default function App() {
     heroCands[0] ||
     nextAfterAnchor ||
     null;
-  const pickIsTonight = !anchorDay && !!pick && heroCands.includes(pick);
+  // "Tonight's sky" only when the pick's own night is the night in
+  // progress: its date is today, or yesterday's date in the small hours
+  // before dawn. Membership in heroCands is NOT the test — that pool
+  // reaches 60 hours out, so a Wednesday shower picked on Monday was
+  // getting labeled "Tonight's sky". Anything further out is "Coming up".
+  const pickIsTonight = (() => {
+    if (anchorDay || !pick) return false;
+    const todayStart = startOfDay(new Date()).getTime();
+    const pickDay = startOfDay(pick.date).getTime();
+    if (pickDay === todayStart) return true;
+    return pickDay === todayStart - DAY && Date.now() < todayStart + 6 * 3600000;
+  })();
 
   return (
     <>
