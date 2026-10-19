@@ -63,7 +63,9 @@ export default function MoonPanel({ asOf, loc }) {
     if (!loc || loc.lat == null) return null;
     const base = asOf || new Date();
     const anchor = new Date(base.getFullYear(), base.getMonth(), base.getDate(), 21);
-    return [{ label: 'Moon', track: lookTrack((d) => moonEquatorial(d), anchor, loc), note: null }];
+    // The Moon is up in daylight too: widen the window to that morning and
+    // keep samples from rise to set, not just after sunset.
+    return [{ label: 'Moon', track: lookTrack((d) => moonEquatorial(d), anchor, loc, { startH: -15, hours: 30, daylightSamples: true }), note: null }];
   }, [loc, asOf]);
   const upcoming = nextMoonPhase(ref);
   const isFullNow = phase > 0.46 && phase < 0.54;

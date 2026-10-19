@@ -1712,8 +1712,14 @@ export function cometEquatorial(orbit, date) {
    Returns the peak — highest point while the Sun is below `darkBelow`
    (degrees; -6 matches the "dark" test elsewhere), falling back to the
    highest point overall — plus rise/set crossings and hourly samples.
-   `daytime` tracks (the Sun itself) ignore darkness entirely. */
-export function lookTrack(raDecAt, anchor, loc, { startH = -6, hours = 24, darkBelow = -6, daytime = false } = {}) {
+   `daytime` tracks (the Sun itself) ignore darkness entirely.
+   `daylightSamples` tracks (the Moon) keep their hourly samples in
+   daylight too — the Moon is a daytime target, so its list runs from
+   rise to set instead of from sunset. Rise/set are found by walking
+   out from the peak across a wider scan, so a rise that happened
+   before the window opens (an afternoon moonrise, say) is still
+   reported with its real time instead of "already up". */
+export function lookTrack(raDecAt, anchor, loc, { startH = -6, hours = 24, darkBelow = -6, daytime = false, daylightSamples = false } = {}) {
   const step = 10 * 60e3;
   const t0 = anchor.getTime() + startH * 3600e3;
   const pts = [];
@@ -1729,17 +1735,47 @@ export function lookTrack(raDecAt, anchor, loc, { startH = -6, hours = 24, darkB
   const peak = peakPool.length
     ? peakPool.reduce((a, b) => (b.alt > a.alt ? b : a))
     : null;
+  // Rise/set for the passage the peak belongs to: walk out from the peak
+  // over a wider scan than the display window. The window alone misses
+  // rises that fall just before it opens — the Moon rises around 2:50 PM
+  // on a first-quarter evening, minutes before the 3 PM window start,
+  // which used to read as "already up in the evening" with no rise time.
   let rise = null, set = null;
-  for (let i = 1; i < pts.length; i++) {
-    if (!rise && pts[i - 1].alt <= 0 && pts[i].alt > 0) rise = pts[i];
-    if (pts[i - 1].alt > 0 && pts[i].alt <= 0) set = pts[i];
+  if (peak) {
+    const span = 30 * 3600e3;
+    const wide = [];
+    for (let t = peak.time.getTime() - span; t <= peak.time.getTime() + span; t += step) {
+      const date = new Date(t);
+      const { ra, dec } = raDecAt(date);
+      const aa = altAz(ra, dec, date, loc.lat, loc.lon);
+      wide.push({ time: date, alt: aa.alt, az: aa.az });
+    }
+    for (let i = 1; i < wide.length; i++) {
+      const upCross = wide[i - 1].alt <= 0 && wide[i].alt > 0;
+      const downCross = wide[i - 1].alt > 0 && wide[i].alt <= 0;
+      if (wide[i].time <= peak.time && upCross) rise = wide[i];
+      if (wide[i].time > peak.time && downCross && !set) set = wide[i];
+    }
   }
   // Hourly samples for the hover card: night objects only while the Sun is
   // down (a radiant that's still up at noon is not a viewing target), the
-  // Sun only while it's up.
-  const samples = pts.filter(
-    (p) => p.time.getMinutes() === 0 && p.alt > -3 && (daytime ? p.alt > 0 : p.sun < 0),
+  // Sun only while it's up, and daylight-sample tracks (the Moon) for as
+  // long as they're up, day or night.
+  let samples = pts.filter(
+    (p) =>
+      p.time.getMinutes() === 0 &&
+      p.alt > -3 &&
+      (daytime ? p.alt > 0 : daylightSamples ? true : p.sun < 0),
   );
+  // Keep only the passage the peak belongs to, with an hour's grace on
+  // each side for the "below the horizon" cue rows. A wide window can
+  // otherwise mix in the tail of the previous passage (a waning Moon
+  // still up in the morning) ahead of that night's rise.
+  if (rise || set) {
+    const lo = rise ? rise.time.getTime() - 3600e3 : -Infinity;
+    const hi = set ? set.time.getTime() + 3600e3 : Infinity;
+    samples = samples.filter((p) => p.time.getTime() >= lo && p.time.getTime() <= hi);
+  }
   return {
     peak,
     peakInDark: !!peak && (daytime || peak.sun < darkBelow),
@@ -1777,7 +1813,9 @@ export function eventLook(ev, loc) {
   if (ev.type === 'eclipse' && !ev.solar) {
     return [{
       label: 'Moon',
-      track: lookTrack((d) => moonEquatorial(d), ev.date, loc),
+      // The Moon is up in daylight too: widen the window to that morning
+      // and keep samples from rise to set, not just after sunset.
+      track: lookTrack((d) => moonEquatorial(d), ev.date, loc, { startH: -15, hours: 30, daylightSamples: true }),
       note: null,
     }];
   }
