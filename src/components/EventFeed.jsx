@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Card } from '@astryxdesign/core/Card';
 import { Heading } from '@astryxdesign/core/Text';
 import { Text } from '@astryxdesign/core/Text';
@@ -18,10 +18,11 @@ import { Icon } from '@astryxdesign/core/Icon';
 import { ClickableCard } from '@astryxdesign/core/ClickableCard';
 import { useMediaQuery } from '@astryxdesign/core/hooks';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Telescope, Map, CalendarDays, Maximize2 } from 'lucide-react';
-import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage, eclipseVisibleFrom, planetVisibilityFactors } from '../lib/astro.js';
+import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage, eclipseVisibleFrom, planetVisibilityFactors, eventLook } from '../lib/astro.js';
 import MapLightbox from './MapLightbox.jsx';
 import ScoreFactors from './ScoreFactors.jsx';
 import GoScore from './GoScore.jsx';
+import WhereToLook from './WhereToLook.jsx';
 import { TermText } from './Term.jsx';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
@@ -37,6 +38,10 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
   const visFactors = ev.type === 'planet'
     ? planetVisibilityFactors(planetRows, ev.bodies, visWhen)
     : null;
+  /* Where to look on the event's own night: peak time + direction + angle
+     at a glance, full track in the hover card. Pure geometry, computed
+     once per event + location. */
+  const looks = useMemo(() => eventLook(ev, loc), [ev, loc]);
   const mapCaption = ev.solar
     ? 'Dark band: where the total or annular eclipse is visible. Map: NASA.'
     : 'White area: where the eclipse is visible. Map: NASA.';
@@ -117,6 +122,13 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
         )}
         {score && <GoScore score={score} exclude={ev.bodies} />}
         {visFactors && <ScoreFactors factors={visFactors} exclude={ev.bodies} />}
+        {looks && (
+          <WhereToLook
+            looks={looks}
+            whenText={ev.solar ? fmtDate(ev.date) : `night of ${fmtDate(ev.date)}`}
+            locName={loc?.name}
+          />
+        )}
         {!score && notVisible && (
           <Text type="supporting">
             Not visible from {loc?.name || 'your location'} — worth traveling for.

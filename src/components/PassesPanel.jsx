@@ -11,6 +11,7 @@ import { Token } from '@astryxdesign/core/Token';
 import { List } from '@astryxdesign/core/List';
 import { ListItem } from '@astryxdesign/core/List';
 import { EmptyState } from '@astryxdesign/core/EmptyState';
+import { HoverCard } from '@astryxdesign/core/HoverCard';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { Satellite, Clock } from 'lucide-react';
@@ -27,6 +28,36 @@ import {
   compass,
 } from '../lib/astro.js';
 import { Mag } from './Term.jsx';
+
+/* Full track for one pass, in a hover card anchored to the pass's peak
+   angle: appears/peaks/disappears plus the minute-by-minute direction
+   and height, so the glance line can stay one line long. */
+function PassTrack({ p, satName }) {
+  return (
+    <VStack gap={2}>
+      <Text weight="semibold">
+        {satName} — {fmtDate(p.start)} pass
+      </Text>
+      <Text type="supporting">
+        Appears {fmtTime(p.start)} in the {compass(p.startAz)} · peaks{' '}
+        {Math.round(p.maxEl)}° at {fmtTime(p.maxT)} · disappears {fmtTime(p.end)}{' '}
+        toward the {compass(p.endAz)}.
+      </Text>
+      {p.track && p.track.length > 1 && (
+        <VStack gap={1}>
+          {p.track.map((s) => (
+            <HStack key={s.time.getTime()} hAlign="between" vAlign="center" gap={3}>
+              <Text type="supporting">{fmtTime(s.time)}</Text>
+              <Text type="supporting" weight="semibold">
+                {compass(s.az)} · {Math.round(s.alt)}° up
+              </Text>
+            </HStack>
+          ))}
+        </VStack>
+      )}
+    </VStack>
+  );
+}
 
 /* Bright flyovers: ISS / Tiangong / Hubble tabs with visible-pass predictions.
    Each pass gets a 0-100 visibility score from peak elevation, the satellite's
@@ -190,12 +221,20 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
                         </Text>
                       }
                       endContent={
-                        <VStack gap={0} hAlign="end">
-                          <Text type="large" weight="semibold" hasTabularNumbers>
-                            {Math.round(p.maxEl)}°
-                          </Text>
-                          <Text type="supporting">max elev</Text>
-                        </VStack>
+                        <HoverCard
+                          label={`${satName} pass track`}
+                          content={<PassTrack p={p} satName={satName} />}
+                          placement="above"
+                          hasHoverIndication={false}
+                          touchTrigger="tap"
+                        >
+                          <VStack gap={0} hAlign="end">
+                            <Text type="large" weight="semibold" hasTabularNumbers>
+                              {Math.round(p.maxEl)}°
+                            </Text>
+                            <Text type="supporting">max elev</Text>
+                          </VStack>
+                        </HoverCard>
                       }
                     />
                   );

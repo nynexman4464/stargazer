@@ -491,6 +491,8 @@ export function normalizeEvents(showers, eclipses, conjs, comets) {
   (showers?.events || []).forEach((s) =>
     push({
       ...s,
+      radiantRa: showers?.radiants?.[s.name]?.ra ?? null,
+      radiantDec: showers?.radiants?.[s.name]?.dec ?? null,
       kind: 'shower',
       type: 'shower',
       tier: 'backyard',
@@ -1232,7 +1234,7 @@ export function computePasses(satrec, lat, lon, hours, mag, from) {
     const sunlit = !(s < 0 && r2 - s * s < 6371 * 6371);
     const visible = el > 12 && dark && sunlit;
     if (visible) {
-      if (!cur) cur = { start: d, maxEl: el, maxT: d, end: d, startAz: az, endAz: az, mag };
+      if (!cur) cur = { start: d, maxEl: el, maxT: d, end: d, startAz: az, endAz: az, mag, track: [] };
       else {
         cur.end = d;
         cur.endAz = az;
@@ -1241,6 +1243,10 @@ export function computePasses(satrec, lat, lon, hours, mag, from) {
           cur.maxT = d;
         }
       }
+      // Minute-by-minute positions for the pass hover card (the glance
+      // line only carries start -> end direction and the peak).
+      const last = cur.track[cur.track.length - 1];
+      if (!last || d - last.time >= 60000) cur.track.push({ time: d, alt: el, az });
     } else if (cur) {
       if (cur.maxEl > 18 && cur.end - cur.start > 60000) passes.push(cur);
       cur = null;
@@ -1629,4 +1635,172 @@ function scorePlanet(row, eph, cloud, loc) {
     label: score >= 78 ? 'Great' : score >= 55 ? 'Fair' : 'Poor',
     altNote, moonNote, cloudNote,
   };
+}
+
+/* ============================== where to look ============================== */
+/* Direction + height above the horizon for an event's object on its own
+   night: a glanceable peak (best time, compass direction, angle) plus the
+   full track for a hover card. Pure geometry — no network — built on the
+   same altAz() the planet visibility and satellite passes use. */
+
+/* The Sun's sky coordinates (RA/Dec in degrees) — the same math sunElev()
+   uses for elevation, exposed for altAz(). */
+export function sunRaDec(date) {
+  const JD = date.getTime() / DAY + 2440587.5;
+  const n = JD - 2451545.0;
+  const L = (((280.46 + 0.9856474 * n) % 360) + 360) % 360;
+  const g = (357.528 + 0.9856003 * n) * RAD;
+  const lambda = (L + 1.915 * Math.sin(g) + 0.02 * Math.sin(2 * g)) * RAD;
+  const eps = (23.439 - 0.0000004 * n) * RAD;
+  return {
+    ra: rev(Math.atan2(Math.cos(eps) * Math.sin(lambda), Math.cos(lambda)) / RAD),
+    dec: Math.asin(Math.sin(eps) * Math.sin(lambda)) / RAD,
+  };
+}
+
+/* One planet's sky coordinates at a moment (bodyEquatorial is the engine
+   behind planetEphemeris, which only snapshots one date for all planets). */
+export function planetRaDec(name, date) {
+  const e = bodyEquatorial(name.toLowerCase(), dayNumber(date));
+  return { ra: e.ra, dec: e.dec };
+}
+
+/* A comet's sky coordinates from its orbital elements
+   (comets.json `orbit`: q, e, i, node, argPeri in degrees/AU, tpJd = Julian
+   date of perihelion). Two-body Kepler motion — degree-level accuracy,
+   plenty for where-to-look guidance. Elongation (degrees from the Sun) is
+   included because comets near the Sun live or die by it. */
+export function cometEquatorial(orbit, date) {
+  const a = orbit.q / (1 - orbit.e);
+  const n = 0.9856076686 / Math.pow(a, 1.5); // mean motion, deg/day
+  const jd = date.getTime() / DAY + 2440587.5;
+  const M = rev(n * (jd - orbit.tpJd)) * RAD;
+  // Newton on Kepler's equation; high-eccentricity comets need a better
+  // first guess and more iterations than the planets' keplerE allows.
+  let E = orbit.e < 0.8 ? M : Math.PI;
+  for (let k = 0; k < 50; k++) {
+    const dE = (E - orbit.e * Math.sin(E) - M) / (1 - orbit.e * Math.cos(E));
+    E -= dE;
+    if (Math.abs(dE) < 1e-9) break;
+  }
+  const xv = a * (Math.cos(E) - orbit.e);
+  const yv = a * Math.sqrt(1 - orbit.e * orbit.e) * Math.sin(E);
+  const v = Math.atan2(yv, xv);
+  const r = Math.hypot(xv, yv);
+  const N = orbit.node * RAD, inc = orbit.i * RAD, vw = v + orbit.argPeri * RAD;
+  const xh = r * (Math.cos(N) * Math.cos(vw) - Math.sin(N) * Math.sin(vw) * Math.cos(inc));
+  const yh = r * (Math.sin(N) * Math.cos(vw) + Math.cos(N) * Math.sin(vw) * Math.cos(inc));
+  const zh = r * Math.sin(vw) * Math.sin(inc);
+  // Geocentric: add the Sun's heliocentric position, exactly as
+  // bodyEquatorial does for the planets, then rotate ecliptic -> equatorial.
+  const d = dayNumber(date);
+  const sun = helioEcliptic(ORBITAL_ELEMENTS.sun, d);
+  const lonsun = rev(sun.vDeg + sun.wDeg);
+  const xs = sun.r * Math.cos(lonsun * RAD), ys = sun.r * Math.sin(lonsun * RAD);
+  const xg = xh + xs, yg = yh + ys, zg = zh;
+  const ecl = (23.4393 - 3.563e-7 * d) * RAD;
+  const xe = xg, ye = yg * Math.cos(ecl) - zg * Math.sin(ecl), ze = yg * Math.sin(ecl) + zg * Math.cos(ecl);
+  const ra = rev(Math.atan2(ye, xe) / RAD);
+  const dec = Math.atan2(ze, Math.hypot(xe, ye)) / RAD;
+  const s = sunRaDec(date);
+  return { ra, dec, elong: angularSep(ra, dec, s.ra, s.dec) };
+}
+
+/* Track one sky position across a window around an anchor time.
+   raDecAt(date) -> { ra, dec } (degrees); fixed positions (a shower
+   radiant) just ignore the date, moving bodies (Moon, comet) recompute.
+   Returns the peak — highest point while the Sun is below `darkBelow`
+   (degrees; -6 matches the "dark" test elsewhere), falling back to the
+   highest point overall — plus rise/set crossings and hourly samples.
+   `daytime` tracks (the Sun itself) ignore darkness entirely. */
+export function lookTrack(raDecAt, anchor, loc, { startH = -6, hours = 24, darkBelow = -6, daytime = false } = {}) {
+  const step = 10 * 60e3;
+  const t0 = anchor.getTime() + startH * 3600e3;
+  const pts = [];
+  for (let t = t0; t <= t0 + hours * 3600e3; t += step) {
+    const date = new Date(t);
+    const { ra, dec } = raDecAt(date);
+    const aa = altAz(ra, dec, date, loc.lat, loc.lon);
+    pts.push({ time: date, alt: aa.alt, az: aa.az, sun: sunElev(date, loc.lat, loc.lon) });
+  }
+  const up = pts.filter((p) => p.alt > 0);
+  const darkUp = up.filter((p) => daytime || p.sun < darkBelow);
+  const peakPool = darkUp.length ? darkUp : up;
+  const peak = peakPool.length
+    ? peakPool.reduce((a, b) => (b.alt > a.alt ? b : a))
+    : null;
+  let rise = null, set = null;
+  for (let i = 1; i < pts.length; i++) {
+    if (!rise && pts[i - 1].alt <= 0 && pts[i].alt > 0) rise = pts[i];
+    if (pts[i - 1].alt > 0 && pts[i].alt <= 0) set = pts[i];
+  }
+  // Hourly samples for the hover card: night objects only while the Sun is
+  // down (a radiant that's still up at noon is not a viewing target), the
+  // Sun only while it's up.
+  const samples = pts.filter(
+    (p) => p.time.getMinutes() === 0 && p.alt > -3 && (daytime ? p.alt > 0 : p.sun < 0),
+  );
+  return {
+    peak,
+    peakInDark: !!peak && (daytime || peak.sun < darkBelow),
+    rise,
+    set,
+    upAllWindow: up.length === pts.length,
+    neverUp: up.length === 0,
+    samples,
+  };
+}
+
+/* Where-to-look for one normalized event, as an array of
+   { label, track, note } — one entry per object (two for a conjunction).
+   Returns null when the event's object has no computable position. */
+export function eventLook(ev, loc) {
+  if (!ev || !loc || loc.lat == null || loc.lon == null) return null;
+  const cap1 = (s) => s.charAt(0).toUpperCase() + s.slice(1);
+  if (ev.type === 'shower') {
+    if (ev.radiantRa == null || ev.radiantDec == null) return null;
+    const ra = ev.radiantRa, dec = ev.radiantDec;
+    return [{
+      label: `${ev.name} radiant`,
+      track: lookTrack(() => ({ ra, dec }), ev.date, loc),
+      note: 'Meteors stream out from the radiant in every direction — don’t stare straight at it. Look about halfway up the sky, a little off to one side of it, where the streaks run longest.',
+    }];
+  }
+  if (ev.type === 'planet') {
+    const looks = (ev.bodies || []).map((b) => ({
+      label: cap1(b),
+      track: lookTrack((d) => planetRaDec(b, d), ev.date, loc),
+      note: null,
+    }));
+    return looks.length ? looks : null;
+  }
+  if (ev.type === 'eclipse' && !ev.solar) {
+    return [{
+      label: 'Moon',
+      track: lookTrack((d) => moonEquatorial(d), ev.date, loc),
+      note: null,
+    }];
+  }
+  if (ev.type === 'eclipse' && ev.solar) {
+    const visible = eclipseVisibleFrom(ev, loc);
+    return [{
+      label: 'Sun',
+      // ev.date is 9 PM on eclipse day; scan that whole calendar day.
+      track: lookTrack((d) => sunRaDec(d), ev.date, loc, { startH: -21, hours: 24, daytime: true }),
+      note: visible
+        ? 'A daytime event — this is the Sun’s path across your sky that day. Never look at the Sun without eclipse glasses or a proper solar filter.'
+        : `This eclipse isn’t visible from ${loc.name || 'your location'} — this is the Sun’s path at home that day.`,
+    }];
+  }
+  if (ev.type === 'comet') {
+    if (!ev.orbit) return null;
+    const track = lookTrack((d) => cometEquatorial(ev.orbit, d), ev.date, loc, { darkBelow: 0 });
+    const { elong } = cometEquatorial(ev.orbit, ev.date);
+    return [{
+      label: ev.name,
+      track,
+      note: `Only about ${Math.round(elong)}° from the Sun at perihelion — a twilight target at best, low in the glow just after sunset or before sunrise.`,
+    }];
+  }
+  return null;
 }

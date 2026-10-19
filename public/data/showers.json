@@ -1,13 +1,80 @@
 {
-  "_note": "date = evening you go out (local). peak_night = evening → following morning. moon = 2027 lunar-phase context from the IMO 2027 calendar; omitted for 2026 records (no verified source on hand). Rates are qualitative except where a source gave a number. 2028–2036 instances repeat the verified 2027 peak dates — annual showers peak within a day of the same date each year — with 2027-specific moon context removed.",
+  "_note": "date = evening you go out (local). peak_night = evening → following morning. moon = 2027 lunar-phase context from the IMO 2027 calendar; omitted for 2026 records (no verified source on hand). Rates are qualitative except where a source gave a number. 2028–2036 instances repeat the verified 2027 peak dates — annual showers peak within a day of the same date each year — with 2027-specific moon context removed. Radiant RA/Dec (degrees, at maximum) live in the top-level radiants map, keyed by shower name.",
   "_source": [
     "IMO 2027 meteor shower calendar (imo.net/files/meteor-shower/cal2027.pdf) — annual dates, ZHRs, parent bodies; site was offline on build date, table contents confirmed via indexed copy",
     "timeanddate.com meteor shower calendar 2026 (peak nights)",
     "EarthSky — 2027 Quadrantids peak guidance",
     "Astronomy Now meteor shower calendar",
     "NASA Science — Quadrantids",
-    "Lunar phases for 2027 moon notes: IMO 2027 calendar Table 4 (lunar phases)"
+    "Lunar phases for 2027 moon notes: IMO 2027 calendar Table 4 (lunar phases)",
+    "IMO meteor shower calendar — radiant positions (RA/Dec in degrees) at each shower's maximum, in the top-level radiants map keyed by shower name; Southern Taurids use the Nov 5 maximum position to match this file's peak date"
   ],
+  "radiants": {
+    "Quadrantids": {
+      "ra": 230,
+      "dec": 49
+    },
+    "Lyrids": {
+      "ra": 271,
+      "dec": 34
+    },
+    "Eta Aquariids": {
+      "ra": 338,
+      "dec": -1
+    },
+    "Southern Delta Aquariids": {
+      "ra": 340,
+      "dec": -16
+    },
+    "Alpha Capricornids": {
+      "ra": 307,
+      "dec": -10
+    },
+    "Perseids": {
+      "ra": 48,
+      "dec": 58
+    },
+    "Kappa Cygnids": {
+      "ra": 286,
+      "dec": 59
+    },
+    "Draconids": {
+      "ra": 262,
+      "dec": 54
+    },
+    "Southern Taurids": {
+      "ra": 52,
+      "dec": 13
+    },
+    "Orionids": {
+      "ra": 95,
+      "dec": 16
+    },
+    "Northern Taurids": {
+      "ra": 58,
+      "dec": 22
+    },
+    "Leonids": {
+      "ra": 152,
+      "dec": 22
+    },
+    "Alpha Monocerotids": {
+      "ra": 117,
+      "dec": 1
+    },
+    "Geminids": {
+      "ra": 112,
+      "dec": 33
+    },
+    "December Coma Berenicids": {
+      "ra": 175,
+      "dec": 18
+    },
+    "Ursids": {
+      "ra": 217,
+      "dec": 76
+    }
+  },
   "events": [
     {
       "date": "2026-10-08",

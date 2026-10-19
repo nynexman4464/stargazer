@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Card } from '@astryxdesign/core/Card';
 import { Heading } from '@astryxdesign/core/Text';
 import { Text } from '@astryxdesign/core/Text';
@@ -21,7 +21,10 @@ import {
   cloudCover,
   loadCloudClimatology,
   typicalCloud,
+  lookTrack,
+  moonEquatorial,
 } from '../lib/astro.js';
+import WhereToLook from './WhereToLook.jsx';
 
 const base = import.meta.env.BASE_URL;
 
@@ -54,6 +57,14 @@ export default function MoonPanel({ asOf, loc }) {
     : new Date();
   const { phase, illum } = moonPhase(ref);
   const name = moonPhaseName(phase);
+  // Where the Moon is that night: peak time + direction + angle at a
+  // glance, full track in the hover card (same component as the events).
+  const moonLooks = useMemo(() => {
+    if (!loc || loc.lat == null) return null;
+    const base = asOf || new Date();
+    const anchor = new Date(base.getFullYear(), base.getMonth(), base.getDate(), 21);
+    return [{ label: 'Moon', track: lookTrack((d) => moonEquatorial(d), anchor, loc), note: null }];
+  }, [loc, asOf]);
   const upcoming = nextMoonPhase(ref);
   const isFullNow = phase > 0.46 && phase < 0.54;
   // The full moon we're featuring: tonight's if it's full now, else the next one.
@@ -172,6 +183,18 @@ export default function MoonPanel({ asOf, loc }) {
             )}
           </VStack>
         </HStack>
+        {moonLooks && (
+          <VStack gap={1}>
+            <Text type="label" color="secondary">
+              Where to look {asOf ? `· ${fmtDate(asOf)}` : '· tonight'}
+            </Text>
+            <WhereToLook
+              looks={moonLooks}
+              whenText={asOf ? `night of ${fmtDate(asOf)}` : 'tonight'}
+              locName={loc?.name}
+            />
+          </VStack>
+        )}
       </VStack>
     </Card>
   );

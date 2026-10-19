@@ -12,7 +12,8 @@ import ScoreFactors from './ScoreFactors.jsx';
 import GoScore from './GoScore.jsx';
 import Starfield from './Starfield.jsx';
 import { TermText } from './Term.jsx';
-import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eventImage, eclipseVisibleFrom, planetVisibilityFactors } from '../lib/astro.js';
+import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eventImage, eclipseVisibleFrom, planetVisibilityFactors, eventLook } from '../lib/astro.js';
+import WhereToLook from './WhereToLook.jsx';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
@@ -26,6 +27,9 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc, pla
   const visFactors = pick && pick.type === 'planet'
     ? planetVisibilityFactors(planetRows, pick.bodies, visWhen)
     : null;
+  // Where to look on the pick's own night (peak time, direction, angle;
+  // full track in the hover card).
+  const looks = pick ? eventLook(pick, loc) : null;
   // Everything in this card refers to the pick's own date — never mix
   // tonight's moon/conditions with a future event's. The full current-moon
   // picture lives in the Moon panel below.
@@ -114,6 +118,18 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc, pla
                       Visibility {visWhen}
                     </Text>
                     <ScoreFactors factors={visFactors} exclude={pick.bodies} />
+                  </VStack>
+                )}
+                {looks && (
+                  <VStack gap={1}>
+                    <Text type="label" color="secondary">
+                      Where to look · {fmtDate(pick.date)}
+                    </Text>
+                    <WhereToLook
+                      looks={looks}
+                      whenText={pick.solar ? fmtDate(pick.date) : `night of ${fmtDate(pick.date)}`}
+                      locName={loc?.name}
+                    />
                   </VStack>
                 )}
               </>
