@@ -200,10 +200,6 @@ body {
   aspect-ratio: 10 / 13;
   border-radius: var(--radius-lg);
 }
-.sg-skychart {
-  width: min(94vw, 58vh);
-  height: auto;
-}
 .sg-skyview-foot {
   padding: var(--spacing-3) var(--spacing-4) max(var(--spacing-4), env(safe-area-inset-bottom));
 }

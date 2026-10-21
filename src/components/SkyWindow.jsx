@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { memo, useMemo } from 'react';
 import { altAz, moonEquatorial, fmtTime, compass } from '../lib/astro.js';
 
 /* The window view, ISS Detector style: the screen is a window onto
@@ -10,11 +10,19 @@ import { altAz, moonEquatorial, fmtTime, compass } from '../lib/astro.js';
    moves. Below the horizon a ground band fills in, a ring at screen
    center marks exactly where the view is aimed, and when the main
    target is outside the frame an arrow at the edge points to it.
-   Per-frame cost is tiny (only the slice of sky in front of the
-   phone is drawn), which is what lets follow mode glide. */
+
+   Rendering notes (this redraws at frame rate in follow mode):
+   the component is memoized and the caller quantizes the center,
+   so still frames cost nothing; all line work (constellations and
+   target tracks) is clipped to the frame and merged into a handful
+   of <path> elements instead of hundreds of nodes; and projected
+   points are never trusted raw — gnomonic projection sends
+   near-edge points to enormous coordinates, which used to smear
+   a fat streak across the view. */
 
 const W = 400;
 const H = 520;
+const M = 40; // clip margin outside the frame
 const DEG = Math.PI / 180;
 
 // Unit vector in East/North/Up coordinates for an az/el direction.
@@ -31,7 +39,26 @@ function norm(a) {
   return [a[0] / l, a[1] / l, a[2] / l];
 }
 
-export default function SkyWindow({ sky, atTime, loc, targets, center, fov = 55 }) {
+/* Liang–Barsky clip of a segment to the frame plus margin.
+   Returns [x1, y1, x2, y2] or null when fully outside. */
+function clipSeg(x1, y1, x2, y2) {
+  let t0 = 0, t1 = 1;
+  const dx = x2 - x1, dy = y2 - y1;
+  const ps = [-dx, dx, -dy, dy];
+  const qs = [x1 + M, W + M - x1, y1 + M, H + M - y1];
+  for (let i = 0; i < 4; i++) {
+    if (ps[i] === 0) {
+      if (qs[i] < 0) return null;
+    } else {
+      const t = qs[i] / ps[i];
+      if (ps[i] < 0) { if (t > t1) return null; if (t > t0) t0 = t; }
+      else { if (t < t0) return null; if (t < t1) t1 = t; }
+    }
+  }
+  return [x1 + t0 * dx, y1 + t0 * dy, x1 + t1 * dx, y1 + t1 * dy];
+}
+
+export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov = 55 }) {
   const skyAltAz = useMemo(() => {
     if (!sky || !loc || !atTime) return null;
     const altazOf = ([ra, dec]) => altAz(ra, dec, atTime, loc.lat, loc.lon);
@@ -55,6 +82,8 @@ export default function SkyWindow({ sky, atTime, loc, targets, center, fov = 55 
   const cosMin = Math.cos(maxAng * DEG);
 
   // Project one alt-az direction; null when outside the frame cone.
+  // minDot can be lowered for line endpoints, whose segments are then
+  // clipped to the frame instead of being drawn to wild coordinates.
   const proj = (alt, az, minDot = cosMin) => {
     const D = dirOf(az, alt);
     const den = dot(D, C);
@@ -64,6 +93,10 @@ export default function SkyWindow({ sky, atTime, loc, targets, center, fov = 55 
       y: H / 2 - (f * dot(D, U)) / den,
       den,
     };
+  };
+  const segPath = (parts, pa, pb) => {
+    const s = clipSeg(pa.x, pa.y, pb.x, pb.y);
+    if (s) parts.push(`M${s[0].toFixed(1)},${s[1].toFixed(1)} L${s[2].toFixed(1)},${s[3].toFixed(1)}`);
   };
 
   // Ground below the horizon: sample the el=0 line across the view,
@@ -104,20 +137,19 @@ export default function SkyWindow({ sky, atTime, loc, targets, center, fov = 55 
     );
   });
 
-  const lineEls = [];
-  skyAltAz.lines.forEach((line, li) => {
+  // Constellation stick figures as ONE path of clipped segments.
+  const lineParts = [];
+  skyAltAz.lines.forEach((line) => {
     for (let i = 1; i < line.length; i++) {
       const a = line[i - 1], b = line[i];
-      const pa = proj(a.alt, a.az, cosMin * 0.9);
-      const pb = proj(b.alt, b.az, cosMin * 0.9);
-      if (!pa || !pb) continue;
-      if (Math.hypot(pa.x - pb.x, pa.y - pb.y) > 430) continue;
-      lineEls.push(
-        <line key={`l${li}-${i}`} x1={pa.x} y1={pa.y} x2={pb.x} y2={pb.y}
-          stroke="var(--color-text-secondary)" strokeWidth="1" opacity="0.4" />,
-      );
+      const pa = proj(a.alt, a.az, 0.05);
+      const pb = proj(b.alt, b.az, 0.05);
+      if (pa && pb) segPath(lineParts, pa, pb);
     }
   });
+  const linesEl = lineParts.length ? (
+    <path d={lineParts.join(' ')} stroke="var(--color-text-secondary)" strokeWidth="1" opacity="0.4" fill="none" />
+  ) : null;
 
   const labelEls = [];
   skyAltAz.labels.forEach((s, i) => {
@@ -155,25 +187,22 @@ export default function SkyWindow({ sky, atTime, loc, targets, center, fov = 55 
   const targetEls = [];
   targets.forEach((t, ti) => {
     if (t.path && t.path.length > 1) {
-      // Split the track where it leaves the frame.
-      let run = [];
-      const flush = () => {
-        if (run.length > 1) {
-          targetEls.push(
-            <polyline key={`tp${ti}-${targetEls.length}`}
-              points={run.map((p) => `${p.x.toFixed(1)},${p.y.toFixed(1)}`).join(' ')}
-              fill="none" stroke="var(--color-icon-accent)" strokeWidth="2.5"
-              strokeLinejoin="round" strokeLinecap="round" opacity="0.9" />,
-          );
-        }
-        run = [];
-      };
+      // The track as clipped segments in one path; points behind the
+      // view break the chain rather than streaking across it.
+      const parts = [];
+      let prev = null;
       t.path.forEach((pt) => {
-        const p = pt.alt > -2 ? proj(pt.alt, pt.az, cosMin * 0.9) : null;
-        if (p) run.push(p);
-        else flush();
+        const p = pt.alt > -2 ? proj(pt.alt, pt.az, 0.05) : null;
+        if (p && prev) segPath(parts, prev, p);
+        prev = p;
       });
-      flush();
+      if (parts.length) {
+        targetEls.push(
+          <path key={`tp${ti}`} d={parts.join(' ')}
+            fill="none" stroke="var(--color-icon-accent)" strokeWidth="2.5"
+            strokeLinejoin="round" strokeLinecap="round" opacity="0.9" />,
+        );
+      }
     }
     if (t.peak && t.peak.alt > 0) {
       const p = proj(t.peak.alt, t.peak.az);
@@ -245,7 +274,7 @@ export default function SkyWindow({ sky, atTime, loc, targets, center, fov = 55 
       </defs>
       <rect x="0" y="0" width={W} height={H} fill="url(#sg-win-grad)" />
       {groundEl}
-      {lineEls}
+      {linesEl}
       {starEls}
       {labelEls}
       {moonEl}
@@ -265,4 +294,4 @@ export default function SkyWindow({ sky, atTime, loc, targets, center, fov = 55 
       </g>
     </svg>
   );
-}
+});
