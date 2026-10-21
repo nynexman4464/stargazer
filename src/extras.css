@@ -167,13 +167,25 @@ body {
   text-align: center;
 }
 
-/* Sky chart ("find it in the sky") fullscreen view */
+/* Sky chart ("find it in the sky"): a fullscreen sheet on small
+   screens; on wide screens a centered modal panel — sky window
+   large at left, guidance in a side column. The window sized off
+   the phone viewport (min(94vw, 44dvh)) stranded a ~420px patch
+   in the middle of a desktop monitor (Alex, 2026-10-21). */
 .sg-skyview {
   position: fixed;
   inset: 0;
   z-index: 1000;
   display: flex;
+  align-items: center;
+  justify-content: center;
+  background: color-mix(in srgb, var(--color-background-body) 55%, transparent);
+}
+.sg-skyview-panel {
+  display: flex;
   flex-direction: column;
+  width: 100%;
+  height: 100%;
   background: var(--color-background-body);
 }
 .sg-skyview-head {
@@ -204,6 +216,34 @@ body {
 }
 .sg-skyview-foot {
   padding: var(--spacing-3) var(--spacing-4) max(var(--spacing-4), env(safe-area-inset-bottom));
+}
+@media (min-width: 900px) {
+  .sg-skyview-panel {
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr) 340px;
+    grid-template-areas: 'head head' 'stage foot';
+    width: min(1080px, 96vw);
+    height: min(900px, 94dvh);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.55);
+    overflow: hidden;
+  }
+  .sg-skyview-head { grid-area: head; }
+  .sg-skyview-stage { grid-area: stage; }
+  .sg-skyview-foot {
+    grid-area: foot;
+    overflow-y: auto;
+    padding-bottom: var(--spacing-4);
+  }
+  /* Size the window off the panel height instead of the phone
+     rule; aspect-ratio derives the width, and max-width keeps it
+     inside the stage column on squarer viewports. */
+  .sg-skywindow {
+    width: auto;
+    height: calc(min(900px, 94dvh) - 140px);
+    max-width: calc(96vw - 420px);
+  }
 }
 
 /* Realistic moon phase photos — Jay Tanner render set (public/img/moon).

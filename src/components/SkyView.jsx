@@ -23,8 +23,12 @@ function clamp(v, lo, hi) {
 }
 const quant = (v) => Math.round(v * 20) / 20; // 0.05-degree steps for the memoized window — fine enough that a slow drag doesn't step visibly (0.2-degree steps were ~1px jumps)
 
-/* Fullscreen "find it in the sky" view: the SkyWindow for one target,
-   plus optional live phone pointing. Follow mode reads the phone's
+/* "Find it in the sky" view: the SkyWindow for one target, plus
+   optional live phone pointing. Presentation (extras.css): a
+   fullscreen sheet on small screens; on wide screens a centered
+   modal panel with the window large at left and guidance in a
+   side column — the phone-sized portrait window looked lost on
+   a desktop monitor (Alex, 2026-10-21). Follow mode reads the phone's
    orientation (direction + tilt from devicePointing) and aims the
    window where the back of the phone points, ISS Detector style.
    Magnetic bearings are corrected to true north for this location.
@@ -544,7 +548,14 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   }
 
   return createPortal(
-    <div className="sg-skyview" role="dialog" aria-modal="true" aria-label={title}>
+    <div
+      className="sg-skyview"
+      role="dialog"
+      aria-modal="true"
+      aria-label={title}
+      onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
+    >
+      <div className="sg-skyview-panel">
       <HStack gap={2} vAlign="start" hAlign="between" className="sg-skyview-head">
         <VStack gap={0}>
           <Heading level={2}>{title}</Heading>
@@ -624,6 +635,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             : 'The patch of sky this view is aimed at, framed on the target. Drag to look around, pinch to widen or narrow the view; double-tap re-frames on the target. The ring marks the exact center.'}
         </Text>
       </VStack>
+      </div>
     </div>,
     document.body,
   );
