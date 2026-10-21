@@ -41,11 +41,16 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   const [pointing, setPointing] = useState(null);
   const [orientMsg, setOrientMsg] = useState(null);
   const [view, setView] = useState({ s: 1, x: 0, y: 0 });
-  const [, setTick] = useState(0);
+  const [nowMs, setNowMs] = useState(() => Date.now());
   const handlerRef = useRef(null);
-  const smoothRef = useRef(null);
-  const pointSmoothRef = useRef(null);
-  const lastSetRef = useRef(0);
+  // Sensor events only write these targets; the rAF loop below eases
+  // the displayed heading/pointing toward them at frame rate. Writing
+  // state per sensor event (and re-drawing per step) is what made
+  // follow mode jumpy.
+  const targetHeadingRef = useRef(null);
+  const targetPointRef = useRef(null);
+  const dispHeadingRef = useRef(null);
+  const dispPointRef = useRef(null);
   const gotSignalRef = useRef(false);
   const stageRef = useRef(null);
   const pointers = useRef(new Map());
@@ -68,7 +73,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     loadSky()
       .then((j) => { if (!cancelled) setSky(j); })
       .catch(() => { if (!cancelled) setSky(null); });
-    const id = setInterval(() => setTick((t) => t + 1), 15000);
+    const id = setInterval(() => setNowMs(Date.now()), 15000);
     return () => { cancelled = true; clearInterval(id); };
   }, [isOpen, title]);
 
@@ -81,8 +86,10 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     setFollow(false);
     setHeading(null);
     setPointing(null);
-    smoothRef.current = null;
-    pointSmoothRef.current = null;
+    targetHeadingRef.current = null;
+    targetPointRef.current = null;
+    dispHeadingRef.current = null;
+    dispPointRef.current = null;
     gotSignalRef.current = false;
   }, []);
 
@@ -98,6 +105,57 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       stopFollow();
     };
   }, [isOpen, onClose, stopFollow]);
+
+  /* Frame-rate easing: while following, glide the displayed heading
+     and pointing toward the latest sensor targets with a short time
+     constant, snapping the last fraction of a degree. This replaces
+     per-event state writes, which stepped at the sensor/throttle
+     rate and made the chart jump. */
+  useEffect(() => {
+    if (!follow) return;
+    let raf = 0;
+    let last = performance.now();
+    let shownH = null;
+    let shownP = null;
+    const step = (t) => {
+      const dt = Math.min(0.1, (t - last) / 1000);
+      last = t;
+      const kh = 1 - Math.exp(-dt / 0.09);
+      const kp = 1 - Math.exp(-dt / 0.11);
+      const th = targetHeadingRef.current;
+      if (th != null) {
+        if (dispHeadingRef.current == null) dispHeadingRef.current = th;
+        else {
+          const d = ((th - dispHeadingRef.current + 540) % 360) - 180;
+          dispHeadingRef.current = Math.abs(d) < 0.04
+            ? th
+            : ((dispHeadingRef.current + d * kh) % 360 + 360) % 360;
+        }
+        if (shownH == null || Math.abs(((dispHeadingRef.current - shownH + 540) % 360) - 180) > 0.02) {
+          shownH = dispHeadingRef.current;
+          setHeading(shownH);
+        }
+      }
+      const tp = targetPointRef.current;
+      if (tp) {
+        if (!dispPointRef.current) dispPointRef.current = { ...tp };
+        else {
+          const dp = dispPointRef.current;
+          const d = ((tp.az - dp.az + 540) % 360) - 180;
+          dp.az = Math.abs(d) < 0.04 ? tp.az : ((dp.az + d * kp) % 360 + 360) % 360;
+          dp.el = Math.abs(tp.el - dp.el) < 0.04 ? tp.el : dp.el + (tp.el - dp.el) * kp;
+        }
+        const dp = dispPointRef.current;
+        if (!shownP || Math.abs(dp.az - shownP.az) > 0.02 || Math.abs(dp.el - shownP.el) > 0.02) {
+          shownP = { ...dp };
+          setPointing(shownP);
+        }
+      }
+      raf = requestAnimationFrame(step);
+    };
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [follow]);
 
   const startFollow = async () => {
     setOrientMsg(null);
@@ -126,34 +184,13 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       }
       if (raw == null && e.alpha == null) return;
       gotSignalRef.current = true;
+      if (raw != null) {
+        targetHeadingRef.current = ((raw + decl) % 360 + 360) % 360;
+      }
       // Tilt: where the back of the phone is aimed (az/el, magnetic frame).
-      let pt = null;
       if (e.alpha != null && e.beta != null && e.gamma != null) {
         const p = devicePointing(e.alpha, e.beta, e.gamma);
-        if (p) pt = { az: ((p.az + decl) % 360 + 360) % 360, el: p.el };
-      }
-      const now = Date.now();
-      if (raw != null) {
-        const trueH = ((raw + decl) % 360 + 360) % 360;
-        const rad = (trueH * Math.PI) / 180;
-        const s = smoothRef.current || { x: Math.sin(rad), y: Math.cos(rad) };
-        s.x += 0.3 * (Math.sin(rad) - s.x);
-        s.y += 0.3 * (Math.cos(rad) - s.y);
-        smoothRef.current = s;
-        if (now - lastSetRef.current > 150) {
-          lastSetRef.current = now;
-          setHeading(((Math.atan2(s.x, s.y) * 180) / Math.PI + 360) % 360);
-        }
-      }
-      if (pt) {
-        const ps = pointSmoothRef.current || { az: pt.az, el: pt.el };
-        let dAz = pt.az - ps.az;
-        if (dAz > 180) dAz -= 360;
-        if (dAz < -180) dAz += 360;
-        ps.az = ((ps.az + 0.4 * dAz) % 360 + 360) % 360;
-        ps.el += 0.4 * (pt.el - ps.el);
-        pointSmoothRef.current = ps;
-        setPointing({ ...ps });
+        if (p) targetPointRef.current = { az: ((p.az + decl) % 360 + 360) % 360, el: p.el };
       }
     };
     handlerRef.current = onOrient;
@@ -295,12 +332,15 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     return () => stage.removeEventListener('wheel', onWheel);
   }, [isOpen, zoomAt, sky]);
 
+  // Stable across the per-frame follow renders; refreshes on the
+  // 15-second tick so the memoized chart layers stay valid.
+  const withLive = useMemo(
+    () => (targets || []).map((t) => ({ ...t, live: t.nowFn ? t.nowFn(new Date(nowMs)) : null })),
+    [targets, nowMs],
+  );
+
   if (!isOpen) return null;
 
-  const withLive = (targets || []).map((t) => ({
-    ...t,
-    live: t.nowFn ? t.nowFn(new Date()) : null,
-  }));
   const primary = withLive[0];
   const refPoint = primary?.live || primary?.peak;
   let guidance = null;
