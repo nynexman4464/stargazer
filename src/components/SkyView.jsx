@@ -33,13 +33,13 @@ const quant = (v) => Math.round(v * 20) / 20; // 0.05-degree steps for the memoi
    orientation (AbsoluteOrientationSensor): the OS blends gyro,
    accelerometer and magnetometer into one quaternion — the same
    rotation-vector source native finder apps use, and far
-   steadier than raw events. The rAF loop slerps a smoothed
-   quaternion toward the latest reading with an adaptive time
-   constant (heavy damping while the phone is nearly still, light
-   while it is actually turning), then converts to az/el. Where
-   the fused sensor does not exist (iOS, Firefox), the fallback is
-   deviceorientation Euler events through a median-of-3 spike
-   filter and low-pass into target refs, eased in the same loop.
+   steadier than raw events. The fusion already did the filtering
+   work, so the rAF loop adds only a fixed frame-scale slerp
+   (tau 60ms) against sample shimmer, then converts to az/el.
+   Where the fused sensor does not exist (iOS, Firefox), the
+   fallback is deviceorientation Euler events through a
+   median-of-3 spike filter and low-pass into target refs, eased
+   in the same loop.
    The window receives the aim quantized and is memoized, so a
    still phone re-renders almost nothing. Dragging grabs manual
    control, pinch and buttons set the view width. Everything
@@ -57,7 +57,6 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   const handlerRef = useRef(null);
   const sensorRef = useRef(null);
   const quatRef = useRef(null);
-  const quatHistRef = useRef([]);
   const smoothQuatRef = useRef(null);
   const fusedRef = useRef(false);
   const targetHeadingRef = useRef(null);
@@ -122,7 +121,6 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     }
     fusedRef.current = false;
     quatRef.current = null;
-    quatHistRef.current = [];
     smoothQuatRef.current = null;
     // Freeze the window where the phone was aimed, so stopping
     // follow does not snap the view back to the target framing.
@@ -174,37 +172,16 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
           if (!smoothQuatRef.current) {
             smoothQuatRef.current = [...raw];
           } else {
-            // Damping keyed to how fast the phone is ACTUALLY
-            // turning, measured on the raw readings over the last
-            // ~140ms: a deliberate turn sustains its direction and
-            // nets a large angle over the window, so damping falls
-            // away almost immediately; compass wobble reverses
-            // inside the window, cancels out, and stays damped.
-            // (The first version keyed off the gap to the smoothed
-            // value instead, which gave gentle moves the full
-            // still-phone damping until lag built up — syrupy.)
-            let tau = 0.45;
-            const h = quatHistRef.current;
-            if (h.length > 1) {
-              const first = h[0];
-              const latest = h[h.length - 1];
-              const span = (latest.t - first.t) / 1000;
-              if (span > 0.05) {
-                const d = Math.min(1, Math.abs(
-                  first.q[0] * latest.q[0] + first.q[1] * latest.q[1]
-                  + first.q[2] * latest.q[2] + first.q[3] * latest.q[3],
-                ));
-                const speed = ((2 * Math.acos(d) * 180) / Math.PI) / span;
-                const f = Math.min(1, Math.max(0, Math.log(speed / 5) / Math.log(90 / 5)));
-                tau = 0.45 * Math.pow(0.03 / 0.45, f);
-              }
-            }
-            // A big gap (follow just started, phone flipped
-            // around): catch up now, do not glide there.
-            const s = smoothQuatRef.current;
-            const gd = Math.min(1, Math.abs(s[0] * raw[0] + s[1] * raw[1] + s[2] * raw[2] + s[3] * raw[3]));
-            if ((2 * Math.acos(gd) * 180) / Math.PI > 30) tau = Math.min(tau, 0.05);
-            smoothQuatRef.current = slerpQuat(s, raw, 1 - Math.exp(-dt / tau));
+            // The fused feed needs almost no help — the OS fusion
+            // already did the filtering work (that was the point
+            // of switching to it). What remains is slow magnetic
+            // wander indoors, which no filter removes without
+            // adding lag, plus 60Hz sample shimmer. So: one fixed
+            // frame-scale slerp (tau 60ms) that only takes the
+            // shimmer off. Earlier adaptive schemes (tau keyed to
+            // lag, then to turning speed) both ended up syrupy or
+            // veto-prone; predictable and light beats clever here.
+            smoothQuatRef.current = slerpQuat(smoothQuatRef.current, raw, 1 - Math.exp(-dt / 0.06));
           }
           const aim = quatAim(smoothQuatRef.current);
           if (aim) {
@@ -344,15 +321,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         const sensor = new AbsoluteOrientationSensor({ frequency: 60 });
         sensor.addEventListener('reading', () => {
           if (sensor.quaternion) {
-            const q = [...sensor.quaternion];
-            quatRef.current = q;
-            // Short raw history for the turning-speed estimate;
-            // keep the newest sample and everything back to
-            // ~160ms (plus one older anchor).
-            const h = quatHistRef.current;
-            const now = performance.now();
-            h.push({ q, t: now });
-            while (h.length > 2 && h[1].t < now - 160) h.shift();
+            quatRef.current = [...sensor.quaternion];
             gotSignalRef.current = true;
           }
         });
@@ -361,7 +330,6 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             sensorRef.current = null;
             fusedRef.current = false;
             quatRef.current = null;
-            quatHistRef.current = [];
             smoothQuatRef.current = null;
             startEuler();
           }
