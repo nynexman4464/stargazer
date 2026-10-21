@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { altAz, moonEquatorial, fmtTime, compass } from '../lib/astro.js';
+import { altAz, moonEquatorial, fmtTime, compass, frameFrom } from '../lib/astro.js';
 
 /* The window view, ISS Detector style: the screen is a window onto
    the patch of sky it is aimed at. The caller supplies the view
@@ -31,13 +31,6 @@ function dirOf(az, el) {
   return [Math.cos(e) * Math.sin(a), Math.cos(e) * Math.cos(a), Math.sin(e)];
 }
 function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
-function cross(a, b) {
-  return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
-}
-function norm(a) {
-  const l = Math.hypot(a[0], a[1], a[2]) || 1;
-  return [a[0] / l, a[1] / l, a[2] / l];
-}
 
 /* Liang–Barsky clip of a segment to the frame plus margin.
    Returns [x1, y1, x2, y2] or null when fully outside. */
@@ -58,7 +51,7 @@ function clipSeg(x1, y1, x2, y2) {
   return [x1 + t0 * dx, y1 + t0 * dy, x1 + t1 * dx, y1 + t1 * dy];
 }
 
-export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov = 55 }) {
+export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov = 55, up = null }) {
   const skyAltAz = useMemo(() => {
     if (!sky || !loc || !atTime) return null;
     const altazOf = ([ra, dec]) => altAz(ra, dec, atTime, loc.lat, loc.lon);
@@ -73,10 +66,12 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
 
   if (!skyAltAz || !center) return null;
 
-  const C = dirOf(center.az, center.el);
-  const up0 = [0, 0, 1];
-  const U = norm([up0[0] - dot(up0, C) * C[0], up0[1] - dot(up0, C) * C[1], up0[2] - dot(up0, C) * C[2]]);
-  const Rv = norm(cross(C, U));
+  // The frame: center direction from az/el; screen-up from the
+  // caller's carried up vector when there is one (a drag in
+  // progress transports it rigidly, which is what keeps the field
+  // from spinning near the zenith), else world up via frameFrom's
+  // fallbacks.
+  const { C, U, R: Rv } = frameFrom(dirOf(center.az, center.el), up || null);
   const f = (W / 2) / Math.tan((fov / 2) * DEG);
   const maxAng = Math.atan(Math.hypot(W / 2, H / 2) / f) / DEG + 4;
   const cosMin = Math.cos(maxAng * DEG);

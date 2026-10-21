@@ -1911,18 +1911,70 @@ export function slerpQuat(qa, qb, t) {
    finger (grabPan below: one Jacobian feedback step per move).
    Screen offsets are in tangent-plane units: (pixels from the
    frame center) / (focal length in pixels), y up. The frame is the
-   same one SkyWindow projects with: C the center direction, U
-   world-up made perpendicular to C, R = C x U. */
-function viewFrame(az, el) {
+   same one SkyWindow projects with: C the center direction, U the
+   screen-up direction, R = C x U. */
+/* View frames as direction vectors. A frame is { C, U }: C the
+   view-center direction, U the screen-up direction, both unit
+   vectors in East/North/Up coordinates; R = C x U completes it.
+   Frames are CARRIED (rotated rigidly) while dragging rather than
+   re-derived from az/el at every step: a frame rebuilt from az/el
+   takes its up from world up, and world up's projection onto the
+   view is undefined at the zenith — pass within a few degrees of
+   overhead and the rebuilt up whips around, spinning the whole
+   field (Alex's screen recording, 2026-10-21: at up 84-85 the
+   readout whipped SW-WNW-NW-NNE while the field rotated under
+   small drags). A carried frame crosses the zenith smoothly;
+   only the az/el readout is ill-conditioned there, which is
+   geometry, not a bug. */
+export function dirVec(az, el) {
   const a = az * RAD, e = el * RAD;
-  const C = [Math.cos(e) * Math.sin(a), Math.cos(e) * Math.cos(a), Math.sin(e)];
-  let U = [-C[2] * C[0], -C[2] * C[1], 1 - C[2] * C[2]];
-  const lu = Math.hypot(U[0], U[1], U[2]) || 1;
-  U = [U[0] / lu, U[1] / lu, U[2] / lu];
+  return [Math.cos(e) * Math.sin(a), Math.cos(e) * Math.cos(a), Math.sin(e)];
+}
+
+export function azElOf(C) {
+  return {
+    az: ((Math.atan2(C[0], C[1]) / RAD) % 360 + 360) % 360,
+    el: Math.asin(Math.max(-1, Math.min(1, C[2]))) / RAD,
+  };
+}
+
+function perpOf(C, hint) {
+  if (!hint) return null;
+  const d = hint[0] * C[0] + hint[1] * C[1] + hint[2] * C[2];
+  const v = [hint[0] - d * C[0], hint[1] - d * C[1], hint[2] - d * C[2]];
+  const l = Math.hypot(v[0], v[1], v[2]);
+  return l > 1e-6 ? [v[0] / l, v[1] / l, v[2] / l] : null;
+}
+
+/* Build a full frame from a center direction and an optional up
+   hint (a carried up from a drag, or the phone's real up). With
+   no usable hint, up falls back to world up, then to north at the
+   zenith itself, where world up has no projection left. */
+export function frameFrom(C, upHint) {
+  const U = perpOf(C, upHint) || perpOf(C, [0, 0, 1]) || perpOf(C, [0, 1, 0]) || [1, 0, 0];
   let R = [C[1] * U[2] - C[2] * U[1], C[2] * U[0] - C[0] * U[2], C[0] * U[1] - C[1] * U[0]];
   const lr = Math.hypot(R[0], R[1], R[2]) || 1;
   R = [R[0] / lr, R[1] / lr, R[2] / lr];
   return { C, U, R };
+}
+
+/* Rotate a whole frame rigidly around an axis. */
+export function rotateFrame(frame, axis, ang) {
+  return frameFrom(rotAround(frame.C, axis, ang), rotAround(frame.U, axis, ang));
+}
+
+/* Keep a frame's center elevation inside [lo, hi] by rotating the
+   whole frame around its own right axis — rigidly, so the carried
+   up survives the clamp. */
+export function clampFrameEl(frame, lo, hi) {
+  const { el } = azElOf(frame.C);
+  if (el >= lo && el <= hi) return { C: frame.C, U: frame.U };
+  const lim = el < lo ? lo : hi;
+  const fr = frameFrom(frame.C, frame.U);
+  const d = (Math.abs(lim - el) * Math.PI) / 180;
+  const a = rotateFrame(fr, fr.R, d);
+  const b = rotateFrame(fr, fr.R, -d);
+  return Math.abs(azElOf(a.C).el - lim) <= Math.abs(azElOf(b.C).el - lim) ? a : b;
 }
 
 function rotAround(v, axis, ang) {
@@ -1935,9 +1987,9 @@ function rotAround(v, axis, ang) {
   ];
 }
 
-/* The sky direction shown at a screen offset from a view center. */
-export function screenPoint(az, el, nx, ny) {
-  const { C, U, R } = viewFrame(az, el);
+/* The sky direction shown at a screen offset from a view frame. */
+export function screenPoint(frame, nx, ny) {
+  const { C, U, R } = frameFrom(frame.C, frame.U);
   const P = [
     C[0] + nx * R[0] + ny * U[0],
     C[1] + nx * R[1] + ny * U[1],
@@ -1945,12 +1997,6 @@ export function screenPoint(az, el, nx, ny) {
   ];
   const l = Math.hypot(P[0], P[1], P[2]) || 1;
   return [P[0] / l, P[1] / l, P[2] / l];
-}
-
-function frameOf(C) {
-  const az = ((Math.atan2(C[0], C[1]) / RAD) % 360 + 360) % 360;
-  const el = Math.asin(Math.max(-1, Math.min(1, C[2]))) / RAD;
-  return { az, el, ...viewFrame(az, el) };
 }
 
 function uvOf(P, fr) {
@@ -1961,35 +2007,34 @@ function uvOf(P, fr) {
   };
 }
 
-/* One feedback step toward the view center that puts sky direction
+/* One feedback step toward the view frame that puts sky direction
    P at screen offset (nx, ny): measure P's current offset, take a
-   single Jacobian step (numeric 2x2, from rotating the center
+   single Jacobian step (numeric 2x2, from rotating the frame
    around its up and right axes), clamped small. Called once per
    pointer move, so the error is re-measured from the true position
    every event — that feedback is what makes it track a finger
-   exactly in ordinary geometry yet only drift a little, never
-   fling, in the degenerate patch near the zenith where the
-   screen-position map folds and no converged solve exists. */
-export function grabPan(center, P, nx, ny) {
-  const fr = viewFrame(center.az, center.el);
-  if ((P[0] * fr.C[0] + P[1] * fr.C[1] + P[2] * fr.C[2]) < 0.05) return center;
+   exactly. The frame is transported by the step's own rotations,
+   never rebuilt from az/el, so the step stays smooth through the
+   zenith patch where an az/el-parametrized frame folds. */
+export function grabPan(frame, P, nx, ny) {
+  const fr = frameFrom(frame.C, frame.U);
+  if ((P[0] * fr.C[0] + P[1] * fr.C[1] + P[2] * fr.C[2]) < 0.05) return { C: fr.C, U: fr.U };
   const { u, v } = uvOf(P, fr);
   const eu = nx - u, ev = ny - v;
-  if (Math.abs(eu) < 1e-7 && Math.abs(ev) < 1e-7) return center;
+  if (Math.abs(eu) < 1e-7 && Math.abs(ev) < 1e-7) return { C: fr.C, U: fr.U };
   const h = 1e-4;
-  const a1 = uvOf(P, frameOf(rotAround(fr.C, fr.U, h)));
-  const a2 = uvOf(P, frameOf(rotAround(fr.C, fr.R, h)));
+  const a1 = uvOf(P, frameFrom(rotAround(fr.C, fr.U, h), fr.U));
+  const a2 = uvOf(P, rotateFrame(fr, fr.R, h));
   const j00 = (a1.u - u) / h, j10 = (a1.v - v) / h;
   const j01 = (a2.u - u) / h, j11 = (a2.v - v) / h;
   const det = j00 * j11 - j01 * j10;
-  if (Math.abs(det) < 1e-4) return center;
+  if (Math.abs(det) < 1e-4) return { C: fr.C, U: fr.U };
   const clampStep = (x) => Math.max(-0.08, Math.min(0.08, x));
   const tU = clampStep((eu * j11 - ev * j01) / det);
   const tR = clampStep((j00 * ev - j10 * eu) / det);
-  let C = rotAround(fr.C, fr.U, tU);
-  C = rotAround(C, frameOf(C).R, tR);
-  const out = frameOf(C);
-  return { az: out.az, el: out.el };
+  const step1 = frameFrom(rotAround(fr.C, fr.U, tU), fr.U);
+  const out = rotateFrame(step1, step1.R, tR);
+  return { C: out.C, U: out.U };
 }
 
 /* Where-to-look for one normalized event, as an array of

@@ -8,7 +8,7 @@ import { Button } from '@astryxdesign/core/Button';
 import { IconButton } from '@astryxdesign/core/IconButton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
-import { loadJSON, compass, fmtTime, devicePointing, quatAim, slerpQuat, screenPoint, grabPan } from '../lib/astro.js';
+import { loadJSON, compass, fmtTime, devicePointing, quatAim, slerpQuat, dirVec, azElOf, frameFrom, clampFrameEl, screenPoint, grabPan } from '../lib/astro.js';
 import SkyWindow from './SkyWindow.jsx';
 
 const base = import.meta.env.BASE_URL;
@@ -53,6 +53,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   const [orientMsg, setOrientMsg] = useState(null);
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [winCenter, setWinCenter] = useState(null);
+  const [frameUp, setFrameUp] = useState(null); // the sky window's carried screen-up vector while dragging (null = derive from world up)
   const [fov, setFov] = useState(55);
   const handlerRef = useRef(null);
   const sensorRef = useRef(null);
@@ -122,6 +123,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     fusedRef.current = false;
     quatRef.current = null;
     smoothQuatRef.current = null;
+    setFrameUp(null);
     // Freeze the window where the phone was aimed, so stopping
     // follow does not snap the view back to the target framing.
     if (dispPointRef.current) {
@@ -232,6 +234,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
 
   const startFollow = async () => {
     setOrientMsg(null);
+    setFrameUp(null); // follow framing is az/el-based; drop any carried up
     let eulerStarted = false;
     const startEuler = () => {
       if (eulerStarted || handlerRef.current) return;
@@ -393,23 +396,30 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     if (follow) stopFollow();
     if (pointers.current.size === 1) {
       // Remember the sky direction under the finger; every move
-      // then solves for the center that keeps it there (grabPan).
+      // then solves for the frame that keeps it there (grabPan).
+      // The gesture carries the frame's up vector with it — that
+      // is what keeps the field steady near the zenith.
       const fr = svgFrame();
       const off = fr ? screenOffset(fr, e.clientX, e.clientY) : null;
+      const vf = frameFrom(dirVec(winCenterResolved.az, winCenterResolved.el), frameUp);
       gesture.current = {
         mode: 'winpan',
         sx: e.clientX, sy: e.clientY,
-        grab: off ? screenPoint(winCenterResolved.az, winCenterResolved.el, off.nx, off.ny) : null,
-        az: winCenterResolved.az, el: winCenterResolved.el,
+        grab: off ? screenPoint(vf, off.nx, off.ny) : null,
+        C: vf.C, U: vf.U,
         moved: false, tapX: e.clientX, tapY: e.clientY,
       };
     } else if (pointers.current.size === 2) {
       const [a, b] = [...pointers.current.values()];
+      const cur = gesture.current;
+      const vf = cur && cur.C
+        ? { C: cur.C, U: cur.U }
+        : frameFrom(dirVec(winCenterResolved.az, winCenterResolved.el), frameUp);
       gesture.current = {
         mode: 'winpinch',
         d0: Math.hypot(a.x - b.x, a.y - b.y),
         fov0: fov,
-        az: winCenterResolved.az, el: winCenterResolved.el,
+        C: vf.C, U: vf.U,
         moved: true,
       };
     }
@@ -426,11 +436,13 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         const fr = svgFrame();
         if (fr) {
           const off = screenOffset(fr, e.clientX, e.clientY);
-          const next = grabPan({ az: g.az, el: g.el }, g.grab, off.nx, off.ny);
-          const el = clamp(next.el, -50, 85);
-          g.az = next.az;
-          g.el = el;
-          setWinCenter({ az: next.az, el });
+          // Transport the frame, then bound its elevation by
+          // rotating the whole frame (rigidly — up survives).
+          const next = clampFrameEl(grabPan({ C: g.C, U: g.U }, g.grab, off.nx, off.ny), -50, 88);
+          g.C = next.C;
+          g.U = next.U;
+          setFrameUp(next.U);
+          setWinCenter(azElOf(next.C));
         }
       }
     } else if (g.mode === 'winpinch' && pointers.current.size === 2) {
@@ -452,6 +464,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         if (now - lastTap.current < 300) {
           // Double-tap re-frames on the target and resets the width.
           setWinCenter(null);
+          setFrameUp(null);
           setFov(55);
           lastTap.current = 0;
         } else {
@@ -468,8 +481,8 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       gesture.current = {
         mode: 'winpan',
         sx: p.x, sy: p.y,
-        grab: off ? screenPoint(g.az, g.el, off.nx, off.ny) : null,
-        az: g.az, el: g.el,
+        grab: off ? screenPoint({ C: g.C, U: g.U }, off.nx, off.ny) : null,
+        C: g.C, U: g.U,
         moved: true,
       };
     }
@@ -562,6 +575,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             loc={loc}
             targets={withLive}
             center={{ az: quant(winCenterResolved.az), el: quant(winCenterResolved.el) }}
+            up={frameUp}
             fov={Math.round(fov * 2) / 2}
           />
         )}
@@ -589,7 +603,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             variant="ghost"
             size="sm"
             isDisabled={fov === 55 && winCenter == null}
-            onClick={() => { setFov(55); setWinCenter(null); }}
+            onClick={() => { setFov(55); setWinCenter(null); setFrameUp(null); }}
           />
         </HStack>
       </div>
