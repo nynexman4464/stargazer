@@ -230,6 +230,31 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
             strokeLinejoin="round" strokeLinecap="round" opacity="0.9" />,
         );
       }
+      // Start/end times at the ends of the line, ISS Detector style
+      // (the old radar chart had these; the window rewrite dropped
+      // them — Alex asked for them back, 2026-10-21). The ends are
+      // the first/last above-horizon points of the track. A label
+      // shows only when its end is actually in frame; panning or
+      // zooming out to the end brings it in. Labels tuck inside at
+      // the frame edges so the time never clips off the side.
+      const abovePts = t.path.filter((pt) => pt.alt > 0);
+      if (abovePts.length > 1) {
+        [abovePts[0], abovePts[abovePts.length - 1]].forEach((pt, ei) => {
+          const p = proj(pt.alt, pt.az);
+          if (!p || p.x < 4 || p.x > W - 4 || p.y < 8 || p.y > H - 8) return;
+          const anchor = p.x < 52 ? 'start' : p.x > W - 52 ? 'end' : 'middle';
+          const tx = anchor === 'start' ? p.x + 7 : anchor === 'end' ? p.x - 7 : p.x;
+          const ty = p.y >= 30 ? p.y - 8 : p.y + 15;
+          targetEls.push(
+            <g key={`te${ti}-${ei}`}>
+              <circle cx={p.x} cy={p.y} r="3" fill="var(--color-background-body)" stroke="var(--color-icon-accent)" strokeWidth="2" />
+              <text x={tx} y={ty} textAnchor={anchor} fontSize="9.5" fill="var(--color-text-secondary)">
+                {fmtTime(pt.time)}
+              </text>
+            </g>,
+          );
+        });
+      }
     }
     // Two markers, deliberately distinct: the gold dot is the PEAK
     // (labeled with the target name and peak time); the accent dot
