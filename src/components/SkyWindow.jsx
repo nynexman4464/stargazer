@@ -125,6 +125,25 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
     </g>
   ) : null;
 
+  // Below-horizon sky stays DRAWN (Alex looks down there on purpose —
+  // tracks after set, positions before rise) but faded: the same
+  // ground polygon again as a translucent wash over the sky content,
+  // rendered late, with the horizon line re-stroked on top so the
+  // boundary stays crisp. Content above the line is untouched.
+  const belowFadeEl = horizonPts.length > 1 ? (
+    <g>
+      <polygon
+        points={`${horizonPts.map((p) => `${p.x.toFixed(0)},${p.y.toFixed(0)}`).join(' ')} ${W},${H} 0,${H}`}
+        fill="var(--color-background-card)"
+        opacity="0.62"
+      />
+      <polyline
+        points={horizonPts.map((p) => `${p.x.toFixed(0)},${p.y.toFixed(0)}`).join(' ')}
+        fill="none" stroke="var(--color-border-emphasized)" strokeWidth="1.5"
+      />
+    </g>
+  ) : null;
+
   const starEls = [];
   skyAltAz.stars.forEach((s, i) => {
     const p = proj(s.alt, s.az);
@@ -291,6 +310,7 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
       {labelEls}
       {moonEl}
       {targetEls}
+      {belowFadeEl}
       {arrowEl}
       <text x={W / 2} y="20" textAnchor="middle" fontSize="11.5" fill="var(--color-text-secondary)">
         {compass(center.az)} · up {Math.round(center.el)}°
