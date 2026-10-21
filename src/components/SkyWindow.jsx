@@ -204,16 +204,22 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
         );
       }
     }
+    // Two markers, deliberately distinct: the gold dot is the PEAK
+    // (labeled with the target name and peak time); the accent dot
+    // is where the target is RIGHT NOW, labeled "now". They often
+    // sit close together near the peak — the labels keep them from
+    // reading as one dot.
+    let peakP = null;
     if (t.peak && t.peak.alt > 0) {
-      const p = proj(t.peak.alt, t.peak.az);
-      if (p) {
+      peakP = proj(t.peak.alt, t.peak.az);
+      if (peakP) {
         targetEls.push(
           <g key={`tg${ti}`}>
-            <circle cx={p.x} cy={p.y} r="6" fill="var(--color-text-yellow)" stroke="var(--color-background-body)" strokeWidth="2" />
-            <text x={p.x} y={p.y - 12} textAnchor="middle" fontSize="12" fontWeight="bold" fill="var(--color-text-primary)">
+            <circle cx={peakP.x} cy={peakP.y} r="6" fill="var(--color-text-yellow)" stroke="var(--color-background-body)" strokeWidth="2" />
+            <text x={peakP.x} y={peakP.y - 12} textAnchor="middle" fontSize="12" fontWeight="bold" fill="var(--color-text-primary)">
               {t.label}
             </text>
-            <text x={p.x} y={p.y + 20} textAnchor="middle" fontSize="10" fill="var(--color-text-secondary)">
+            <text x={peakP.x} y={peakP.y + 20} textAnchor="middle" fontSize="10" fill="var(--color-text-secondary)">
               {fmtTime(t.peak.time)}
             </text>
           </g>,
@@ -223,10 +229,16 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
     if (t.live && t.live.alt > -2) {
       const p = proj(t.live.alt, t.live.az);
       if (p) {
+        const nearPeak = peakP && Math.hypot(peakP.x - p.x, peakP.y - p.y) < 34;
         targetEls.push(
           <g key={`tl${ti}`}>
-            <circle cx={p.x} cy={p.y} r="11" fill="var(--color-text-yellow)" opacity="0.3" />
-            <circle cx={p.x} cy={p.y} r="5" fill="var(--color-text-yellow)" stroke="var(--color-background-body)" strokeWidth="1.5" />
+            <circle cx={p.x} cy={p.y} r="10" fill="var(--color-icon-accent)" opacity="0.25" />
+            <circle cx={p.x} cy={p.y} r="4.5" fill="var(--color-icon-accent)" stroke="var(--color-background-body)" strokeWidth="1.5" />
+            {nearPeak ? (
+              <text x={p.x} y={p.y + 19} textAnchor="middle" fontSize="9.5" fill="var(--color-text-secondary)">now</text>
+            ) : (
+              <text x={p.x + 9} y={p.y + 3} fontSize="9.5" fill="var(--color-text-secondary)">now</text>
+            )}
           </g>,
         );
       }
