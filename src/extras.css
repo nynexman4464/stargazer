@@ -188,6 +188,8 @@ body {
   min-height: 0;
   overflow: hidden;
   touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
   padding: 0 var(--spacing-3);
 }
 .sg-skyview-zoom {
