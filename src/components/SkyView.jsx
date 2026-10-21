@@ -57,6 +57,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   const handlerRef = useRef(null);
   const sensorRef = useRef(null);
   const quatRef = useRef(null);
+  const quatHistRef = useRef([]);
   const smoothQuatRef = useRef(null);
   const fusedRef = useRef(false);
   const targetHeadingRef = useRef(null);
@@ -121,6 +122,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     }
     fusedRef.current = false;
     quatRef.current = null;
+    quatHistRef.current = [];
     smoothQuatRef.current = null;
     // Freeze the window where the phone was aimed, so stopping
     // follow does not snap the view back to the target framing.
@@ -172,13 +174,36 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
           if (!smoothQuatRef.current) {
             smoothQuatRef.current = [...raw];
           } else {
+            // Damping keyed to how fast the phone is ACTUALLY
+            // turning, measured on the raw readings over the last
+            // ~140ms: a deliberate turn sustains its direction and
+            // nets a large angle over the window, so damping falls
+            // away almost immediately; compass wobble reverses
+            // inside the window, cancels out, and stays damped.
+            // (The first version keyed off the gap to the smoothed
+            // value instead, which gave gentle moves the full
+            // still-phone damping until lag built up — syrupy.)
+            let tau = 0.45;
+            const h = quatHistRef.current;
+            if (h.length > 1) {
+              const first = h[0];
+              const latest = h[h.length - 1];
+              const span = (latest.t - first.t) / 1000;
+              if (span > 0.05) {
+                const d = Math.min(1, Math.abs(
+                  first.q[0] * latest.q[0] + first.q[1] * latest.q[1]
+                  + first.q[2] * latest.q[2] + first.q[3] * latest.q[3],
+                ));
+                const speed = ((2 * Math.acos(d) * 180) / Math.PI) / span;
+                const f = Math.min(1, Math.max(0, Math.log(speed / 5) / Math.log(90 / 5)));
+                tau = 0.45 * Math.pow(0.03 / 0.45, f);
+              }
+            }
+            // A big gap (follow just started, phone flipped
+            // around): catch up now, do not glide there.
             const s = smoothQuatRef.current;
-            const dot = Math.min(1, Math.abs(s[0] * raw[0] + s[1] * raw[1] + s[2] * raw[2] + s[3] * raw[3]));
-            const angDeg = (2 * Math.acos(dot) * 180) / Math.PI;
-            // Nearly still: damp hard (tau 0.5s) so compass wobble
-            // never reaches the screen. Actually turning: tau
-            // shrinks toward 0.06s so the view keeps up.
-            const tau = angDeg <= 2 ? 0.5 : angDeg >= 25 ? 0.06 : 0.5 - ((angDeg - 2) / 23) * 0.44;
+            const gd = Math.min(1, Math.abs(s[0] * raw[0] + s[1] * raw[1] + s[2] * raw[2] + s[3] * raw[3]));
+            if ((2 * Math.acos(gd) * 180) / Math.PI > 30) tau = Math.min(tau, 0.05);
             smoothQuatRef.current = slerpQuat(s, raw, 1 - Math.exp(-dt / tau));
           }
           const aim = quatAim(smoothQuatRef.current);
@@ -319,7 +344,15 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         const sensor = new AbsoluteOrientationSensor({ frequency: 60 });
         sensor.addEventListener('reading', () => {
           if (sensor.quaternion) {
-            quatRef.current = [...sensor.quaternion];
+            const q = [...sensor.quaternion];
+            quatRef.current = q;
+            // Short raw history for the turning-speed estimate;
+            // keep the newest sample and everything back to
+            // ~160ms (plus one older anchor).
+            const h = quatHistRef.current;
+            const now = performance.now();
+            h.push({ q, t: now });
+            while (h.length > 2 && h[1].t < now - 160) h.shift();
             gotSignalRef.current = true;
           }
         });
@@ -328,6 +361,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             sensorRef.current = null;
             fusedRef.current = false;
             quatRef.current = null;
+            quatHistRef.current = [];
             smoothQuatRef.current = null;
             startEuler();
           }
