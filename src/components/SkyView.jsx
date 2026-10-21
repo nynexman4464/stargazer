@@ -230,22 +230,6 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
 
   const startFollow = async () => {
     setOrientMsg(null);
-    if (typeof DeviceOrientationEvent === 'undefined') {
-      setOrientMsg('This browser does not share a compass — the view stays as framed.');
-      return;
-    }
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-      try {
-        const res = await DeviceOrientationEvent.requestPermission();
-        if (res !== 'granted') {
-          setOrientMsg('Compass permission was not granted — the view stays as framed.');
-          return;
-        }
-      } catch {
-        setOrientMsg('Compass permission failed — the view stays as framed.');
-        return;
-      }
-    }
     let eulerStarted = false;
     const startEuler = () => {
       if (eulerStarted || handlerRef.current) return;
@@ -297,6 +281,33 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         }
       }
     };
+    // The Euler flow, permission step included — taken only when
+    // there is no fused sensor. iOS needs the permission dance.
+    // It must NOT run first: desktop Chrome ships a
+    // requestPermission that answers 'not granted' on sensor-less
+    // machines even though that says nothing about the fused
+    // sensor, and asking it first used to veto follow mode before
+    // the fused attempt ever ran.
+    const startEulerFlow = async () => {
+      if (typeof DeviceOrientationEvent === 'undefined') {
+        setOrientMsg('This browser does not share a compass — the view stays as framed.');
+        return false;
+      }
+      if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        try {
+          const res = await DeviceOrientationEvent.requestPermission();
+          if (res !== 'granted') {
+            setOrientMsg('Compass permission was not granted — the view stays as framed.');
+            return false;
+          }
+        } catch {
+          setOrientMsg('Compass permission failed — the view stays as framed.');
+          return false;
+        }
+      }
+      startEuler();
+      return true;
+    };
     // Fused orientation first: the OS sensor fusion (gyro +
     // accelerometer + magnetometer) as one quaternion — the same
     // source native finder apps use, and much steadier than the
@@ -329,14 +340,23 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         fusedStarted = false;
       }
     }
-    if (!fusedStarted) startEuler();
+    if (fusedStarted) {
+      setFollow(true);
+      setTimeout(() => {
+        if (!gotSignalRef.current) {
+          // Fused claimed to start but never delivered (seen on
+          // sensor-less desktops): give the Euler events a chance
+          // too before telling the user anything.
+          startEuler();
+          setOrientMsg('No compass signal so far — some browsers only share it over a secure connection or after location is allowed. The view follows once it arrives.');
+        }
+      }, 3000);
+      return;
+    }
+    if (!(await startEulerFlow())) return;
     setFollow(true);
     setTimeout(() => {
       if (!gotSignalRef.current) {
-        // Fused claimed to start but never delivered (seen on
-        // sensor-less desktops): give the Euler events a chance
-        // too before telling the user anything.
-        if (fusedStarted) startEuler();
         setOrientMsg('No compass signal so far — some browsers only share it over a secure connection or after location is allowed. The view follows once it arrives.');
       }
     }, 3000);
