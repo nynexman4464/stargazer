@@ -1776,6 +1776,14 @@ export function lookTrack(raDecAt, anchor, loc, { startH = -6, hours = 24, darkB
     const hi = set ? set.time.getTime() + 3600e3 : Infinity;
     samples = samples.filter((p) => p.time.getTime() >= lo && p.time.getTime() <= hi);
   }
+  // The passage as a plottable path (10-minute points above the horizon,
+  // same passage restriction) for the sky chart's track line.
+  const path = pts.filter((p) => {
+    if (p.alt <= 0) return false;
+    if (rise && p.time.getTime() < rise.time.getTime() - step) return false;
+    if (set && p.time.getTime() > set.time.getTime()) return false;
+    return true;
+  });
   return {
     peak,
     peakInDark: !!peak && (daytime || peak.sun < darkBelow),
@@ -1784,7 +1792,29 @@ export function lookTrack(raDecAt, anchor, loc, { startH = -6, hours = 24, darkB
     upAllWindow: up.length === pts.length,
     neverUp: up.length === 0,
     samples,
+    path,
   };
+}
+
+/* Interpolate a track path (lookTrack path or a satellite pass track —
+   both are {time, alt, az} point lists) at an arbitrary moment, for the
+   sky chart's live "where it is right now" dot. Azimuth takes the short
+   way around the 360/0 seam. Null when the moment is outside the path. */
+export function pathPointAt(path, date) {
+  if (!path || path.length < 2) return null;
+  const t = date.getTime();
+  if (t < path[0].time.getTime() || t > path[path.length - 1].time.getTime()) return null;
+  for (let i = 1; i < path.length; i++) {
+    if (path[i].time.getTime() >= t) {
+      const a = path[i - 1], b = path[i];
+      const f = (t - a.time.getTime()) / (b.time.getTime() - a.time.getTime());
+      let dAz = b.az - a.az;
+      if (dAz > 180) dAz -= 360;
+      if (dAz < -180) dAz += 360;
+      return { time: date, alt: a.alt + (b.alt - a.alt) * f, az: (a.az + dAz * f + 360) % 360 };
+    }
+  }
+  return null;
 }
 
 /* Where-to-look for one normalized event, as an array of

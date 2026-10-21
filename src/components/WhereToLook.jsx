@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { HoverCard } from '@astryxdesign/core/HoverCard';
 import { HStack } from '@astryxdesign/core/HStack';
 import { Icon } from '@astryxdesign/core/Icon';
+import { IconButton } from '@astryxdesign/core/IconButton';
 import { Text } from '@astryxdesign/core/Text';
 import { VStack } from '@astryxdesign/core/VStack';
-import { Compass } from 'lucide-react';
-import { compass, fmtTime } from '../lib/astro.js';
+import { Compass, Telescope } from 'lucide-react';
+import { compass, fmtTime, pathPointAt } from '../lib/astro.js';
+import SkyView from './SkyView.jsx';
 
 /* Where to look for an event's object(s): a glanceable line per object —
    "Orionids radiant peaks 5:00 AM — look S, 64° up" — with the full track
@@ -81,25 +84,52 @@ function LookDetails({ look, whenText, locName }) {
   );
 }
 
-export default function WhereToLook({ looks, whenText, locName }) {
+export default function WhereToLook({ looks, whenText, locName, loc }) {
+  const [skyLook, setSkyLook] = useState(null);
   if (!looks || looks.length === 0) return null;
   const place = locName || 'your location';
   return (
     <VStack gap={1}>
       {looks.map((look) => (
-        <HoverCard
-          key={look.label}
-          label={`${look.label}: where to look`}
-          content={<LookDetails look={look} whenText={whenText} locName={place} />}
-          placement="above"
-          touchTrigger="tap"
-        >
-          <HStack gap={1} vAlign="center">
-            <Icon icon={Compass} size="sm" color="secondary" />
-            <Text type="supporting">{glanceText(look, place)}</Text>
-          </HStack>
-        </HoverCard>
+        <HStack key={look.label} gap={1} vAlign="center">
+          <HoverCard
+            label={`${look.label}: where to look`}
+            content={<LookDetails look={look} whenText={whenText} locName={place} />}
+            placement="above"
+            touchTrigger="tap"
+          >
+            <HStack gap={1} vAlign="center">
+              <Icon icon={Compass} size="sm" color="secondary" />
+              <Text type="supporting">{glanceText(look, place)}</Text>
+            </HStack>
+          </HoverCard>
+          {loc && look.track?.peak && look.track?.path?.length > 1 && (
+            <IconButton
+              icon={<Icon icon={Telescope} size="sm" />}
+              label={`Sky chart for ${look.label}`}
+              variant="ghost"
+              size="sm"
+              onClick={() => setSkyLook(look)}
+            />
+          )}
+        </HStack>
       ))}
+      {skyLook && (
+        <SkyView
+          isOpen
+          onClose={() => setSkyLook(null)}
+          title={`${skyLook.label} — find in the sky`}
+          subtitle={whenText}
+          targets={[{
+            label: skyLook.label,
+            path: skyLook.track.path,
+            peak: skyLook.track.peak,
+            nowFn: (now) => pathPointAt(skyLook.track.path, now),
+          }]}
+          atTime={skyLook.track.peak?.time}
+          loc={loc}
+        />
+      )}
     </VStack>
   );
 }

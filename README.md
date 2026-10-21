@@ -82,7 +82,10 @@ meteor-shower image is AI-generated. Eclipse path and visibility maps in
 `public/img/eclipse-maps/` are NASA public-domain charts (Fred Espenak,
 NASA's Goddard Space Flight Center). Moon phase photos in `public/img/moon/`
 are from Jay Tanner's rendered lunar phase set, used under CC BY-SA 3.0 via
-Wikimedia Commons.
+Wikimedia Commons. Star and constellation data in `public/data/sky.json`
+(magnitudes to 4.5, stick figures, names) is trimmed from the d3-celestial
+data files (BSD-3-Clause, derived from the HYG / Yale Bright Star data) by
+`tools/sky-data/build-sky-data.mjs`.
 
 ## Data
 

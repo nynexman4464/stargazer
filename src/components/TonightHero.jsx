@@ -129,6 +129,7 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc, pla
                       looks={looks}
                       whenText={pick.solar ? fmtDate(pick.date) : `night of ${fmtDate(pick.date)}`}
                       locName={loc?.name}
+                      loc={loc}
                     />
                   </VStack>
                 )}

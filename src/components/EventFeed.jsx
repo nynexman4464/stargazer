@@ -127,6 +127,7 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
             looks={looks}
             whenText={ev.solar ? fmtDate(ev.date) : `night of ${fmtDate(ev.date)}`}
             locName={loc?.name}
+            loc={loc}
           />
         )}
         {!score && notVisible && (

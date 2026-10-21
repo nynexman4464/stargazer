@@ -194,6 +194,7 @@ export default function MoonPanel({ asOf, loc }) {
               looks={moonLooks}
               whenText={asOf ? `night of ${fmtDate(asOf)}` : 'tonight'}
               locName={loc?.name}
+              loc={loc}
             />
           </VStack>
         )}

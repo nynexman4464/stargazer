@@ -14,7 +14,8 @@ import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { HoverCard } from '@astryxdesign/core/HoverCard';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
 import { Icon } from '@astryxdesign/core/Icon';
-import { Satellite, Clock } from 'lucide-react';
+import { IconButton } from '@astryxdesign/core/IconButton';
+import { Satellite, Clock, Telescope } from 'lucide-react';
 import {
   SATS,
   fetchTLE,
@@ -26,8 +27,10 @@ import {
   countdown,
   isImminent,
   compass,
+  pathPointAt,
 } from '../lib/astro.js';
 import { Mag } from './Term.jsx';
+import SkyView from './SkyView.jsx';
 
 /* Full track for one pass, in a hover card anchored to the pass's peak
    angle: appears/peaks/disappears plus the minute-by-minute direction
@@ -65,6 +68,7 @@ function PassTrack({ p, satName }) {
    the best score at a glance. */
 export default function PassesPanel({ loc, bundledTles, fromDate }) {
   const [norad, setNorad] = useState(SATS[0].norad);
+  const [skyPass, setSkyPass] = useState(null);
   const [allPasses, setAllPasses] = useState(null); // null = loading, else { [norad]: scored passes }
   const [failedSats, setFailedSats] = useState([]);
   const wxCache = useRef({});
@@ -221,20 +225,31 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
                         </Text>
                       }
                       endContent={
-                        <HoverCard
-                          label={`${satName} pass track`}
-                          content={<PassTrack p={p} satName={satName} />}
-                          placement="above"
-                          hasHoverIndication={false}
-                          touchTrigger="tap"
-                        >
-                          <VStack gap={0} hAlign="end">
-                            <Text type="large" weight="semibold" hasTabularNumbers>
-                              {Math.round(p.maxEl)}°
-                            </Text>
-                            <Text type="supporting">max elev</Text>
-                          </VStack>
-                        </HoverCard>
+                        <HStack gap={1} vAlign="center">
+                          {p.track?.length > 1 && (
+                            <IconButton
+                              icon={<Icon icon={Telescope} size="sm" />}
+                              label={`Sky chart for this ${satName} pass`}
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setSkyPass(p)}
+                            />
+                          )}
+                          <HoverCard
+                            label={`${satName} pass track`}
+                            content={<PassTrack p={p} satName={satName} />}
+                            placement="above"
+                            hasHoverIndication={false}
+                            touchTrigger="tap"
+                          >
+                            <VStack gap={0} hAlign="end">
+                              <Text type="large" weight="semibold" hasTabularNumbers>
+                                {Math.round(p.maxEl)}°
+                              </Text>
+                              <Text type="supporting">max elev</Text>
+                            </VStack>
+                          </HoverCard>
+                        </HStack>
                       }
                     />
                   );
@@ -244,6 +259,28 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
           </div>
           </VStack>
       </VStack>
+      {skyPass && (
+        <SkyView
+          isOpen
+          onClose={() => setSkyPass(null)}
+          title={`${satName} — find in the sky`}
+          subtitle={`${fmtDate(skyPass.start)} · appears ${fmtTime(skyPass.start)} in the ${compass(skyPass.startAz)} · peaks ${Math.round(skyPass.maxEl)}° at ${fmtTime(skyPass.maxT)}`}
+          targets={[{
+            label: satName,
+            path: skyPass.track,
+            peak: {
+              time: skyPass.maxT,
+              alt: skyPass.maxEl,
+              az: (skyPass.track.reduce((best, s) =>
+                Math.abs(s.time - skyPass.maxT) < Math.abs(best.time - skyPass.maxT) ? s : best,
+              skyPass.track[0])).az,
+            },
+            nowFn: (now) => pathPointAt(skyPass.track, now),
+          }]}
+          atTime={skyPass.maxT}
+          loc={loc}
+        />
+      )}
     </Card>
   );
 }

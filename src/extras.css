@@ -167,6 +167,34 @@ body {
   text-align: center;
 }
 
+/* Sky chart ("find it in the sky") fullscreen view */
+.sg-skyview {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  background: var(--color-background-body);
+}
+.sg-skyview-head {
+  padding: var(--spacing-3) var(--spacing-4);
+}
+.sg-skyview-body {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  padding: 0 var(--spacing-3);
+}
+.sg-skychart {
+  width: min(94vw, 58vh);
+  height: auto;
+}
+.sg-skyview-foot {
+  padding: var(--spacing-3) var(--spacing-4) max(var(--spacing-4), env(safe-area-inset-bottom));
+}
+
 /* Realistic moon phase photos — Jay Tanner render set (public/img/moon).
    Circular crop, like the event thumbnails. */
 .sg-moon-photo,
