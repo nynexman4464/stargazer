@@ -1817,6 +1817,28 @@ export function pathPointAt(path, date) {
   return null;
 }
 
+/* Where the phone itself is pointing, from a DeviceOrientation event's
+   alpha/beta/gamma (degrees). Builds the spec rotation (intrinsic
+   Z-X'-Y'') and takes the direction the back of the phone faces —
+   hold the phone up in front of you and that is your line of sight
+   over the top of it, which is how the finder apps aim. Returns
+   { az, el } in the event's own (magnetic-north) frame; callers add
+   the local declination to get true bearings. Earth frame from the
+   rotation is x East, y North, z Up. */
+export function devicePointing(alpha, beta, gamma) {
+  if (alpha == null || beta == null || gamma == null) return null;
+  const a = alpha * RAD, b = beta * RAD, g = gamma * RAD;
+  // R = Rz(a) Rx(b) Ry(g), applied to the device back vector (0,0,-1).
+  const x1 = -Math.sin(g);
+  const y1 = Math.cos(g) * Math.sin(b);
+  const z1 = -Math.cos(g) * Math.cos(b);
+  const x = x1 * Math.cos(a) - y1 * Math.sin(a);
+  const y = x1 * Math.sin(a) + y1 * Math.cos(a);
+  const el = Math.asin(Math.max(-1, Math.min(1, z1))) / RAD;
+  const az = rev(Math.atan2(x, y) / RAD);
+  return { az, el };
+}
+
 /* Where-to-look for one normalized event, as an array of
    { label, track, note } — one entry per object (two for a conjunction).
    Returns null when the event's object has no computable position. */

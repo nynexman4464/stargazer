@@ -21,7 +21,7 @@ function project(alt, az, rot) {
   return { x: CX + r * Math.sin(a), y: CY - r * Math.cos(a) };
 }
 
-export default function SkyChart({ sky, atTime, loc, targets, heading = null, follow = false }) {
+export default function SkyChart({ sky, atTime, loc, targets, heading = null, follow = false, pointer = null }) {
   const rot = follow && heading != null ? heading : 0;
 
   // Star/line/label positions in alt-az for atTime (heading-independent;
@@ -168,6 +168,23 @@ export default function SkyChart({ sky, atTime, loc, targets, heading = null, fo
     }
   });
 
+  // Where the phone itself is pointing (follow mode): a reticle the user
+  // walks onto the target. Below the horizon it parks on the rim, faded.
+  const pointerEl = pointer ? (() => {
+    const below = pointer.el < 0;
+    const p = project(Math.max(pointer.el, 0), pointer.az, rot);
+    return (
+      <g opacity={below ? 0.45 : 1}>
+        <circle cx={p.x} cy={p.y} r="11" fill="none" stroke="var(--color-warning)" strokeWidth="2" />
+        <circle cx={p.x} cy={p.y} r="2.2" fill="var(--color-warning)" />
+        <line x1={p.x - 16} y1={p.y} x2={p.x - 6} y2={p.y} stroke="var(--color-warning)" strokeWidth="2" />
+        <line x1={p.x + 6} y1={p.y} x2={p.x + 16} y2={p.y} stroke="var(--color-warning)" strokeWidth="2" />
+        <line x1={p.x} y1={p.y - 16} x2={p.x} y2={p.y - 6} stroke="var(--color-warning)" strokeWidth="2" />
+        <line x1={p.x} y1={p.y + 6} x2={p.x} y2={p.y + 16} stroke="var(--color-warning)" strokeWidth="2" />
+      </g>
+    );
+  })() : null;
+
   const facingEl = heading != null ? (() => {
     const p = project(0, heading, rot);
     const tip = project(-7, heading, rot);
@@ -207,6 +224,7 @@ export default function SkyChart({ sky, atTime, loc, targets, heading = null, fo
       {ringLabel(30, 4)}
       {cardinals}
       {facingEl}
+      {pointerEl}
     </svg>
   );
 }

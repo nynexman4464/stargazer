@@ -179,13 +179,21 @@ body {
 .sg-skyview-head {
   padding: var(--spacing-3) var(--spacing-4);
 }
-.sg-skyview-body {
+.sg-skyview-stage {
+  position: relative;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   min-height: 0;
+  overflow: hidden;
+  touch-action: none;
   padding: 0 var(--spacing-3);
+}
+.sg-skyview-zoom {
+  position: absolute;
+  right: var(--spacing-3);
+  bottom: var(--spacing-3);
 }
 .sg-skychart {
   width: min(94vw, 58vh);
