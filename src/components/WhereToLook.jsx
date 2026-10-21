@@ -124,7 +124,16 @@ export default function WhereToLook({ looks, whenText, locName, loc }) {
             label: skyLook.label,
             path: skyLook.track.path,
             peak: skyLook.track.peak,
-            nowFn: (now) => pathPointAt(skyLook.track.path, now),
+            // "Where it is right now": inside this event's passage,
+            // interpolate the track; outside it (the object up this
+            // morning on last night's passage, say), compute the
+            // position directly — but only while it is actually up.
+            nowFn: (now) => {
+              const onTrack = pathPointAt(skyLook.track.path, now);
+              if (onTrack) return onTrack;
+              const p = skyLook.track.posAt ? skyLook.track.posAt(now) : null;
+              return p && p.alt > 0 ? p : null;
+            },
           }]}
           atTime={skyLook.track.peak?.time}
           loc={loc}

@@ -1793,6 +1793,16 @@ export function lookTrack(raDecAt, anchor, loc, { startH = -6, hours = 24, darkB
     neverUp: up.length === 0,
     samples,
     path,
+    // Position at ANY moment, from the same coordinate source as the
+    // track — including moments outside this track's passage. The sky
+    // view's "now" dot needs it: the morning before an event night,
+    // the object is up on the PREVIOUS passage, and interpolating
+    // this track's path rightly returns nothing there.
+    posAt: (date) => {
+      const { ra, dec } = raDecAt(date);
+      const aa = altAz(ra, dec, date, loc.lat, loc.lon);
+      return { time: date, alt: aa.alt, az: aa.az };
+    },
   };
 }
 
