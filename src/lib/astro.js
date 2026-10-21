@@ -1849,6 +1849,96 @@ export function devicePointing(alpha, beta, gamma) {
   return { az, el };
 }
 
+/* Dragging the sky window: exact grab. Axis-separated az/el steps
+   cannot track a finger — at 55 degrees up a degree of azimuth is
+   only about half a degree of sky, and prescribed rotations around
+   the camera axes swing the center off its elevation — so instead
+   the gesture remembers the sky direction it grabbed and, on every
+   move, steps the view center so that direction stays under the
+   finger (grabPan below: one Jacobian feedback step per move).
+   Screen offsets are in tangent-plane units: (pixels from the
+   frame center) / (focal length in pixels), y up. The frame is the
+   same one SkyWindow projects with: C the center direction, U
+   world-up made perpendicular to C, R = C x U. */
+function viewFrame(az, el) {
+  const a = az * RAD, e = el * RAD;
+  const C = [Math.cos(e) * Math.sin(a), Math.cos(e) * Math.cos(a), Math.sin(e)];
+  let U = [-C[2] * C[0], -C[2] * C[1], 1 - C[2] * C[2]];
+  const lu = Math.hypot(U[0], U[1], U[2]) || 1;
+  U = [U[0] / lu, U[1] / lu, U[2] / lu];
+  let R = [C[1] * U[2] - C[2] * U[1], C[2] * U[0] - C[0] * U[2], C[0] * U[1] - C[1] * U[0]];
+  const lr = Math.hypot(R[0], R[1], R[2]) || 1;
+  R = [R[0] / lr, R[1] / lr, R[2] / lr];
+  return { C, U, R };
+}
+
+function rotAround(v, axis, ang) {
+  const c = Math.cos(ang), s = Math.sin(ang);
+  const d = axis[0] * v[0] + axis[1] * v[1] + axis[2] * v[2];
+  return [
+    v[0] * c + (axis[1] * v[2] - axis[2] * v[1]) * s + axis[0] * d * (1 - c),
+    v[1] * c + (axis[2] * v[0] - axis[0] * v[2]) * s + axis[1] * d * (1 - c),
+    v[2] * c + (axis[0] * v[1] - axis[1] * v[0]) * s + axis[2] * d * (1 - c),
+  ];
+}
+
+/* The sky direction shown at a screen offset from a view center. */
+export function screenPoint(az, el, nx, ny) {
+  const { C, U, R } = viewFrame(az, el);
+  const P = [
+    C[0] + nx * R[0] + ny * U[0],
+    C[1] + nx * R[1] + ny * U[1],
+    C[2] + nx * R[2] + ny * U[2],
+  ];
+  const l = Math.hypot(P[0], P[1], P[2]) || 1;
+  return [P[0] / l, P[1] / l, P[2] / l];
+}
+
+function frameOf(C) {
+  const az = ((Math.atan2(C[0], C[1]) / RAD) % 360 + 360) % 360;
+  const el = Math.asin(Math.max(-1, Math.min(1, C[2]))) / RAD;
+  return { az, el, ...viewFrame(az, el) };
+}
+
+function uvOf(P, fr) {
+  const d = P[0] * fr.C[0] + P[1] * fr.C[1] + P[2] * fr.C[2];
+  return {
+    u: (P[0] * fr.R[0] + P[1] * fr.R[1] + P[2] * fr.R[2]) / d,
+    v: (P[0] * fr.U[0] + P[1] * fr.U[1] + P[2] * fr.U[2]) / d,
+  };
+}
+
+/* One feedback step toward the view center that puts sky direction
+   P at screen offset (nx, ny): measure P's current offset, take a
+   single Jacobian step (numeric 2x2, from rotating the center
+   around its up and right axes), clamped small. Called once per
+   pointer move, so the error is re-measured from the true position
+   every event — that feedback is what makes it track a finger
+   exactly in ordinary geometry yet only drift a little, never
+   fling, in the degenerate patch near the zenith where the
+   screen-position map folds and no converged solve exists. */
+export function grabPan(center, P, nx, ny) {
+  const fr = viewFrame(center.az, center.el);
+  if ((P[0] * fr.C[0] + P[1] * fr.C[1] + P[2] * fr.C[2]) < 0.05) return center;
+  const { u, v } = uvOf(P, fr);
+  const eu = nx - u, ev = ny - v;
+  if (Math.abs(eu) < 1e-7 && Math.abs(ev) < 1e-7) return center;
+  const h = 1e-4;
+  const a1 = uvOf(P, frameOf(rotAround(fr.C, fr.U, h)));
+  const a2 = uvOf(P, frameOf(rotAround(fr.C, fr.R, h)));
+  const j00 = (a1.u - u) / h, j10 = (a1.v - v) / h;
+  const j01 = (a2.u - u) / h, j11 = (a2.v - v) / h;
+  const det = j00 * j11 - j01 * j10;
+  if (Math.abs(det) < 1e-4) return center;
+  const clampStep = (x) => Math.max(-0.08, Math.min(0.08, x));
+  const tU = clampStep((eu * j11 - ev * j01) / det);
+  const tR = clampStep((j00 * ev - j10 * eu) / det);
+  let C = rotAround(fr.C, fr.U, tU);
+  C = rotAround(C, frameOf(C).R, tR);
+  const out = frameOf(C);
+  return { az: out.az, el: out.el };
+}
+
 /* Where-to-look for one normalized event, as an array of
    { label, track, note } — one entry per object (two for a conjunction).
    Returns null when the event's object has no computable position. */

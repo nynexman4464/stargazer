@@ -8,7 +8,7 @@ import { Button } from '@astryxdesign/core/Button';
 import { IconButton } from '@astryxdesign/core/IconButton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
-import { loadJSON, compass, fmtTime, devicePointing } from '../lib/astro.js';
+import { loadJSON, compass, fmtTime, devicePointing, screenPoint, grabPan } from '../lib/astro.js';
 import SkyWindow from './SkyWindow.jsx';
 
 const base = import.meta.env.BASE_URL;
@@ -21,7 +21,7 @@ function loadSky() {
 function clamp(v, lo, hi) {
   return Math.min(hi, Math.max(lo, v));
 }
-const quant = (v) => Math.round(v * 5) / 5; // 0.2-degree steps for the memoized window
+const quant = (v) => Math.round(v * 20) / 20; // 0.05-degree steps for the memoized window — fine enough that a slow drag doesn't step visibly (0.2-degree steps were ~1px jumps)
 
 /* Fullscreen "find it in the sky" view: the SkyWindow for one target,
    plus optional live phone pointing. Follow mode reads the phone's
@@ -255,6 +255,25 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   };
 
   /* ---- drag to look around, pinch to set the view width ---- */
+  // The rendered sky frame in screen terms: its center and the
+  // projection's focal length in pixels, from the SVG element
+  // itself (the stage around it is bigger than the sky).
+  const svgFrame = () => {
+    const svg = stageRef.current?.querySelector('svg');
+    if (!svg) return null;
+    const rect = svg.getBoundingClientRect();
+    if (rect.width < 10) return null;
+    return {
+      cx: rect.left + rect.width / 2,
+      cy: rect.top + rect.height / 2,
+      fPx: (rect.width / 2) / Math.tan(((fov / 2) * Math.PI) / 180),
+    };
+  };
+  const screenOffset = (fr, x, y) => ({
+    nx: (x - fr.cx) / fr.fPx,
+    ny: -(y - fr.cy) / fr.fPx,
+  });
+
   const onPointerDown = (e) => {
     if (e.target.closest('button')) return; // zoom controls keep their clicks
     stageRef.current.setPointerCapture(e.pointerId);
@@ -263,10 +282,14 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     // (stopFollow freezes the current aim as the manual center).
     if (follow) stopFollow();
     if (pointers.current.size === 1) {
+      // Remember the sky direction under the finger; every move
+      // then solves for the center that keeps it there (grabPan).
+      const fr = svgFrame();
+      const off = fr ? screenOffset(fr, e.clientX, e.clientY) : null;
       gesture.current = {
         mode: 'winpan',
         sx: e.clientX, sy: e.clientY,
-        az0: winCenterResolved.az, el0: winCenterResolved.el,
+        grab: off ? screenPoint(winCenterResolved.az, winCenterResolved.el, off.nx, off.ny) : null,
         az: winCenterResolved.az, el: winCenterResolved.el,
         moved: false, tapX: e.clientX, tapY: e.clientY,
       };
@@ -276,7 +299,6 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         mode: 'winpinch',
         d0: Math.hypot(a.x - b.x, a.y - b.y),
         fov0: fov,
-        az0: winCenterResolved.az, el0: winCenterResolved.el,
         az: winCenterResolved.az, el: winCenterResolved.el,
         moved: true,
       };
@@ -289,22 +311,17 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     const g = gesture.current;
     if (!g) return;
     if (g.mode === 'winpan' && pointers.current.size === 1) {
-      const dx = e.clientX - g.sx;
-      const dy = e.clientY - g.sy;
-      if (Math.hypot(dx, dy) > 6) g.moved = true;
-      if (g.moved) {
-        // Grab-the-sky dragging: the sky follows the finger in both
-        // axes. Sideways, the aim center moves opposite the drag;
-        // vertically, dragging down pulls the sky down, which aims
-        // the center HIGHER (screen y runs down, elevation up — the
-        // signs differ, and matching them felt reversed).
-        const rect = stageRef.current.getBoundingClientRect();
-        const dpp = fov / rect.width;
-        const az = ((g.az0 - dx * dpp) % 360 + 360) % 360;
-        const el = clamp(g.el0 + dy * dpp, -15, 78);
-        g.az = az;
-        g.el = el;
-        setWinCenter({ az, el });
+      if (Math.hypot(e.clientX - g.sx, e.clientY - g.sy) > 6) g.moved = true;
+      if (g.moved && g.grab) {
+        const fr = svgFrame();
+        if (fr) {
+          const off = screenOffset(fr, e.clientX, e.clientY);
+          const next = grabPan({ az: g.az, el: g.el }, g.grab, off.nx, off.ny);
+          const el = clamp(next.el, -15, 78);
+          g.az = next.az;
+          g.el = el;
+          setWinCenter({ az: next.az, el });
+        }
       }
     } else if (g.mode === 'winpinch' && pointers.current.size === 2) {
       const [a, b] = [...pointers.current.values()];
@@ -333,12 +350,16 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       }
       gesture.current = null;
     } else if (pointers.current.size === 1) {
+      // Pinch ends with one finger still down: re-grab the sky
+      // under that finger at the current center and keep panning.
       const [p] = [...pointers.current.values()];
+      const fr = svgFrame();
+      const off = fr ? screenOffset(fr, p.x, p.y) : null;
       gesture.current = {
         mode: 'winpan',
         sx: p.x, sy: p.y,
-        az0: g.az ?? g.az0, el0: g.el ?? g.el0,
-        az: g.az ?? g.az0, el: g.el ?? g.el0,
+        grab: off ? screenPoint(g.az, g.el, off.nx, off.ny) : null,
+        az: g.az, el: g.el,
         moved: true,
       };
     }
