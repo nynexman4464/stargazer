@@ -116,7 +116,6 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
       <polygon
         points={`${horizonPts.map((p) => `${p.x.toFixed(0)},${p.y.toFixed(0)}`).join(' ')} ${W},${H} 0,${H}`}
         fill="var(--color-background-card)"
-        opacity="0.92"
       />
       <polyline
         points={horizonPts.map((p) => `${p.x.toFixed(0)},${p.y.toFixed(0)}`).join(' ')}
@@ -285,12 +284,16 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
         </linearGradient>
       </defs>
       <rect x="0" y="0" width={W} height={H} fill="url(#sg-win-grad)" />
-      {groundEl}
       {linesEl}
       {starEls}
       {labelEls}
       {moonEl}
       {targetEls}
+      {/* Ground renders AFTER all sky content: it is opaque, so
+          anything below the horizon — stars, stick figures, tracks,
+          markers — is hidden behind the earth, as it should be.
+          Only the off-frame arrow, readout and aim ring sit above it. */}
+      {groundEl}
       {arrowEl}
       <text x={W / 2} y="20" textAnchor="middle" fontSize="11.5" fill="var(--color-text-secondary)">
         {compass(center.az)} · up {Math.round(center.el)}°
