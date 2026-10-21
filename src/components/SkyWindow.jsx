@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { altAz, moonEquatorial, fmtTime, compass, frameFrom } from '../lib/astro.js';
+import { altAz, moonEquatorial, sunRaDec, moonPhase, fmtTime, compass, frameFrom } from '../lib/astro.js';
 
 /* The window view, ISS Detector style: the screen is a window onto
    the patch of sky it is aimed at. The caller supplies the view
@@ -61,6 +61,8 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
       lines: sky.lines.map((line) => line.map((pt) => altazOf(pt))),
       labels: sky.labels.map((s) => ({ ...altazOf(s), name: s[2] })),
       moon: (() => { const m = moonEquatorial(atTime); return altAz(m.ra, m.dec, atTime, loc.lat, loc.lon); })(),
+      sun: (() => { const s = sunRaDec(atTime); return altAz(s.ra, s.dec, atTime, loc.lat, loc.lon); })(),
+      moonIllum: moonPhase(atTime).illum,
     };
   }, [sky, atTime, loc]);
 
@@ -202,10 +204,57 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
   if (m.alt > -2 && !targets.some((t) => t.label === 'Moon')) {
     const p = proj(m.alt, m.az);
     if (p) {
+      // The Moon drawn in its approximate phase for the view's
+      // date (Alex, 2026-10-21): the lit part of the disc with
+      // the real terminator shape — a half-ellipse whose width
+      // follows the illumination — rotated so the lit side faces
+      // the Sun on screen. The Sun is usually below the horizon
+      // in this view and cannot be projected, so its direction
+      // comes from the Moon's own tangent plane: the direction
+      // from Moon to Sun, read against the screen vectors of the
+      // Moon's local up and east.
+      const R = 9;
+      const cosI = 2 * skyAltAz.moonIllum - 1; // +1 at full, -1 at new
+      const Dm = dirOf(m.az, m.alt);
+      const Ds = dirOf(skyAltAz.sun.az, skyAltAz.sun.alt);
+      const dm = dot(Ds, Dm);
+      const v = [Ds[0] - dm * Dm[0], Ds[1] - dm * Dm[1], Ds[2] - dm * Dm[2]];
+      const eAlt = [-Math.sin(m.alt * DEG) * Math.sin(m.az * DEG), -Math.sin(m.alt * DEG) * Math.cos(m.az * DEG), Math.cos(m.alt * DEG)];
+      const eAz = [Math.cos(m.az * DEG), -Math.sin(m.az * DEG), 0];
+      const vAlt = dot(v, eAlt);
+      const vAz = dot(v, eAz) / Math.max(0.2, Math.cos(m.alt * DEG));
+      const pA = proj(m.alt + 1, m.az, 0.05);
+      const pZ = proj(m.alt, m.az + 1, 0.05);
+      let rot = 0;
+      if (pA && pZ
+        && Math.hypot(pA.x - p.x, pA.y - p.y) < 80 && Math.hypot(pZ.x - p.x, pZ.y - p.y) < 80) {
+        rot = Math.atan2(
+          vAlt * (pA.y - p.y) + vAz * (pZ.y - p.y),
+          vAlt * (pA.x - p.x) + vAz * (pZ.x - p.x),
+        ) / DEG;
+      }
+      // Lit polygon, canonical (lit side toward +x, y up): the
+      // Sun-facing half of the limb, then the terminator
+      // half-ellipse x = -cosI * sqrt(1 - y^2) back around.
+      const litPts = [];
+      for (let k = 0; k <= 24; k++) {
+        const a = -Math.PI / 2 + (k / 24) * Math.PI;
+        litPts.push([Math.cos(a), Math.sin(a)]);
+      }
+      for (let k = 1; k <= 24; k++) {
+        const b = Math.PI / 2 - (k / 24) * Math.PI;
+        litPts.push([-cosI * Math.cos(b), Math.sin(b)]);
+      }
+      const ca = Math.cos(rot * DEG), sa = Math.sin(rot * DEG);
+      const litStr = litPts.map(([ux, uy]) => {
+        const fx = ux, fy = -uy; // canonical y-up -> screen y-down
+        return `${(p.x + R * (fx * ca - fy * sa)).toFixed(1)},${(p.y + R * (fx * sa + fy * ca)).toFixed(1)}`;
+      }).join(' ');
       moonEl = (
         <g>
-          <circle cx={p.x} cy={p.y} r="7" fill="var(--color-text-yellow)" opacity="0.9" />
-          <text x={p.x + 10} y={p.y + 3} fontSize="10" fill="var(--color-text-secondary)">Moon</text>
+          <circle cx={p.x} cy={p.y} r={R} fill="var(--color-background-muted)" stroke="var(--color-border-emphasized)" strokeWidth="0.75" />
+          <polygon points={litStr} fill="var(--color-text-yellow)" opacity="0.95" />
+          <text x={p.x + 13} y={p.y + 3} fontSize="10" fill="var(--color-text-secondary)">Moon</text>
         </g>
       );
     }
