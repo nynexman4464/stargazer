@@ -83,9 +83,9 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     ? (primaryTarget.live && primaryTarget.live.alt > -5 ? primaryTarget.live : primaryTarget.peak)
     : null;
   const winCenterResolved = follow && pointing
-    ? { az: pointing.az, el: clamp(pointing.el, -15, 75) }
+    ? { az: pointing.az, el: clamp(pointing.el, -50, 85) }
     : winCenter || (primaryPos
-      ? { az: primaryPos.az, el: clamp(primaryPos.alt, -10, 70) }
+      ? { az: primaryPos.az, el: clamp(primaryPos.alt, -50, 70) }
       : { az: 180, el: 30 });
 
   useEffect(() => {
@@ -107,7 +107,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     // Freeze the window where the phone was aimed, so stopping
     // follow does not snap the view back to the target framing.
     if (dispPointRef.current) {
-      setWinCenter({ az: dispPointRef.current.az, el: clamp(dispPointRef.current.el, -15, 75) });
+      setWinCenter({ az: dispPointRef.current.az, el: clamp(dispPointRef.current.el, -50, 85) });
     }
     setFollow(false);
     setHeading(null);
@@ -317,7 +317,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         if (fr) {
           const off = screenOffset(fr, e.clientX, e.clientY);
           const next = grabPan({ az: g.az, el: g.el }, g.grab, off.nx, off.ny);
-          const el = clamp(next.el, -15, 78);
+          const el = clamp(next.el, -50, 85);
           g.az = next.az;
           g.el = el;
           setWinCenter({ az: next.az, el });
