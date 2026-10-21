@@ -1849,6 +1849,59 @@ export function devicePointing(alpha, beta, gamma) {
   return { az, el };
 }
 
+/* The same aim from a fused orientation quaternion — the
+   AbsoluteOrientationSensor reading ([x, y, z, w], the rotation
+   that carries device axes into Earth axes: x east, y north,
+   z up; the OS sensor fusion behind Android's rotation vector).
+   The back of the phone is device (0,0,-1), which under R(q) is
+   the negated third column of the rotation matrix. Must agree
+   with devicePointing on the equivalent Euler orientation —
+   node-tested over a spread of poses. Returns { az, el } in the
+   magnetic frame, like devicePointing. */
+export function quatAim(q) {
+  if (!q || q.length < 4) return null;
+  const [x, y, z, w] = q;
+  const bx = -2 * (x * z + w * y);
+  const by = -2 * (y * z - w * x);
+  const bz = 2 * (x * x + y * y) - 1;
+  const el = Math.asin(Math.max(-1, Math.min(1, bz))) / RAD;
+  const az = rev(Math.atan2(bx, by) / RAD);
+  return { az, el };
+}
+
+/* Spherical interpolation between two orientation quaternions —
+   the correct way to smooth orientation: no Euler wrap, no gimbal
+   artifacts, constant angular speed. t in [0, 1]. */
+export function slerpQuat(qa, qb, t) {
+  let [ax, ay, az, aw] = qa;
+  const [bx, by, bz, bw] = qb;
+  let dot = ax * bx + ay * by + az * bz + aw * bw;
+  // Take the short way around: q and -q are the same orientation.
+  const s = dot < 0 ? -1 : 1;
+  dot = Math.abs(dot);
+  if (dot > 0.9995) {
+    // Nearly identical: linear blend + normalize is accurate here.
+    const r = [
+      ax + (s * bx - ax) * t,
+      ay + (s * by - ay) * t,
+      az + (s * bz - az) * t,
+      aw + (s * bw - aw) * t,
+    ];
+    const l = Math.hypot(r[0], r[1], r[2], r[3]) || 1;
+    return [r[0] / l, r[1] / l, r[2] / l, r[3] / l];
+  }
+  const theta = Math.acos(Math.min(1, dot));
+  const sinT = Math.sin(theta);
+  const wa = Math.sin((1 - t) * theta) / sinT;
+  const wb = Math.sin(t * theta) / sinT;
+  return [
+    wa * ax + wb * s * bx,
+    wa * ay + wb * s * by,
+    wa * az + wb * s * bz,
+    wa * aw + wb * s * bw,
+  ];
+}
+
 /* Dragging the sky window: exact grab. Axis-separated az/el steps
    cannot track a finger — at 55 degrees up a degree of azimuth is
    only about half a degree of sky, and prescribed rotations around

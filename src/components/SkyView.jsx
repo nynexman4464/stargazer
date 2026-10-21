@@ -8,7 +8,7 @@ import { Button } from '@astryxdesign/core/Button';
 import { IconButton } from '@astryxdesign/core/IconButton';
 import { Icon } from '@astryxdesign/core/Icon';
 import { X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
-import { loadJSON, compass, fmtTime, devicePointing, screenPoint, grabPan } from '../lib/astro.js';
+import { loadJSON, compass, fmtTime, devicePointing, quatAim, slerpQuat, screenPoint, grabPan } from '../lib/astro.js';
 import SkyWindow from './SkyWindow.jsx';
 
 const base = import.meta.env.BASE_URL;
@@ -29,15 +29,22 @@ const quant = (v) => Math.round(v * 20) / 20; // 0.05-degree steps for the memoi
    window where the back of the phone points, ISS Detector style.
    Magnetic bearings are corrected to true north for this location.
 
-   Smoothness pipeline (phone compasses are noisy, especially
-   indoors — raw azimuth can spike 20 degrees between samples):
-   sensor events pass a median-of-3 spike filter and a low-pass
-   into target refs only; a requestAnimationFrame loop eases the
-   displayed aim toward the target; the window receives the aim
-   quantized to 0.2 degrees and is memoized, so a still phone
-   re-renders nothing. Dragging grabs manual control, pinch and
-   buttons set the view width. Everything degrades to a framed,
-   draggable window where no compass is available. */
+   Smoothness pipeline. First choice is the phone's FUSED
+   orientation (AbsoluteOrientationSensor): the OS blends gyro,
+   accelerometer and magnetometer into one quaternion — the same
+   rotation-vector source native finder apps use, and far
+   steadier than raw events. The rAF loop slerps a smoothed
+   quaternion toward the latest reading with an adaptive time
+   constant (heavy damping while the phone is nearly still, light
+   while it is actually turning), then converts to az/el. Where
+   the fused sensor does not exist (iOS, Firefox), the fallback is
+   deviceorientation Euler events through a median-of-3 spike
+   filter and low-pass into target refs, eased in the same loop.
+   The window receives the aim quantized and is memoized, so a
+   still phone re-renders almost nothing. Dragging grabs manual
+   control, pinch and buttons set the view width. Everything
+   degrades to a framed, draggable window where no compass is
+   available. */
 export default function SkyView({ isOpen, onClose, title, subtitle, targets, atTime, loc }) {
   const [sky, setSky] = useState(null);
   const [follow, setFollow] = useState(false);
@@ -48,6 +55,10 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   const [winCenter, setWinCenter] = useState(null);
   const [fov, setFov] = useState(55);
   const handlerRef = useRef(null);
+  const sensorRef = useRef(null);
+  const quatRef = useRef(null);
+  const smoothQuatRef = useRef(null);
+  const fusedRef = useRef(false);
   const targetHeadingRef = useRef(null);
   const targetPointRef = useRef(null);
   const pointSamplesRef = useRef([]);
@@ -104,6 +115,13 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       window.removeEventListener('deviceorientation', handlerRef.current, true);
       handlerRef.current = null;
     }
+    if (sensorRef.current) {
+      try { sensorRef.current.stop(); } catch { /* already stopped */ }
+      sensorRef.current = null;
+    }
+    fusedRef.current = false;
+    quatRef.current = null;
+    smoothQuatRef.current = null;
     // Freeze the window where the phone was aimed, so stopping
     // follow does not snap the view back to the target framing.
     if (dispPointRef.current) {
@@ -133,9 +151,12 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     };
   }, [isOpen, onClose, stopFollow]);
 
-  /* Frame-rate easing: while following, glide the displayed heading
-     and pointing toward the filtered sensor targets, snapping the
-     last fraction of a degree. */
+  /* Frame-rate smoothing while following. Fused source: slerp the
+     smoothed quaternion toward the latest reading (adaptive tau),
+     convert, done — the slerp IS the filter. Euler fallback: glide
+     the displayed heading and pointing toward the filtered sensor
+     targets, snapping the last fraction of a degree. Either way,
+     state updates only when the displayed aim actually moved. */
   useEffect(() => {
     if (!follow) return;
     let raf = 0;
@@ -145,42 +166,67 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     const step = (t) => {
       const dt = Math.min(0.1, (t - last) / 1000);
       last = t;
-      const kh = 1 - Math.exp(-dt / 0.09);
-      const kp = 1 - Math.exp(-dt / 0.17);
-      const th = targetHeadingRef.current;
-      if (th != null) {
-        if (dispHeadingRef.current == null) dispHeadingRef.current = th;
-        else {
-          const d = ((th - dispHeadingRef.current + 540) % 360) - 180;
-          dispHeadingRef.current = Math.abs(d) < 0.04
-            ? th
-            : ((dispHeadingRef.current + d * kh) % 360 + 360) % 360;
+      if (fusedRef.current) {
+        const raw = quatRef.current;
+        if (raw) {
+          if (!smoothQuatRef.current) {
+            smoothQuatRef.current = [...raw];
+          } else {
+            const s = smoothQuatRef.current;
+            const dot = Math.min(1, Math.abs(s[0] * raw[0] + s[1] * raw[1] + s[2] * raw[2] + s[3] * raw[3]));
+            const angDeg = (2 * Math.acos(dot) * 180) / Math.PI;
+            // Nearly still: damp hard (tau 0.5s) so compass wobble
+            // never reaches the screen. Actually turning: tau
+            // shrinks toward 0.06s so the view keeps up.
+            const tau = angDeg <= 2 ? 0.5 : angDeg >= 25 ? 0.06 : 0.5 - ((angDeg - 2) / 23) * 0.44;
+            smoothQuatRef.current = slerpQuat(s, raw, 1 - Math.exp(-dt / tau));
+          }
+          const aim = quatAim(smoothQuatRef.current);
+          if (aim) {
+            const azT = ((aim.az + decl) % 360 + 360) % 360;
+            dispHeadingRef.current = azT;
+            dispPointRef.current = { az: azT, el: aim.el };
+          }
         }
-        if (shownH == null || Math.abs(((dispHeadingRef.current - shownH + 540) % 360) - 180) > 0.02) {
-          shownH = dispHeadingRef.current;
-          setHeading(shownH);
+      } else {
+        const kh = 1 - Math.exp(-dt / 0.09);
+        const kp = 1 - Math.exp(-dt / 0.17);
+        const th = targetHeadingRef.current;
+        if (th != null) {
+          if (dispHeadingRef.current == null) dispHeadingRef.current = th;
+          else {
+            const d = ((th - dispHeadingRef.current + 540) % 360) - 180;
+            dispHeadingRef.current = Math.abs(d) < 0.04
+              ? th
+              : ((dispHeadingRef.current + d * kh) % 360 + 360) % 360;
+          }
+        }
+        const tp = targetPointRef.current;
+        if (tp) {
+          if (!dispPointRef.current) dispPointRef.current = { ...tp };
+          else {
+            const dp = dispPointRef.current;
+            const d = ((tp.az - dp.az + 540) % 360) - 180;
+            dp.az = Math.abs(d) < 0.04 ? tp.az : ((dp.az + d * kp) % 360 + 360) % 360;
+            dp.el = Math.abs(tp.el - dp.el) < 0.04 ? tp.el : dp.el + (tp.el - dp.el) * kp;
+          }
         }
       }
-      const tp = targetPointRef.current;
-      if (tp) {
-        if (!dispPointRef.current) dispPointRef.current = { ...tp };
-        else {
-          const dp = dispPointRef.current;
-          const d = ((tp.az - dp.az + 540) % 360) - 180;
-          dp.az = Math.abs(d) < 0.04 ? tp.az : ((dp.az + d * kp) % 360 + 360) % 360;
-          dp.el = Math.abs(tp.el - dp.el) < 0.04 ? tp.el : dp.el + (tp.el - dp.el) * kp;
-        }
-        const dp = dispPointRef.current;
-        if (!shownP || Math.abs(dp.az - shownP.az) > 0.02 || Math.abs(dp.el - shownP.el) > 0.02) {
-          shownP = { ...dp };
-          setPointing(shownP);
-        }
+      if (dispHeadingRef.current != null
+        && (shownH == null || Math.abs(((dispHeadingRef.current - shownH + 540) % 360) - 180) > 0.02)) {
+        shownH = dispHeadingRef.current;
+        setHeading(shownH);
+      }
+      const dp = dispPointRef.current;
+      if (dp && (!shownP || Math.abs(dp.az - shownP.az) > 0.02 || Math.abs(dp.el - shownP.el) > 0.02)) {
+        shownP = { ...dp };
+        setPointing(shownP);
       }
       raf = requestAnimationFrame(step);
     };
     raf = requestAnimationFrame(step);
     return () => cancelAnimationFrame(raf);
-  }, [follow]);
+  }, [follow, decl]);
 
   const startFollow = async () => {
     setOrientMsg(null);
@@ -200,6 +246,14 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         return;
       }
     }
+    let eulerStarted = false;
+    const startEuler = () => {
+      if (eulerStarted || handlerRef.current) return;
+      eulerStarted = true;
+      handlerRef.current = onOrient;
+      window.addEventListener('deviceorientationabsolute', onOrient, true);
+      window.addEventListener('deviceorientation', onOrient, true);
+    };
     const onOrient = (e) => {
       let raw = null;
       if (typeof e.webkitCompassHeading === 'number' && !Number.isNaN(e.webkitCompassHeading)) {
@@ -243,12 +297,46 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         }
       }
     };
-    handlerRef.current = onOrient;
-    window.addEventListener('deviceorientationabsolute', onOrient, true);
-    window.addEventListener('deviceorientation', onOrient, true);
+    // Fused orientation first: the OS sensor fusion (gyro +
+    // accelerometer + magnetometer) as one quaternion — the same
+    // source native finder apps use, and much steadier than the
+    // Euler events, which stay as the fallback for browsers
+    // without the sensor (iOS, Firefox) or if it errors out.
+    let fusedStarted = false;
+    if ('AbsoluteOrientationSensor' in window) {
+      try {
+        const sensor = new AbsoluteOrientationSensor({ frequency: 60 });
+        sensor.addEventListener('reading', () => {
+          if (sensor.quaternion) {
+            quatRef.current = [...sensor.quaternion];
+            gotSignalRef.current = true;
+          }
+        });
+        sensor.addEventListener('error', () => {
+          if (sensorRef.current === sensor) {
+            sensorRef.current = null;
+            fusedRef.current = false;
+            quatRef.current = null;
+            smoothQuatRef.current = null;
+            startEuler();
+          }
+        });
+        sensor.start();
+        sensorRef.current = sensor;
+        fusedRef.current = true;
+        fusedStarted = true;
+      } catch {
+        fusedStarted = false;
+      }
+    }
+    if (!fusedStarted) startEuler();
     setFollow(true);
     setTimeout(() => {
       if (!gotSignalRef.current) {
+        // Fused claimed to start but never delivered (seen on
+        // sensor-less desktops): give the Euler events a chance
+        // too before telling the user anything.
+        if (fusedStarted) startEuler();
         setOrientMsg('No compass signal so far — some browsers only share it over a secure connection or after location is allowed. The view follows once it arrives.');
       }
     }, 3000);
