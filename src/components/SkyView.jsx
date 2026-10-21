@@ -293,12 +293,15 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       const dy = e.clientY - g.sy;
       if (Math.hypot(dx, dy) > 6) g.moved = true;
       if (g.moved) {
-        // Grab-the-sky dragging: content follows the finger, so the
-        // aim center moves the opposite way.
+        // Grab-the-sky dragging: the sky follows the finger in both
+        // axes. Sideways, the aim center moves opposite the drag;
+        // vertically, dragging down pulls the sky down, which aims
+        // the center HIGHER (screen y runs down, elevation up — the
+        // signs differ, and matching them felt reversed).
         const rect = stageRef.current.getBoundingClientRect();
         const dpp = fov / rect.width;
         const az = ((g.az0 - dx * dpp) % 360 + 360) % 360;
-        const el = clamp(g.el0 - dy * dpp, -15, 78);
+        const el = clamp(g.el0 + dy * dpp, -15, 78);
         g.az = az;
         g.el = el;
         setWinCenter({ az, el });
@@ -379,7 +382,18 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         ? `You are facing ${primary.label} — look up about ${Math.round(refPoint.alt)}°`
         : `Turn ${diff > 0 ? 'right' : 'left'} ${Math.abs(Math.round(diff))}°, then look up about ${Math.round(refPoint.alt)}° for ${primary.label}`;
     } else {
-      guidance = `${primary.label}: face ${compass(refPoint.az)}, look up ${Math.round(refPoint.alt)}° ${when}`;
+      // No live position means the object is not up right now (the
+      // Moon at 6 AM, say) — say so, with when it comes back, rather
+      // than silently showing only the peak marker.
+      let notUp = '';
+      if (primary.nowFn && !primary.live) {
+        if (primary.rise && nowMs < primary.rise.time.getTime()) {
+          notUp = ` It is not up right now — it rises ${fmtTime(primary.rise.time)}.`;
+        } else if (primary.set && nowMs > primary.set.time.getTime()) {
+          notUp = ` It is not up right now — it set at ${fmtTime(primary.set.time)}.`;
+        }
+      }
+      guidance = `${primary.label}: face ${compass(refPoint.az)}, look up ${Math.round(refPoint.alt)}° ${when}.${notUp}`;
     }
   } else if (primary) {
     guidance = `${primary.label} is below the horizon at the time shown.`;

@@ -124,6 +124,8 @@ export default function WhereToLook({ looks, whenText, locName, loc }) {
             label: skyLook.label,
             path: skyLook.track.path,
             peak: skyLook.track.peak,
+            rise: skyLook.track.rise,
+            set: skyLook.track.set,
             // "Where it is right now": inside this event's passage,
             // interpolate the track; outside it (the object up this
             // morning on last night's passage, say), compute the
