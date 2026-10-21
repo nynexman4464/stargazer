@@ -48,7 +48,10 @@ function PassTrack({ p, satName }) {
       </Text>
       {p.track && p.track.length > 1 && (
         <VStack gap={1}>
-          {p.track.map((s) => (
+          {/* Visible minutes only — the track also carries the
+              in-shadow extension points the sky view draws dotted;
+              this card stays the visible pass, minute by minute. */}
+          {p.track.filter((s) => s.vis !== false).map((s) => (
             <HStack key={s.time.getTime()} hAlign="between" vAlign="center" gap={3}>
               <Text type="supporting">{fmtTime(s.time)}</Text>
               <Text type="supporting" weight="semibold">

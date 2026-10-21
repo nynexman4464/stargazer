@@ -634,6 +634,11 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             ? `The view follows your phone: aim until the target sits in the center ring — the arrow points to it while it is off-screen. Magnetic north here is about ${Math.abs(decl).toFixed(0)}° ${decl < 0 ? 'west' : 'east'} of true north, corrected above. Phone compasses wobble, worst indoors; outdoors away from metal they settle.`
             : 'The patch of sky this view is aimed at, framed on the target. Drag to look around, pinch to widen or narrow the view; double-tap re-frames on the target. The ring marks the exact center.'}
         </Text>
+        {primary?.path?.some((p) => p.vis === false) && (
+          <Text type="supporting">
+            Dotted line: the satellite is above the horizon there but not visible — in Earth’s shadow, or the sky still too bright. It lights up where the line turns solid.
+          </Text>
+        )}
       </VStack>
       </div>
     </div>,

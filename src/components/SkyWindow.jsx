@@ -216,12 +216,21 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
     if (t.path && t.path.length > 1) {
       // The track as clipped segments in one path; points behind the
       // view break the chain rather than streaking across it.
+      // Satellite tracks carry vis flags (computePasses): segments
+      // touching a not-visible point — the satellite above the
+      // horizon but in Earth's shadow, or the sky still too bright
+      // — are drawn DOTTED, ISS Detector style, the rest solid.
       const parts = [];
+      const dottedParts = [];
       let prev = null;
+      let prevPt = null;
       t.path.forEach((pt) => {
         const p = pt.alt > -2 ? proj(pt.alt, pt.az, 0.05) : null;
-        if (p && prev) segPath(parts, prev, p);
+        if (p && prev) {
+          segPath(prevPt.vis === false || pt.vis === false ? dottedParts : parts, prev, p);
+        }
         prev = p;
+        prevPt = pt;
       });
       if (parts.length) {
         targetEls.push(
@@ -230,14 +239,23 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
             strokeLinejoin="round" strokeLinecap="round" opacity="0.9" />,
         );
       }
+      if (dottedParts.length) {
+        targetEls.push(
+          <path key={`tpd${ti}`} d={dottedParts.join(' ')}
+            fill="none" stroke="var(--color-icon-accent)" strokeWidth="2.5"
+            strokeLinejoin="round" strokeLinecap="round" strokeDasharray="0.1 6" opacity="0.55" />,
+        );
+      }
       // Start/end times at the ends of the line, ISS Detector style
       // (the old radar chart had these; the window rewrite dropped
       // them — Alex asked for them back, 2026-10-21). The ends are
-      // the first/last above-horizon points of the track. A label
-      // shows only when its end is actually in frame; panning or
-      // zooming out to the end brings it in. Labels tuck inside at
-      // the frame edges so the time never clips off the side.
-      const abovePts = t.path.filter((pt) => pt.alt > 0);
+      // the first/last points of the VISIBLE run: satellite tracks
+      // continue dotted past them to the horizon, unlabeled. A
+      // label shows only when its end is actually in frame;
+      // panning or zooming out to the end brings it in. Labels
+      // tuck inside at the frame edges so the time never clips.
+      const visPts = t.path.filter((pt) => pt.alt > 0 && pt.vis !== false);
+      const abovePts = visPts.length > 1 ? visPts : t.path.filter((pt) => pt.alt > 0);
       if (abovePts.length > 1) {
         [abovePts[0], abovePts[abovePts.length - 1]].forEach((pt, ei) => {
           const p = proj(pt.alt, pt.az);

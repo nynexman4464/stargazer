@@ -1214,11 +1214,45 @@ export function computePasses(satrec, lat, lon, hours, mag, from) {
   const end = now + hours * 3600000;
   const passes = [];
   let cur = null;
+  // The track also carries the above-horizon points where the
+  // satellite is NOT visible — before it lights up and after it
+  // winks out, mostly time spent in Earth's shadow (or with the
+  // sky not dark yet, or still low). The sky view draws those
+  // stretches dotted, ISS Detector style: the station is up there
+  // flying that line, it just is not lit. Points carry vis:true
+  // on the visible run and vis:false off it; pass start/end/peak
+  // stay the VISIBLE window, exactly as before.
+  let pre = []; // above-horizon, not-yet-visible points, awaiting a pass
+  let lastVis = null; // most recent visible sample, for exact track ends
+  const pushPt = (arr, d, el, az, vis, force = false) => {
+    const last = arr[arr.length - 1];
+    if (force || !last || d - last.time >= 60000) arr.push({ time: d, alt: el, az, vis });
+  };
+  // The visible run's final sample belongs on the track even when
+  // it lands inside the minute spacing, so the drawn line (and its
+  // end time label) ends where visibility actually ends.
+  const flushVis = () => {
+    if (!cur || !cur.inVis || !lastVis) return;
+    const last = cur.track[cur.track.length - 1];
+    if (!last || last.time.getTime() !== lastVis.time.getTime()) {
+      cur.track.push({ ...lastVis, vis: true });
+    }
+  };
+  const finish = (needDuration) => {
+    flushVis();
+    if (cur && cur.maxEl > 18 && (!needDuration || cur.end - cur.start > 60000)) {
+      delete cur.inVis;
+      passes.push(cur);
+    }
+    cur = null;
+    lastVis = null;
+  };
   for (let t = now; t < end; t += step) {
     const d = new Date(t);
     const pv = propagate(satrec, d);
     if (!pv || !pv.position) {
-      cur = null;
+      finish(true);
+      pre = [];
       continue;
     }
     const gmst = gstime(d);
@@ -1226,6 +1260,13 @@ export function computePasses(satrec, lat, lon, hours, mag, from) {
     const look = ecfToLookAngles(observerGd, ecf);
     const el = look.elevation / RAD;
     const az = look.azimuth / RAD;
+    if (el <= 0) {
+      // Below the horizon: any open pass is complete, and the
+      // pre-visible buffer belonged to a span that has ended.
+      finish(true);
+      pre = [];
+      continue;
+    }
     const dark = sunElev(d, lat, lon) < -6;
     // cylindrical Earth shadow test for satellite sunlight
     const sd = sunDirECF(d);
@@ -1234,25 +1275,41 @@ export function computePasses(satrec, lat, lon, hours, mag, from) {
     const sunlit = !(s < 0 && r2 - s * s < 6371 * 6371);
     const visible = el > 12 && dark && sunlit;
     if (visible) {
-      if (!cur) cur = { start: d, maxEl: el, maxT: d, end: d, startAz: az, endAz: az, mag, track: [] };
-      else {
+      lastVis = { time: d, alt: el, az };
+      if (!cur) {
+        cur = { start: d, maxEl: el, maxT: d, end: d, startAz: az, endAz: az, mag, track: [...pre], inVis: true };
+        pre = [];
+        pushPt(cur.track, d, el, az, true, true);
+      } else {
         cur.end = d;
         cur.endAz = az;
         if (el > cur.maxEl) {
           cur.maxEl = el;
           cur.maxT = d;
         }
+        // Minute-by-minute positions for the pass hover card (the
+        // glance line only carries start -> end direction and the
+        // peak). Entering the visible run (first point, or back
+        // from a shadow gap) is forced so the solid line starts
+        // exactly where visibility does.
+        const entering = !cur.inVis;
+        cur.inVis = true;
+        pushPt(cur.track, d, el, az, true, entering);
       }
-      // Minute-by-minute positions for the pass hover card (the glance
-      // line only carries start -> end direction and the peak).
-      const last = cur.track[cur.track.length - 1];
-      if (!last || d - last.time >= 60000) cur.track.push({ time: d, alt: el, az });
     } else if (cur) {
-      if (cur.maxEl > 18 && cur.end - cur.start > 60000) passes.push(cur);
-      cur = null;
+      // Above the horizon but not visible: the dotted continuation.
+      // flushVis inside the first such call pins the solid line's
+      // end; the first shadow point is forced so the dotted line
+      // starts right where the solid one stops.
+      const wasVis = cur.inVis;
+      if (wasVis) flushVis();
+      pushPt(cur.track, d, el, az, false, wasVis);
+      cur.inVis = false;
+    } else {
+      pushPt(pre, d, el, az, false);
     }
   }
-  if (cur && cur.maxEl > 18) passes.push(cur);
+  finish(false);
   return passes.slice(0, 6);
 }
 
