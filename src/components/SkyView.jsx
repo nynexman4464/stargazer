@@ -10,6 +10,7 @@ import { Icon } from '@astryxdesign/core/Icon';
 import { X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 import { loadJSON, compass, fmtTime, devicePointing } from '../lib/astro.js';
 import SkyChart from './SkyChart.jsx';
+import SkyWindow from './SkyWindow.jsx';
 
 const base = import.meta.env.BASE_URL;
 let skyCache = null;
@@ -42,6 +43,12 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   const [orientMsg, setOrientMsg] = useState(null);
   const [view, setView] = useState({ s: 1, x: 0, y: 0 });
   const [nowMs, setNowMs] = useState(() => Date.now());
+  // Window view (the default, ISS Detector style): the aim center is
+  // the phone pointing while following, a dragged manual center, or
+  // framed on the target otherwise. fov is its horizontal view width.
+  const [mode, setMode] = useState('window');
+  const [winCenter, setWinCenter] = useState(null);
+  const [fov, setFov] = useState(55);
   const handlerRef = useRef(null);
   // Sensor events only write these targets; the rAF loop below eases
   // the displayed heading/pointing toward them at frame rate. Writing
@@ -67,6 +74,25 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     }
   }, [loc]);
 
+  // Stable across the per-frame follow renders; refreshes on the
+  // 15-second tick so the memoized chart/window layers stay valid.
+  const withLive = useMemo(
+    () => (targets || []).map((t) => ({ ...t, live: t.nowFn ? t.nowFn(new Date(nowMs)) : null })),
+    [targets, nowMs],
+  );
+
+  // Where the window view is aimed: the phone while following, else a
+  // dragged center, else framed on the main target.
+  const primaryTarget = withLive[0] || null;
+  const primaryPos = primaryTarget
+    ? (primaryTarget.live && primaryTarget.live.alt > -5 ? primaryTarget.live : primaryTarget.peak)
+    : null;
+  const winCenterResolved = follow && pointing
+    ? { az: pointing.az, el: clamp(pointing.el, -15, 75) }
+    : winCenter || (primaryPos
+      ? { az: primaryPos.az, el: clamp(primaryPos.alt, -10, 70) }
+      : { az: 180, el: 30 });
+
   useEffect(() => {
     if (!isOpen) return;
     let cancelled = false;
@@ -82,6 +108,11 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       window.removeEventListener('deviceorientationabsolute', handlerRef.current, true);
       window.removeEventListener('deviceorientation', handlerRef.current, true);
       handlerRef.current = null;
+    }
+    // Freeze the window where the phone was aimed, so stopping
+    // follow does not snap the view back to the target framing.
+    if (dispPointRef.current) {
+      setWinCenter({ az: dispPointRef.current.az, el: clamp(dispPointRef.current.el, -15, 75) });
     }
     setFollow(false);
     setHeading(null);
@@ -235,6 +266,31 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     if (e.target.closest('button')) return; // zoom controls keep their clicks
     stageRef.current.setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (mode === 'window') {
+      // Grabbing the window takes manual control back from follow mode
+      // (stopFollow freezes the current aim as the manual center).
+      if (follow) stopFollow();
+      if (pointers.current.size === 1) {
+        gesture.current = {
+          mode: 'winpan',
+          sx: e.clientX, sy: e.clientY,
+          az0: winCenterResolved.az, el0: winCenterResolved.el,
+          az: winCenterResolved.az, el: winCenterResolved.el,
+          moved: false, tapX: e.clientX, tapY: e.clientY,
+        };
+      } else if (pointers.current.size === 2) {
+        const [a, b] = [...pointers.current.values()];
+        gesture.current = {
+          mode: 'winpinch',
+          d0: Math.hypot(a.x - b.x, a.y - b.y),
+          fov0: fov,
+          az0: winCenterResolved.az, el0: winCenterResolved.el,
+          az: winCenterResolved.az, el: winCenterResolved.el,
+          moved: true,
+        };
+      }
+      return;
+    }
     if (pointers.current.size === 1) {
       gesture.current = {
         mode: 'pan',
@@ -266,7 +322,28 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     const g = gesture.current;
     if (!g) return;
-    if (g.mode === 'pan' && pointers.current.size === 1) {
+    if (g.mode === 'winpan' && pointers.current.size === 1) {
+      const dx = e.clientX - g.sx;
+      const dy = e.clientY - g.sy;
+      if (Math.hypot(dx, dy) > 6) g.moved = true;
+      if (g.moved) {
+        // Grab-the-sky dragging: content follows the finger, so the
+        // aim center moves the opposite way.
+        const rect = stageRef.current.getBoundingClientRect();
+        const dpp = fov / rect.width;
+        const az = ((g.az0 - dx * dpp) % 360 + 360) % 360;
+        const el = clamp(g.el0 - dy * dpp, -15, 78);
+        g.az = az;
+        g.el = el;
+        setWinCenter({ az, el });
+      }
+    } else if (g.mode === 'winpinch' && pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()];
+      const d1 = Math.hypot(a.x - b.x, a.y - b.y);
+      if (d1 < 1 || g.d0 < 1) return;
+      setFov(clamp(g.fov0 * (g.d0 / d1), 28, 95));
+      g.moved = true;
+    } else if (g.mode === 'pan' && pointers.current.size === 1) {
       const dx = e.clientX - g.sx;
       const dy = e.clientY - g.sy;
       if (Math.hypot(dx, dy) > 6) g.moved = true;
@@ -291,6 +368,32 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   const onPointerUp = (e) => {
     pointers.current.delete(e.pointerId);
     const g = gesture.current;
+    if (g && (g.mode === 'winpan' || g.mode === 'winpinch')) {
+      if (pointers.current.size === 0) {
+        if (g.mode === 'winpan' && !g.moved) {
+          const now = Date.now();
+          if (now - lastTap.current < 300) {
+            // Double-tap re-frames on the target and resets the width.
+            setWinCenter(null);
+            setFov(55);
+            lastTap.current = 0;
+          } else {
+            lastTap.current = now;
+          }
+        }
+        gesture.current = null;
+      } else if (pointers.current.size === 1) {
+        const [p] = [...pointers.current.values()];
+        gesture.current = {
+          mode: 'winpan',
+          sx: p.x, sy: p.y,
+          az0: g.az ?? g.az0, el0: g.el ?? g.el0,
+          az: g.az ?? g.az0, el: g.el ?? g.el0,
+          moved: true,
+        };
+      }
+      return;
+    }
     if (g && pointers.current.size === 0) {
       if (g.mode === 'pan' && !g.moved) {
         const now = Date.now();
@@ -325,19 +428,16 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     if (!stage) return;
     const onWheel = (e) => {
       e.preventDefault();
+      if (mode === 'window') {
+        setFov((prev) => clamp(prev * (e.deltaY < 0 ? 0.9 : 1.11), 28, 95));
+        return;
+      }
       const p = stagePoint(e.clientX, e.clientY);
       zoomAt(p.x, p.y, e.deltaY < 0 ? 1.15 : 1 / 1.15);
     };
     stage.addEventListener('wheel', onWheel, { passive: false });
     return () => stage.removeEventListener('wheel', onWheel);
-  }, [isOpen, zoomAt, sky]);
-
-  // Stable across the per-frame follow renders; refreshes on the
-  // 15-second tick so the memoized chart layers stay valid.
-  const withLive = useMemo(
-    () => (targets || []).map((t) => ({ ...t, live: t.nowFn ? t.nowFn(new Date(nowMs)) : null })),
-    [targets, nowMs],
-  );
+  }, [isOpen, zoomAt, sky, mode]);
 
   if (!isOpen) return null;
 
@@ -350,14 +450,20 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       const dAz = ((refPoint.az - pointing.az + 540) % 360) - 180;
       const dEl = refPoint.alt - pointing.el;
       if (Math.abs(dAz) <= 5 && Math.abs(dEl) <= 5) {
-        guidance = `That is it — you are pointing right at ${primary.label}. Look up from the phone.`;
+        guidance = mode === 'window'
+          ? `That is it — ${primary.label} should be right around the center ring. Look up from the phone.`
+          : `That is it — you are pointing right at ${primary.label}. Look up from the phone.`;
       } else {
         const parts = [];
         if (Math.abs(dAz) > 4) parts.push(`turn ${dAz > 0 ? 'right' : 'left'} ${Math.abs(Math.round(dAz))}°`);
         if (Math.abs(dEl) > 4) parts.push(`tilt ${dEl > 0 ? 'up' : 'down'} ${Math.abs(Math.round(dEl))}°`);
         guidance = parts.length
-          ? `${parts.join(' · ')} — walk the orange reticle onto ${primary.label}`
-          : `Nearly there — small adjustments put the reticle on ${primary.label}`;
+          ? (mode === 'window'
+            ? `${parts.join(' · ')} — until ${primary.label} reaches the center ring`
+            : `${parts.join(' · ')} — walk the orange reticle onto ${primary.label}`)
+          : (mode === 'window'
+            ? `Nearly there — small adjustments center ${primary.label}`
+            : `Nearly there — small adjustments put the reticle on ${primary.label}`);
       }
     } else if (follow && heading != null) {
       const diff = ((refPoint.az - heading + 540) % 360) - 180;
@@ -394,38 +500,44 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        {sky ? (
+        {!sky ? (
+          <Text type="supporting">Loading the stars…</Text>
+        ) : mode === 'window' ? (
+          <SkyWindow sky={sky} atTime={atTime} loc={loc} targets={withLive} center={winCenterResolved} fov={fov} />
+        ) : (
           <div style={{ transform: `translate(${view.x}px, ${view.y}px) scale(${view.s})` }}>
             <SkyChart sky={sky} atTime={atTime} loc={loc} targets={withLive} heading={heading} follow={follow} pointer={follow ? pointing : null} />
           </div>
-        ) : (
-          <Text type="supporting">Loading the stars…</Text>
         )}
         <HStack gap={1} vAlign="center" className="sg-skyview-zoom">
-          <Text type="supporting">{Math.round(view.s * 100)}%</Text>
+          <Text type="supporting">{mode === 'window' ? `${Math.round(fov)}° wide` : `${Math.round(view.s * 100)}%`}</Text>
           <IconButton
             icon={<Icon icon={ZoomOut} size="sm" />}
             label="Zoom out"
             variant="ghost"
             size="sm"
-            isDisabled={view.s <= 1.01}
-            onClick={() => zoomAt(0, 0, 1 / 1.5)}
+            isDisabled={mode === 'window' ? fov >= 94.5 : view.s <= 1.01}
+            onClick={mode === 'window' ? () => setFov((p) => clamp(p * 1.35, 28, 95)) : () => zoomAt(0, 0, 1 / 1.5)}
           />
           <IconButton
             icon={<Icon icon={ZoomIn} size="sm" />}
             label="Zoom in"
             variant="ghost"
             size="sm"
-            isDisabled={view.s >= 3.49}
-            onClick={() => zoomAt(0, 0, 1.5)}
+            isDisabled={mode === 'window' ? fov <= 28.5 : view.s >= 3.49}
+            onClick={mode === 'window' ? () => setFov((p) => clamp(p / 1.35, 28, 95)) : () => zoomAt(0, 0, 1.5)}
           />
           <IconButton
             icon={<Icon icon={Maximize2} size="sm" />}
             label="Reset zoom"
             variant="ghost"
             size="sm"
-            isDisabled={view.s <= 1.01 && view.x === 0 && view.y === 0}
-            onClick={() => setView({ s: 1, x: 0, y: 0 })}
+            isDisabled={mode === 'window'
+              ? fov === 55 && winCenter == null
+              : view.s <= 1.01 && view.x === 0 && view.y === 0}
+            onClick={mode === 'window'
+              ? () => { setFov(55); setWinCenter(null); }
+              : () => setView({ s: 1, x: 0, y: 0 })}
           />
         </HStack>
       </div>
@@ -438,12 +550,28 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             label={follow ? 'Stop following my phone' : 'Point my phone at it'}
             onClick={follow ? stopFollow : startFollow}
           />
+          <Button
+            variant={mode === 'window' ? 'primary' : 'secondary'}
+            size="sm"
+            label="Window"
+            onClick={() => setMode('window')}
+          />
+          <Button
+            variant={mode === 'radar' ? 'primary' : 'secondary'}
+            size="sm"
+            label="Radar"
+            onClick={() => setMode('radar')}
+          />
         </HStack>
         {orientMsg && <Text type="supporting">{orientMsg}</Text>}
         <Text type="supporting">
-          {follow
-            ? `Hold the phone up in front of you like a window: the orange reticle is where the back of the phone is aimed. Chart turns with you; magnetic north here is about ${Math.abs(decl).toFixed(0)}° ${decl < 0 ? 'west' : 'east'} of true north, corrected above.`
-            : 'The whole sky overhead: straight up in the center, the horizon at the rim. Pinch or scroll to zoom. North is at the top unless you turn on phone pointing.'}
+          {mode === 'window'
+            ? (follow
+              ? `The view follows your phone: aim until the target sits in the center ring — the arrow points to it while it is off-screen. Magnetic north here is about ${Math.abs(decl).toFixed(0)}° ${decl < 0 ? 'west' : 'east'} of true north, corrected above.`
+              : 'The patch of sky this view is aimed at, framed on the target. Drag to look around, pinch to widen or narrow the view; double-tap re-frames on the target. The ring marks the exact center.')
+            : (follow
+              ? 'The whole sky overhead, turned to the way you face; the orange reticle is where the back of the phone is aimed.'
+              : 'The whole sky overhead: straight up in the center, the horizon at the rim. Pinch or scroll to zoom. North is at the top unless you turn on phone pointing.')}
         </Text>
       </VStack>
     </div>,
