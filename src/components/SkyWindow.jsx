@@ -94,29 +94,47 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
     if (s) parts.push(`M${s[0].toFixed(1)},${s[1].toFixed(1)} L${s[2].toFixed(1)},${s[3].toFixed(1)}`);
   };
 
-  // Ground below the horizon: sample the el=0 line across the view,
-  // fill from it down to the bottom edge, stroke the horizon itself.
-  const horizonPts = [];
-  for (let off = -115; off <= 115; off += 5) {
-    const D = dirOf(center.az + off, 0);
-    const den = dot(D, C);
-    if (den < 0.3) continue;
-    horizonPts.push({
-      x: Math.max(-800, Math.min(W + 800, W / 2 + (f * dot(D, Rv)) / den)),
-      y: Math.max(-800, Math.min(H + 800, H / 2 - (f * dot(D, U)) / den)),
-    });
-  }
-  const groundEl = horizonPts.length > 1 ? (
+  // Ground below the horizon. The horizon is a great circle, so in
+  // this projection it is a straight line, and the ground is the
+  // frame rectangle clipped to the below-horizon half-plane
+  // (Sutherland–Hodgman, in tangent-plane units). Sampling horizon
+  // points and clamping their projections instead used to fold
+  // the polygon into a stray triangle across the sky when the
+  // horizon sat near or beyond the frame edge (Alex's recording,
+  // 2026-10-21: a wedge over the stars while looking up at 70-88
+  // degrees, where no ground belongs at all).
+  const ground = (() => {
+    const hw = (W / 2 + M) / f, hh = (H / 2 + M) / f;
+    const rect = [[-hw, hh], [hw, hh], [hw, -hh], [-hw, -hh]];
+    // Up-component of the direction at tangent coords (x, y);
+    // below the horizon iff negative.
+    const val = (x, y) => C[2] + x * Rv[2] + y * U[2];
+    const poly = [];
+    const line = [];
+    for (let i = 0; i < 4; i++) {
+      const a = rect[i], b = rect[(i + 1) % 4];
+      const va = val(a[0], a[1]), vb = val(b[0], b[1]);
+      if (va <= 0) poly.push(a);
+      if ((va < 0 && vb > 0) || (va > 0 && vb < 0)) {
+        const t = va / (va - vb);
+        const p = [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+        poly.push(p);
+        line.push(p);
+      }
+    }
+    if (poly.length < 3) return null;
+    const toPx = ([x, y]) => `${(W / 2 + f * x).toFixed(0)},${(H / 2 - f * y).toFixed(0)}`;
+    return {
+      points: poly.map(toPx).join(' '),
+      line: line.length === 2 ? line.map(toPx).join(' ') : null,
+    };
+  })();
+  const groundEl = ground ? (
     <g>
-      <polygon
-        points={`${horizonPts.map((p) => `${p.x.toFixed(0)},${p.y.toFixed(0)}`).join(' ')} ${W},${H} 0,${H}`}
-        fill="var(--color-background-card)"
-        opacity="0.92"
-      />
-      <polyline
-        points={horizonPts.map((p) => `${p.x.toFixed(0)},${p.y.toFixed(0)}`).join(' ')}
-        fill="none" stroke="var(--color-border-emphasized)" strokeWidth="1.5"
-      />
+      <polygon points={ground.points} fill="var(--color-background-card)" opacity="0.92" />
+      {ground.line && (
+        <polyline points={ground.line} fill="none" stroke="var(--color-border-emphasized)" strokeWidth="1.5" />
+      )}
     </g>
   ) : null;
 
@@ -125,17 +143,12 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
   // ground polygon again as a translucent wash over the sky content,
   // rendered late, with the horizon line re-stroked on top so the
   // boundary stays crisp. Content above the line is untouched.
-  const belowFadeEl = horizonPts.length > 1 ? (
+  const belowFadeEl = ground ? (
     <g>
-      <polygon
-        points={`${horizonPts.map((p) => `${p.x.toFixed(0)},${p.y.toFixed(0)}`).join(' ')} ${W},${H} 0,${H}`}
-        fill="var(--color-background-card)"
-        opacity="0.62"
-      />
-      <polyline
-        points={horizonPts.map((p) => `${p.x.toFixed(0)},${p.y.toFixed(0)}`).join(' ')}
-        fill="none" stroke="var(--color-border-emphasized)" strokeWidth="1.5"
-      />
+      <polygon points={ground.points} fill="var(--color-background-card)" opacity="0.62" />
+      {ground.line && (
+        <polyline points={ground.line} fill="none" stroke="var(--color-border-emphasized)" strokeWidth="1.5" />
+      )}
     </g>
   ) : null;
 
