@@ -217,6 +217,15 @@ body {
 .sg-skyview-foot {
   padding: var(--spacing-3) var(--spacing-4) max(var(--spacing-4), env(safe-area-inset-bottom));
 }
+/* The guidance line rewrites itself as the phone moves ("turn
+   right 21° · tilt up 18° — …" vs "turn right 19° — …"), and
+   wrapped to one or two lines accordingly, growing the foot
+   and shrinking the stage — the whole view jumped (Alex,
+   2026-10-21). Reserve two lines always; the text can wrap or
+   not without moving anything. */
+.sg-skyview-guidance {
+  min-height: 2.9em;
+}
 @media (min-width: 900px) {
   .sg-skyview-panel {
     display: grid;

@@ -619,7 +619,11 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         </HStack>
       </div>
       <VStack gap={2} className="sg-skyview-foot">
-        {guidance && <Text weight="semibold">{guidance}</Text>}
+        {guidance && (
+          <div className="sg-skyview-guidance">
+            <Text weight="semibold">{guidance}</Text>
+          </div>
+        )}
         <HStack gap={2} vAlign="center">
           <Button
             variant={follow ? 'secondary' : 'primary'}
