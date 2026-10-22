@@ -55,6 +55,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   const [heading, setHeading] = useState(null);
   const [pointing, setPointing] = useState(null);
   const [orientMsg, setOrientMsg] = useState(null);
+  const [sensorSrc, setSensorSrc] = useState(null); // 'fused' | 'euler' — which source the follow loop is actually using, shown in the follow copy so a phone test can report it
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [winCenter, setWinCenter] = useState(null);
   const [frameUp, setFrameUp] = useState(null); // the sky window's carried screen-up vector while dragging (null = derive from world up)
@@ -62,6 +63,8 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   const handlerRef = useRef(null);
   const sensorRef = useRef(null);
   const quatRef = useRef(null);
+  const quatTimeRef = useRef(0);
+  const absSeenRef = useRef(false);
   const smoothQuatRef = useRef(null);
   const fusedRef = useRef(false);
   const targetHeadingRef = useRef(null);
@@ -126,6 +129,9 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     }
     fusedRef.current = false;
     quatRef.current = null;
+    quatTimeRef.current = 0;
+    absSeenRef.current = false;
+    setSensorSrc(null);
     smoothQuatRef.current = null;
     setFrameUp(null);
     // Freeze the window where the phone was aimed, so stopping
@@ -157,22 +163,39 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     };
   }, [isOpen, onClose, stopFollow]);
 
-  /* Frame-rate smoothing while following. Fused source: slerp the
-     smoothed quaternion toward the latest reading (adaptive tau),
-     convert, done — the slerp IS the filter. Euler fallback: glide
-     the displayed heading and pointing toward the filtered sensor
-     targets, snapping the last fraction of a degree. Either way,
-     state updates only when the displayed aim actually moved. */
+  /* Frame-rate smoothing while following. Fused source (when its
+     readings are actually fresh — a sensor that starts and then
+     goes silent must not freeze the view): slerp the smoothed
+     quaternion toward the latest reading with one fixed tau,
+     convert, done — the slerp IS the filter. Euler fallback:
+     glide the displayed heading and pointing toward the filtered
+     sensor targets, snapping the last fraction of a degree.
+     Either way the displayed aim then passes a hold-steady gate
+     (see below), and state updates only when it actually moved. */
   useEffect(() => {
     if (!follow) return;
     let raf = 0;
     let last = performance.now();
     let shownH = null;
     let shownP = null;
+    let srcShown = null;
+    let holdAnchor = null;
+    let holdStill = 0;
+    let holdLock = null;
+    const angDist = (a, b) => {
+      const dAz = ((a.az - b.az + 540) % 360) - 180;
+      const dEl = a.el - b.el;
+      return Math.hypot(dAz * Math.cos((b.el * Math.PI) / 180), dEl);
+    };
     const step = (t) => {
       const dt = Math.min(0.1, (t - last) / 1000);
       last = t;
-      if (fusedRef.current) {
+      const fusedLive = fusedRef.current && quatRef.current
+        && performance.now() - quatTimeRef.current < 1000;
+      const srcNow = fusedLive ? 'fused'
+        : ((targetPointRef.current || targetHeadingRef.current) ? 'euler' : null);
+      if (srcNow && srcNow !== srcShown) { srcShown = srcNow; setSensorSrc(srcNow); }
+      if (fusedLive) {
         const raw = quatRef.current;
         if (raw) {
           if (!smoothQuatRef.current) {
@@ -226,9 +249,31 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         setHeading(shownH);
       }
       const dp = dispPointRef.current;
-      if (dp && (!shownP || Math.abs(dp.az - shownP.az) > 0.02 || Math.abs(dp.el - shownP.el) > 0.02)) {
-        shownP = { ...dp };
-        setPointing(shownP);
+      if (dp) {
+        // Hold-steady (Alex, 2026-10-21: zoning in on the target
+        // was a fight — the aim breathed around it and the 'on
+        // it' state flickered in and out). When the aim has
+        // stayed within a small radius for a few frames, freeze
+        // the displayed aim there so the target can settle into
+        // the ring; movement past a wider radius breaks the hold
+        // immediately. It engages only at rest, so it adds no
+        // lag while moving — unlike heavier smoothing, which
+        // reads as syrup.
+        if (!holdAnchor) { holdAnchor = { ...dp }; holdStill = 0; }
+        if (holdLock) {
+          if (angDist(dp, holdLock) > 1.6) { holdLock = null; holdAnchor = { ...dp }; holdStill = 0; }
+        } else if (angDist(dp, holdAnchor) < 0.4) {
+          holdStill += dt;
+          if (holdStill >= 0.3) holdLock = { ...dp };
+        } else {
+          holdAnchor = { ...dp };
+          holdStill = 0;
+        }
+        const shown = holdLock || dp;
+        if (!shownP || Math.abs(shown.az - shownP.az) > 0.02 || Math.abs(shown.el - shownP.el) > 0.02) {
+          shownP = { ...shown };
+          setPointing(shownP);
+        }
       }
       raf = requestAnimationFrame(step);
     };
@@ -245,9 +290,20 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       eulerStarted = true;
       handlerRef.current = onOrient;
       window.addEventListener('deviceorientationabsolute', onOrient, true);
-      window.addEventListener('deviceorientation', onOrient, true);
+      // Android Chrome fires BOTH event types for the same
+      // physical readings, and running both through the median
+      // and low-pass filters double-processes every sample.
+      // Prefer the absolute event; add the plain one only if
+      // the absolute one stays silent.
+      setTimeout(() => {
+        if (handlerRef.current === onOrient && !absSeenRef.current) {
+          window.addEventListener('deviceorientation', onOrient, true);
+        }
+      }, 1200);
     };
     const onOrient = (e) => {
+      if (e.type === 'deviceorientationabsolute') absSeenRef.current = true;
+      else if (absSeenRef.current) return; // duplicate of an absolute reading
       let raw = null;
       if (typeof e.webkitCompassHeading === 'number' && !Number.isNaN(e.webkitCompassHeading)) {
         raw = e.webkitCompassHeading;
@@ -329,6 +385,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         sensor.addEventListener('reading', () => {
           if (sensor.quaternion) {
             quatRef.current = [...sensor.quaternion];
+            quatTimeRef.current = performance.now();
             gotSignalRef.current = true;
           }
         });
@@ -635,7 +692,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         {orientMsg && <Text type="supporting">{orientMsg}</Text>}
         <Text type="supporting">
           {follow
-            ? `The view follows your phone: aim until the target sits in the center ring — the arrow points to it while it is off-screen. Magnetic north here is about ${Math.abs(decl).toFixed(0)}° ${decl < 0 ? 'west' : 'east'} of true north, corrected above. Phone compasses wobble, worst indoors; outdoors away from metal they settle.`
+            ? `The view follows your phone: aim until the target sits in the center ring — the arrow points to it while it is off-screen. Magnetic north here is about ${Math.abs(decl).toFixed(0)}° ${decl < 0 ? 'west' : 'east'} of true north, corrected above. Phone compasses wobble, worst indoors; outdoors away from metal they settle.${sensorSrc ? ` Sensor source: ${sensorSrc === 'fused' ? 'fused sensors (gyro + compass)' : 'compass events only'}.` : ''}`
             : 'The patch of sky this view is aimed at, framed on the target. Drag to look around, pinch to widen or narrow the view; double-tap re-frames on the target. The ring marks the exact center.'}
         </Text>
         {primary?.path?.some((p) => p.vis === false) && (
