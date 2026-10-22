@@ -1,5 +1,7 @@
 import { memo, useMemo } from 'react';
-import { altAz, moonEquatorial, sunRaDec, moonPhase, fmtTime, compass, frameFrom } from '../lib/astro.js';
+import { altAz, moonEquatorial, sunRaDec, moonPhase, planetRaDec, fmtTime, compass, frameFrom } from '../lib/astro.js';
+
+const PLANET_NAMES = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus', 'Neptune'];
 
 /* The window view, ISS Detector style: the screen is a window onto
    the patch of sky it is aimed at. The caller supplies the view
@@ -63,6 +65,10 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
       moon: (() => { const m = moonEquatorial(atTime); return altAz(m.ra, m.dec, atTime, loc.lat, loc.lon); })(),
       sun: (() => { const s = sunRaDec(atTime); return altAz(s.ra, s.dec, atTime, loc.lat, loc.lon); })(),
       moonIllum: moonPhase(atTime).illum,
+      planets: PLANET_NAMES.map((name) => {
+        const p = planetRaDec(name, atTime);
+        return { ...altAz(p.ra, p.dec, atTime, loc.lat, loc.lon), name };
+      }),
     };
   }, [sky, atTime, loc]);
 
@@ -189,21 +195,48 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
         fill="var(--color-text-gray)" opacity="0.95">{s.name}</text>,
     );
   });
+  // Bright named stars get their own label style — near-white and
+  // semibold, a step up from the gray constellation names — and
+  // the cutoff reaches magnitude 2.0 so Polaris (1.97) makes the
+  // list; at 1.6 it silently missed out (Alex, 2026-10-21).
   skyAltAz.named.forEach((s, i) => {
-    if (s.mag > 1.6) return;
+    if (s.mag > 2.0) return;
     const p = proj(s.alt, s.az);
     if (!p || p.x < -30 || p.x > W + 30 || p.y < -16 || p.y > H + 16) return;
     labelEls.push(
-      <text key={`n${i}`} x={p.x + 6} y={p.y - 6} fontSize="10"
-        fill="var(--color-text-secondary)">{s.name}</text>,
+      <text key={`n${i}`} x={p.x + 6} y={p.y - 6} fontSize="10.5" fontWeight="600"
+        fill="var(--color-text-primary)" opacity="0.95">{s.name}</text>,
+    );
+  });
+
+  // The major planets as landmarks (Alex, 2026-10-21): a ringed
+  // disc — no star looks like that — with a semibold name label.
+  // Drawn wherever they fall in frame, below the horizon included
+  // (the fade wash dims them there like everything else), and
+  // skipped when the planet is the target itself.
+  const planetEls = [];
+  skyAltAz.planets.forEach((pl, i) => {
+    if (targets.some((t) => t.label === pl.name)) return;
+    const p = proj(pl.alt, pl.az);
+    if (!p || p.x < -40 || p.x > W + 40 || p.y < -30 || p.y > H + 30) return;
+    planetEls.push(
+      <g key={`pl${i}`}>
+        <circle cx={p.x} cy={p.y} r="3.4" fill="var(--color-background-body)" stroke="var(--color-text-primary)" strokeWidth="1.6" />
+        <text x={p.x + 7} y={p.y - 7} fontSize="10.5" fontWeight="600" fill="var(--color-text-primary)">{pl.name}</text>
+      </g>,
     );
   });
 
   let moonEl = null;
   const m = skyAltAz.moon;
-  if (m.alt > -2 && !targets.some((t) => t.label === 'Moon')) {
+  // No altitude gate: like the stars and tracks, the Moon draws
+  // below the horizon too and the fade wash dims it there (it
+  // used to vanish under -2 degrees, which is why it was missing
+  // from the Leonids 6 AM view — set by then, 55 degrees down,
+  // but still findable by dragging down to it).
+  if (!targets.some((t) => t.label === 'Moon')) {
     const p = proj(m.alt, m.az);
-    if (p) {
+    if (p && p.x > -50 && p.x < W + 50 && p.y > -50 && p.y < H + 50) {
       // The Moon drawn in its approximate phase for the view's
       // date (Alex, 2026-10-21): the lit part of the disc with
       // the real terminator shape — a half-ellipse whose width
@@ -408,6 +441,7 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
       {linesEl}
       {starEls}
       {labelEls}
+      {planetEls}
       {moonEl}
       {targetEls}
       {belowFadeEl}
