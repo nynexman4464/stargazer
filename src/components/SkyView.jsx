@@ -479,8 +479,13 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     stageRef.current.setPointerCapture(e.pointerId);
     pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
     // Grabbing the window takes manual control back from follow mode
-    // (stopFollow freezes the current aim as the manual center).
-    if (follow) stopFollow();
+    // (stopFollow freezes the current aim as the manual center) —
+    // except in camera pass-through, where follow is LOCKED on
+    // (Alex, 2026-10-22): the chart is slaved to the phone while
+    // the camera is up, so a drag must not decouple it. Pinch
+    // still works — it is the calibration control.
+    if (follow && !cameraOn) stopFollow();
+    if (cameraOn && pointers.current.size === 1) { gesture.current = null; return; }
     if (pointers.current.size === 1) {
       // Remember the sky direction under the finger; every move
       // then solves for the frame that keeps it there (grabPan).
@@ -559,9 +564,10 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         }
       }
       gesture.current = null;
-    } else if (pointers.current.size === 1) {
+    } else if (pointers.current.size === 1 && !cameraOn) {
       // Pinch ends with one finger still down: re-grab the sky
       // under that finger at the current center and keep panning.
+      // (Skipped in camera mode — follow is locked on there.)
       const [p] = [...pointers.current.values()];
       const fr = svgFrame();
       const off = fr ? screenOffset(fr, p.x, p.y) : null;
@@ -715,8 +721,9 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
           <Button
             variant={follow ? 'secondary' : 'primary'}
             size="sm"
-            label={follow ? 'Stop following my phone' : 'Point my phone at it'}
-            onClick={follow ? stopFollow : startFollow}
+            label={cameraOn ? 'Following — locked by camera' : follow ? 'Stop following my phone' : 'Point my phone at it'}
+            isDisabled={cameraOn}
+            onClick={follow ? (cameraOn ? undefined : stopFollow) : startFollow}
           />
           <Button
             variant="secondary"
@@ -729,7 +736,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         {cameraMsg && <Text type="supporting">{cameraMsg}</Text>}
         {cameraOn && (
           <Text type="supporting">
-            Camera pass-through: your phone’s camera shows behind the chart. Phone cameras differ, so line the chart’s horizon up with the real horizon — pinch wider or narrower until they sit on each other, and the compass markers on the line point the way.
+            Camera pass-through: your phone’s camera shows behind the chart. Phone cameras differ, so line the chart’s horizon up with the real horizon — pinch wider or narrower until they sit on each other, and the compass markers on the line point the way. Following is locked on while the camera is up; stopping the camera unlocks it.
           </Text>
         )}
         <Text type="supporting">
