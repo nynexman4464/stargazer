@@ -224,6 +224,10 @@ body {
   margin: auto;
   object-fit: cover;
   pointer-events: none;
+  /* Dimmed under the chart (Alex, 2026-10-22: at full brightness
+     the feed washed the overlay out). The drawn layer keeps full
+     strength; only the camera is turned down. */
+  filter: brightness(0.5);
 }
 .sg-skyview-stage > svg {
   position: relative;
