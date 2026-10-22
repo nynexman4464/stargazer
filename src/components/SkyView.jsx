@@ -56,6 +56,8 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   const [pointing, setPointing] = useState(null);
   const [orientMsg, setOrientMsg] = useState(null);
   const [sensorSrc, setSensorSrc] = useState(null); // 'fused' | 'euler' — which source the follow loop is actually using, shown in the follow copy so a phone test can report it
+  const [cameraOn, setCameraOn] = useState(false); // camera pass-through: the phone's rear camera behind the chart (Alex, 2026-10-22)
+  const [cameraMsg, setCameraMsg] = useState(null);
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [winCenter, setWinCenter] = useState(null);
   const [frameUp, setFrameUp] = useState(null); // the sky window's carried screen-up vector while dragging (null = derive from world up)
@@ -74,6 +76,8 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   const dispPointRef = useRef(null);
   const gotSignalRef = useRef(false);
   const stageRef = useRef(null);
+  const videoRef = useRef(null);
+  const streamRef = useRef(null);
   const pointers = useRef(new Map());
   const gesture = useRef(null);
   const lastTap = useRef(0);
@@ -150,6 +154,23 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     gotSignalRef.current = false;
   }, []);
 
+  const stopCamera = useCallback(() => {
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = null;
+    }
+    if (videoRef.current) videoRef.current.srcObject = null;
+    setCameraOn(false);
+  }, []);
+
+  // The video element mounts when cameraOn flips; attach the
+  // stream then (it cannot be attached before the element exists).
+  useEffect(() => {
+    if (cameraOn && videoRef.current && streamRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [cameraOn]);
+
   useEffect(() => {
     if (!isOpen) return;
     const onKey = (e) => { if (e.key === 'Escape') onClose(); };
@@ -160,8 +181,9 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = prev;
       stopFollow();
+      stopCamera();
     };
-  }, [isOpen, onClose, stopFollow]);
+  }, [isOpen, onClose, stopFollow, stopCamera]);
 
   /* Frame-rate smoothing while following. Fused source (when its
      readings are actually fresh — a sensor that starts and then
@@ -405,6 +427,33 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     }, 3000);
   };
 
+  /* Camera pass-through (Alex, 2026-10-22): the phone's rear
+     camera behind the chart, so you hold the phone at the sky
+     and the track, landmarks and horizon line lie over the real
+     view. Follow starts with it — a pass-through chart that
+     does not track the phone would be pointless. Follow is
+     kicked off first and synchronously, so iOS still counts
+     its compass-permission ask as part of this tap. The stream
+     stops with the toggle or when the view closes. */
+  const startCamera = async () => {
+    setCameraMsg(null);
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      setCameraMsg('This browser does not offer a camera feed, so pass-through stays off.');
+      return;
+    }
+    if (!follow) void startFollow();
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment' },
+        audio: false,
+      });
+      streamRef.current = stream;
+      setCameraOn(true);
+    } catch {
+      setCameraMsg('Camera permission was not granted — pass-through stays off.');
+    }
+  };
+
   /* ---- drag to look around, pinch to set the view width ---- */
   // The rendered sky frame in screen terms: its center and the
   // projection's focal length in pixels, from the SVG element
@@ -611,6 +660,9 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
+        {cameraOn && (
+          <video ref={videoRef} className="sg-skyview-video" autoPlay playsInline muted aria-hidden="true" />
+        )}
         {!sky ? (
           <Text type="supporting">Loading the stars…</Text>
         ) : (
@@ -622,6 +674,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             center={{ az: quant(winCenterResolved.az), el: quant(winCenterResolved.el) }}
             up={frameUp}
             fov={Math.round(fov * 2) / 2}
+            cameraOn={cameraOn}
           />
         )}
         <HStack gap={1} vAlign="center" className="sg-skyview-zoom">
@@ -665,8 +718,20 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             label={follow ? 'Stop following my phone' : 'Point my phone at it'}
             onClick={follow ? stopFollow : startFollow}
           />
+          <Button
+            variant="secondary"
+            size="sm"
+            label={cameraOn ? 'Stop camera' : 'Camera pass-through'}
+            onClick={cameraOn ? stopCamera : startCamera}
+          />
         </HStack>
         {orientMsg && <Text type="supporting">{orientMsg}</Text>}
+        {cameraMsg && <Text type="supporting">{cameraMsg}</Text>}
+        {cameraOn && (
+          <Text type="supporting">
+            Camera pass-through: your phone’s camera shows behind the chart. Phone cameras differ, so line the chart’s horizon up with the real horizon — pinch wider or narrower until they sit on each other, and the compass markers on the line point the way.
+          </Text>
+        )}
         <Text type="supporting">
           {follow
             ? `The view follows your phone: aim until the target sits in the center ring — the arrow points to it while it is off-screen. Magnetic north here is about ${Math.abs(decl).toFixed(0)}° ${decl < 0 ? 'west' : 'east'} of true north, corrected above. Phone compasses wobble, worst indoors; outdoors away from metal they settle.${sensorSrc ? ` Sensor source: ${sensorSrc === 'fused' ? 'fused sensors (gyro + compass)' : 'compass events only'}.` : ''}`

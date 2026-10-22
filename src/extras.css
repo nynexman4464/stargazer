@@ -209,10 +209,24 @@ body {
   right: var(--spacing-3);
   bottom: var(--spacing-3);
 }
-.sg-skywindow {
+.sg-skywindow, .sg-skyview-video {
   width: min(94vw, 44dvh);
   aspect-ratio: 10 / 13;
   border-radius: var(--radius-lg);
+}
+/* Camera pass-through: the live feed sits in exactly the
+   window's box (same sizing rule), centered in the stage,
+   under the chart. It takes no pointer events — drags and
+   pinches belong to the stage. */
+.sg-skyview-video {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  object-fit: cover;
+  pointer-events: none;
+}
+.sg-skyview-stage > svg {
+  position: relative;
 }
 .sg-skyview-foot {
   padding: var(--spacing-3) var(--spacing-4) max(var(--spacing-4), env(safe-area-inset-bottom));
@@ -248,7 +262,7 @@ body {
   /* Size the window off the panel height instead of the phone
      rule; aspect-ratio derives the width, and max-width keeps it
      inside the stage column on squarer viewports. */
-  .sg-skywindow {
+  .sg-skywindow, .sg-skyview-video {
     width: auto;
     height: calc(min(900px, 94dvh) - 140px);
     max-width: calc(96vw - 420px);

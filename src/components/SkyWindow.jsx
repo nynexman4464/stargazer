@@ -53,7 +53,7 @@ function clipSeg(x1, y1, x2, y2) {
   return [x1 + t0 * dx, y1 + t0 * dy, x1 + t1 * dx, y1 + t1 * dy];
 }
 
-export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov = 55, up = null }) {
+export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov = 55, up = null, cameraOn = false }) {
   const skyAltAz = useMemo(() => {
     if (!sky || !loc || !atTime) return null;
     const altazOf = ([ra, dec]) => altAz(ra, dec, atTime, loc.lat, loc.lon);
@@ -153,7 +153,7 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
   // boundary stays crisp. Content above the line is untouched.
   const belowFadeEl = ground ? (
     <g>
-      <polygon points={ground.points} fill="var(--color-background-card)" opacity="0.62" />
+      <polygon points={ground.points} fill="var(--color-background-card)" opacity={cameraOn ? 0.3 : 0.62} />
       {ground.line && (
         <polyline points={ground.line} fill="none" stroke="var(--color-border-emphasized)" strokeWidth="1.5" />
       )}
@@ -434,6 +434,35 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
     }
   });
 
+  // Compass markers ON the horizon line (Alex, 2026-10-22):
+  // N/E/S/W as bold letters in badges where those azimuths cross
+  // the horizon, NE/SE/SW/NW smaller. Rendered after the fade
+  // wash, so they stay crisp above and below the line, and a
+  // marker shows only while its horizon point is in frame.
+  const cardinalEl = (() => {
+    const pts = [
+      [0, 'N', true], [45, 'NE', false], [90, 'E', true], [135, 'SE', false],
+      [180, 'S', true], [225, 'SW', false], [270, 'W', true], [315, 'NW', false],
+    ];
+    const els = [];
+    for (const [az, txt, major] of pts) {
+      const p = proj(0, az);
+      if (!p || p.x < 16 || p.x > W - 16 || p.y < 12 || p.y > H - 12) continue;
+      els.push(major ? (
+        <g key={txt}>
+          <circle cx={p.x} cy={p.y} r="10.5" fill="var(--color-background-body)" opacity="0.82" stroke="var(--color-border-emphasized)" strokeWidth="1" />
+          <text x={p.x} y={p.y + 4.5} textAnchor="middle" fontSize="12" fontWeight="700" fill="var(--color-text-primary)">{txt}</text>
+        </g>
+      ) : (
+        <g key={txt}>
+          <circle cx={p.x} cy={p.y} r="8" fill="var(--color-background-body)" opacity="0.55" />
+          <text x={p.x} y={p.y + 3.5} textAnchor="middle" fontSize="8.5" fontWeight="600" fill="var(--color-text-secondary)">{txt}</text>
+        </g>
+      ));
+    }
+    return els.length ? <g>{els}</g> : null;
+  })();
+
   // Edge arrow for the main target when it is outside the frame:
   // direction from the view axes, pinned near the frame edge, label
   // beside it — the "it's thataway" cue from the finder apps.
@@ -473,16 +502,19 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
           <stop offset="100%" stopColor="var(--color-background-muted)" />
         </linearGradient>
       </defs>
-      <rect x="0" y="0" width={W} height={H} fill="url(#sg-win-grad)" />
-      {groundEl}
-      {linesEl}
-      {starEls}
+      {!cameraOn && <rect x="0" y="0" width={W} height={H} fill="url(#sg-win-grad)" />}
+      {!cameraOn && groundEl}
+      <g opacity={cameraOn ? 0.45 : 1}>
+        {linesEl}
+        {starEls}
+      </g>
       {labelEls}
       {planetEls}
       {sunEl}
       {moonEl}
       {targetEls}
       {belowFadeEl}
+      {cardinalEl}
       {arrowEl}
       <text x={W / 2} y="20" textAnchor="middle" fontSize="11.5" fill="var(--color-text-secondary)">
         {compass(center.az)} · up {Math.round(center.el)}°
