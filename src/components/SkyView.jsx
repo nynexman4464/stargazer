@@ -23,6 +23,30 @@ function clamp(v, lo, hi) {
 }
 const quant = (v) => Math.round(v * 20) / 20; // 0.05-degree steps for the memoized window — fine enough that a slow drag doesn't step visibly (0.2-degree steps were ~1px jumps)
 
+// Camera pass-through calibration memory. No browser API reports
+// a camera's field of view, so the width a user pinches to for a
+// given camera (deviceId, per phone) is the calibration — saved
+// and restored per lens.
+const camFovKey = (id) => `sg-camfov:${id}`;
+function savedCamFov(id) {
+  try {
+    const v = Number(localStorage.getItem(camFovKey(id)));
+    return v >= 12 && v <= 95 ? v : null;
+  } catch {
+    return null;
+  }
+}
+// Friendly lens names from the labels phones report; anything
+// unrecognized falls back to Camera 1/2/3 in enumeration order.
+function friendlyCamName(label, i) {
+  const l = (label || '').toLowerCase();
+  if (/ultra/.test(l)) return 'Ultrawide';
+  if (/tele|periscope/.test(l)) return 'Telephoto';
+  if (/macro/.test(l)) return 'Macro';
+  if (/wide|main/.test(l)) return 'Main';
+  return `Camera ${i + 1}`;
+}
+
 /* "Find it in the sky" view: the SkyWindow for one target, plus
    optional live phone pointing. Presentation (extras.css): a
    fullscreen sheet on small screens; on wide screens a centered
@@ -58,6 +82,9 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   const [sensorSrc, setSensorSrc] = useState(null); // 'fused' | 'euler' — which source the follow loop is actually using, shown in the follow copy so a phone test can report it
   const [cameraOn, setCameraOn] = useState(false); // camera pass-through: the phone's rear camera behind the chart (Alex, 2026-10-22)
   const [cameraMsg, setCameraMsg] = useState(null);
+  const [camDevices, setCamDevices] = useState([]); // rear cameras the browser exposes, for the lens switcher
+  const [camId, setCamId] = useState(null); // deviceId of the live camera
+  const minFovRef = useRef(28); // chart width floor: 28 normally, 12 in camera mode (a telephoto lens is narrower than 28)
   const [nowMs, setNowMs] = useState(() => Date.now());
   const [winCenter, setWinCenter] = useState(null);
   const [frameUp, setFrameUp] = useState(null); // the sky window's carried screen-up vector while dragging (null = derive from world up)
@@ -161,6 +188,9 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     }
     if (videoRef.current) videoRef.current.srcObject = null;
     setCameraOn(false);
+    setCamDevices([]);
+    setCamId(null);
+    setFov((p) => Math.max(28, p)); // back to the normal width floor
   }, []);
 
   // The video element mounts when cameraOn flips; attach the
@@ -449,10 +479,59 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       });
       streamRef.current = stream;
       setCameraOn(true);
+      // Discover the phone's other rear lenses for the switcher
+      // (any phone: whatever the browser exposes at runtime, no
+      // model assumptions) and restore the width last calibrated
+      // on the camera that opened.
+      try {
+        const track = stream.getVideoTracks()[0];
+        const activeId = (track && track.getSettings && track.getSettings().deviceId) || null;
+        setCamId(activeId);
+        const saved = activeId ? savedCamFov(activeId) : null;
+        if (saved) setFov(saved);
+        const devs = await navigator.mediaDevices.enumerateDevices();
+        const rear = devs.filter((d) => d.kind === 'videoinput' && !/front|selfie/i.test(d.label || ''));
+        setCamDevices(rear.map((d, i) => ({ deviceId: d.deviceId, name: friendlyCamName(d.label, i) })));
+      } catch { /* no switcher then — the opened camera still works */ }
     } catch {
       setCameraMsg('Camera permission was not granted — pass-through stays off.');
     }
   };
+
+  /* Switch lenses: open the new camera BEFORE dropping the old
+     stream, so a camera that refuses leaves the working one up. */
+  const switchCamera = async (deviceId) => {
+    if (!deviceId || deviceId === camId) return;
+    setCameraMsg(null);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { deviceId: { exact: deviceId } },
+        audio: false,
+      });
+      if (streamRef.current) streamRef.current.getTracks().forEach((t) => t.stop());
+      streamRef.current = stream;
+      if (videoRef.current) videoRef.current.srcObject = stream;
+      setCamId(deviceId);
+      const saved = savedCamFov(deviceId);
+      setFov(saved || 55); // a lens never calibrated starts at the standard width
+    } catch {
+      setCameraMsg('That camera could not be opened — staying on the current one.');
+    }
+  };
+
+  // Remember the calibrated width per camera: no browser API
+  // reports a camera's field of view, so the pinch calibration
+  // is saved against the camera's deviceId (this phone, this
+  // lens) and restored when that lens is opened again.
+  useEffect(() => {
+    if (!cameraOn || !camId) return;
+    const id = setTimeout(() => {
+      try { localStorage.setItem(camFovKey(camId), String(Math.round(fov * 2) / 2)); } catch { /* storage unavailable */ }
+    }, 500);
+    return () => clearTimeout(id);
+  }, [cameraOn, camId, fov]);
+
+  minFovRef.current = cameraOn ? 12 : 28;
 
   /* ---- drag to look around, pinch to set the view width ---- */
   // The rendered sky frame in screen terms: its center and the
@@ -541,7 +620,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       const [a, b] = [...pointers.current.values()];
       const d1 = Math.hypot(a.x - b.x, a.y - b.y);
       if (d1 < 1 || g.d0 < 1) return;
-      setFov(clamp(g.fov0 * (g.d0 / d1), 28, 95));
+      setFov(clamp(g.fov0 * (g.d0 / d1), minFovRef.current, 95));
       g.moved = true;
     }
   };
@@ -587,7 +666,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     if (!stage) return;
     const onWheel = (e) => {
       e.preventDefault();
-      setFov((prev) => clamp(prev * (e.deltaY < 0 ? 0.9 : 1.11), 28, 95));
+      setFov((prev) => clamp(prev * (e.deltaY < 0 ? 0.9 : 1.11), minFovRef.current, 95));
     };
     stage.addEventListener('wheel', onWheel, { passive: false });
     return () => stage.removeEventListener('wheel', onWheel);
@@ -595,6 +674,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
 
   if (!isOpen) return null;
 
+  const minFov = cameraOn ? 12 : 28;
   const primary = withLive[0];
   const refPoint = primary?.live || primary?.peak;
   let guidance = null;
@@ -698,8 +778,8 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             label="Zoom in"
             variant="ghost"
             size="sm"
-            isDisabled={fov <= 28.5}
-            onClick={() => setFov((p) => clamp(p / 1.35, 28, 95))}
+            isDisabled={fov <= minFov + 0.5}
+            onClick={() => setFov((p) => clamp(p / 1.35, minFov, 95))}
           />
           <IconButton
             icon={<Icon icon={Maximize2} size="sm" />}
@@ -732,11 +812,24 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             onClick={cameraOn ? stopCamera : startCamera}
           />
         </HStack>
+        {cameraOn && camDevices.length > 1 && (
+          <HStack gap={2} vAlign="center">
+            {camDevices.map((d) => (
+              <Button
+                key={d.deviceId}
+                variant={d.deviceId === camId ? 'primary' : 'secondary'}
+                size="sm"
+                label={d.name}
+                onClick={() => switchCamera(d.deviceId)}
+              />
+            ))}
+          </HStack>
+        )}
         {orientMsg && <Text type="supporting">{orientMsg}</Text>}
         {cameraMsg && <Text type="supporting">{cameraMsg}</Text>}
         {cameraOn && (
           <Text type="supporting">
-            Camera pass-through: your phone’s camera shows behind the chart. Phone cameras differ, so line the chart’s horizon up with the real horizon — pinch wider or narrower until they sit on each other, and the compass markers on the line point the way. Following is locked on while the camera is up; stopping the camera unlocks it.
+            Camera pass-through: your phone’s camera shows behind the chart. Phone cameras differ, so line the chart’s horizon up with the real horizon — pinch wider or narrower until they sit on each other, and the compass markers on the line point the way. The width you settle on is remembered for each camera on this phone, and switching cameras above restores its own. Following is locked on while the camera is up; stopping the camera unlocks it.
           </Text>
         )}
         <Text type="supporting">
