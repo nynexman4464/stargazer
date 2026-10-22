@@ -23,27 +23,45 @@ function clamp(v, lo, hi) {
 }
 const quant = (v) => Math.round(v * 20) / 20; // 0.05-degree steps for the memoized window — fine enough that a slow drag doesn't step visibly (0.2-degree steps were ~1px jumps)
 
-// Camera pass-through calibration memory. No browser API reports
-// a camera's field of view, so the width a user pinches to for a
-// given camera (deviceId, per phone) is the calibration — saved
-// and restored per lens.
-const camFovKey = (id) => `sg-camfov:${id}`;
-function savedCamFov(id) {
-  try {
-    const v = Number(localStorage.getItem(camFovKey(id)));
-    return v >= 12 && v <= 95 ? v : null;
-  } catch {
-    return null;
-  }
+// Camera lens classes and their typical DIAGONAL field of view.
+// No browser API reports a camera's field of view — and there
+// is no calibration step (Alex, 2026-10-22) — so when a lens
+// opens, the chart width is set automatically from the class's
+// typical FOV (modern phones cluster tightly: mains ~77-84°,
+// ultrawides ~114-125°, 5x teles ~20-24°) converted through the
+// actual stream size the phone hands over and the window's
+// cover-crop. Pinch stays an ordinary zoom, nothing is saved.
+const LENS_DIAG_FOV = { ultrawide: 120, main: 82, telephoto: 22 };
+function lensClass(label) {
+  const l = (label || '').toLowerCase();
+  if (/ultra/.test(l)) return 'ultrawide';
+  if (/tele|periscope/.test(l)) return 'telephoto';
+  if (/macro/.test(l)) return null;
+  if (/wide|main/.test(l)) return 'main';
+  return null;
+}
+// The chart width (horizontal degrees across the window) that
+// matches a lens of the given diagonal FOV, given the stream's
+// pixel size and the window's 10/13 box: the full stream's
+// horizontal FOV first, then the cover-crop slice of it the
+// window actually shows.
+function chartFovForLens(diagFov, streamW, streamH) {
+  if (!diagFov || !streamW || !streamH) return null;
+  const boxAspect = 10 / 13;
+  const a = streamW / streamH;
+  const tanH = Math.tan((diagFov * Math.PI) / 360) * (a / Math.hypot(a, 1));
+  const dispTan = a >= boxAspect ? tanH * (boxAspect / a) : tanH;
+  const fov = (2 * Math.atan(dispTan) * 180) / Math.PI;
+  return Math.min(95, Math.max(12, fov));
 }
 // Friendly lens names from the labels phones report; anything
 // unrecognized falls back to Camera 1/2/3 in enumeration order.
 function friendlyCamName(label, i) {
-  const l = (label || '').toLowerCase();
-  if (/ultra/.test(l)) return 'Ultrawide';
-  if (/tele|periscope/.test(l)) return 'Telephoto';
-  if (/macro/.test(l)) return 'Macro';
-  if (/wide|main/.test(l)) return 'Main';
+  const c = lensClass(label);
+  if (c === 'ultrawide') return 'Ultrawide';
+  if (c === 'telephoto') return 'Telephoto';
+  if (/macro/i.test(label || '')) return 'Macro';
+  if (c === 'main') return 'Main';
   return `Camera ${i + 1}`;
 }
 
@@ -481,17 +499,19 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       setCameraOn(true);
       // Discover the phone's other rear lenses for the switcher
       // (any phone: whatever the browser exposes at runtime, no
-      // model assumptions) and restore the width last calibrated
-      // on the camera that opened.
+      // model assumptions), and set the chart width for the lens
+      // that opened. The camera a phone opens first for a
+      // rear-facing request is its main lens on effectively every
+      // phone, so an unlabeled opener is treated as main.
       try {
         const track = stream.getVideoTracks()[0];
         const activeId = (track && track.getSettings && track.getSettings().deviceId) || null;
         setCamId(activeId);
-        const saved = activeId ? savedCamFov(activeId) : null;
-        if (saved) setFov(saved);
         const devs = await navigator.mediaDevices.enumerateDevices();
         const rear = devs.filter((d) => d.kind === 'videoinput' && !/front|selfie/i.test(d.label || ''));
-        setCamDevices(rear.map((d, i) => ({ deviceId: d.deviceId, name: friendlyCamName(d.label, i) })));
+        setCamDevices(rear.map((d, i) => ({ deviceId: d.deviceId, name: friendlyCamName(d.label, i), label: d.label || '' })));
+        const active = rear.find((d) => d.deviceId === activeId);
+        applyLensDefault(active ? active.label : '', track, true);
       } catch { /* no switcher then — the opened camera still works */ }
     } catch {
       setCameraMsg('Camera permission was not granted — pass-through stays off.');
@@ -512,26 +532,28 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       streamRef.current = stream;
       if (videoRef.current) videoRef.current.srcObject = stream;
       setCamId(deviceId);
-      const saved = savedCamFov(deviceId);
-      setFov(saved || 55); // a lens never calibrated starts at the standard width
+      const entry = camDevices.find((d) => d.deviceId === deviceId);
+      applyLensDefault(entry ? entry.label : '', stream.getVideoTracks()[0], false);
     } catch {
       setCameraMsg('That camera could not be opened — staying on the current one.');
     }
   };
 
-  // Remember the calibrated width per camera: no browser API
-  // reports a camera's field of view, so the pinch calibration
-  // is saved against the camera's deviceId (this phone, this
-  // lens) and restored when that lens is opened again.
-  useEffect(() => {
-    if (!cameraOn || !camId) return;
-    const id = setTimeout(() => {
-      try { localStorage.setItem(camFovKey(camId), String(Math.round(fov * 2) / 2)); } catch { /* storage unavailable */ }
-    }, 500);
-    return () => clearTimeout(id);
-  }, [cameraOn, camId, fov]);
+  // Set the chart width for a lens automatically: its class's
+  // typical field of view, converted through the stream size the
+  // phone actually delivered. An unrecognized lens leaves the
+  // width where it is.
+  const applyLensDefault = (label, track, assumeMain) => {
+    const cls = lensClass(label) || (assumeMain ? 'main' : null);
+    if (!cls || !track || !track.getSettings) return;
+    const s = track.getSettings() || {};
+    const w = chartFovForLens(LENS_DIAG_FOV[cls], s.width, s.height);
+    if (w) setFov(w);
+  };
 
-  minFovRef.current = cameraOn ? 12 : 28;
+  // The width floor the gesture handlers enforce, synced for
+  // them (they read the ref at event time, not render time).
+  useEffect(() => { minFovRef.current = cameraOn ? 12 : 28; }, [cameraOn]);
 
   /* ---- drag to look around, pinch to set the view width ---- */
   // The rendered sky frame in screen terms: its center and the
@@ -829,7 +851,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         {cameraMsg && <Text type="supporting">{cameraMsg}</Text>}
         {cameraOn && (
           <Text type="supporting">
-            Camera pass-through: your phone’s camera shows behind the chart. Phone cameras differ, so line the chart’s horizon up with the real horizon — pinch wider or narrower until they sit on each other, and the compass markers on the line point the way. The width you settle on is remembered for each camera on this phone, and switching cameras above restores its own. Following is locked on while the camera is up; stopping the camera unlocks it.
+            Camera pass-through: your phone’s camera shows behind the chart, and the chart width is set for the lens automatically where the lens is recognized. Pinch adjusts it like any zoom. Following is locked on while the camera is up; stopping the camera unlocks it.
           </Text>
         )}
         <Text type="supporting">
