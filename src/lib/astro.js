@@ -1240,7 +1240,15 @@ export function computePasses(satrec, lat, lon, hours, mag, from) {
   };
   const finish = (needDuration) => {
     flushVis();
-    if (cur && cur.maxEl > 18 && (!needDuration || cur.end - cur.start > 60000)) {
+    // Qualification (Alex, 2026-10-22): listed if the pass is
+    // genuinely visible for over a minute. The peak bar used
+    // to be 18°, which silently dropped real passes ISS
+    // Detector shows — the Oct 24 ISS peaks at 17°, magnitude
+    // -2, perfectly seeable. 12° is the visibility floor
+    // itself (a sample only counts as visible above it), so
+    // this no longer hides anything the model calls visible;
+    // the pass score carries the quality signal instead.
+    if (cur && cur.maxEl > 12 && (!needDuration || cur.end - cur.start > 60000)) {
       delete cur.inVis;
       passes.push(cur);
     }
