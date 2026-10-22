@@ -181,7 +181,6 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     let shownH = null;
     let shownP = null;
     let srcShown = null;
-    let fusedAz = null;
     const step = (t) => {
       const dt = Math.min(0.1, (t - last) / 1000);
       last = t;
@@ -210,22 +209,8 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
           const aim = quatAim(smoothQuatRef.current);
           if (aim) {
             const azT = ((aim.az + decl) % 360 + 360) % 360;
-            // Heading gets a steadier hand than tilt (Alex,
-            // 2026-10-22, fused feed confirmed on his phone:
-            // the compass channel is 'jumpy as hell', tilt is
-            // steady). Heading is the magnetometer channel;
-            // tilt comes from gravity and gyro and was never
-            // the problem. So azimuth eases with a fixed
-            // 200ms tau while elevation keeps the light 60ms
-            // quaternion path untouched. Fixed numbers — no
-            // speed adaptivity, no deadband.
-            if (fusedAz == null) fusedAz = azT;
-            else {
-              const dAz = ((azT - fusedAz + 540) % 360) - 180;
-              fusedAz = ((fusedAz + dAz * (1 - Math.exp(-dt / 0.2))) % 360 + 360) % 360;
-            }
-            dispHeadingRef.current = fusedAz;
-            dispPointRef.current = { az: fusedAz, el: aim.el };
+            dispHeadingRef.current = azT;
+            dispPointRef.current = { az: azT, el: aim.el };
           }
         }
       } else {
