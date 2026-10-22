@@ -231,6 +231,39 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
     );
   });
 
+  // The Sun as a landmark (Alex, 2026-10-22 — 'show the sun in
+  // all sky views, like we do for moon, even if below horizon').
+  // Same rules as the Moon: drawn wherever it falls in frame,
+  // faded under the ground wash when below the horizon — at
+  // night it tells you where the Sun is sitting, how long ago
+  // it set, how soon it rises. A rayed disc, so it never reads
+  // as the Moon or a planet. Skipped when the Sun is the
+  // target itself (the aim test).
+  let sunEl = null;
+  if (!targets.some((t) => t.label === 'Sun')) {
+    const s = skyAltAz.sun;
+    const p = proj(s.alt, s.az);
+    if (p && p.x > -50 && p.x < W + 50 && p.y > -50 && p.y < H + 50) {
+      const rays = [];
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4;
+        rays.push(
+          <line key={i}
+            x1={p.x + Math.cos(a) * 9.5} y1={p.y + Math.sin(a) * 9.5}
+            x2={p.x + Math.cos(a) * 12.5} y2={p.y + Math.sin(a) * 12.5}
+            stroke="var(--color-text-yellow)" strokeWidth="1.4" strokeLinecap="round" />,
+        );
+      }
+      sunEl = (
+        <g>
+          <circle cx={p.x} cy={p.y} r="6.5" fill="var(--color-text-yellow)" />
+          {rays}
+          <text x={p.x + 15} y={p.y + 3} fontSize="10.5" fill="var(--color-text-secondary)">Sun</text>
+        </g>
+      );
+    }
+  }
+
   let moonEl = null;
   const m = skyAltAz.moon;
   // No altitude gate: like the stars and tracks, the Moon draws
@@ -446,6 +479,7 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
       {starEls}
       {labelEls}
       {planetEls}
+      {sunEl}
       {moonEl}
       {targetEls}
       {belowFadeEl}
