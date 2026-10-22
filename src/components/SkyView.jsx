@@ -380,12 +380,17 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     }
     if (fusedStarted) {
       setFollow(true);
+      // Run the Euler events as a hot spare from the start
+      // (Alex, 2026-10-22: follow 'randomly stopped tracking'
+      // twice in one session). The render loop prefers the
+      // fused feed whenever its readings are fresh and uses
+      // the spare only the moment they stall — a wedged or
+      // background-throttled sensor no longer freezes the
+      // view mid-session, and the source line in the follow
+      // copy shows the switch when it happens.
+      startEuler();
       setTimeout(() => {
         if (!gotSignalRef.current) {
-          // Fused claimed to start but never delivered (seen on
-          // sensor-less desktops): give the Euler events a chance
-          // too before telling the user anything.
-          startEuler();
           setOrientMsg('No compass signal so far — some browsers only share it over a secure connection or after location is allowed. The view follows once it arrives.');
         }
       }, 3000);
