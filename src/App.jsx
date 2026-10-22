@@ -18,6 +18,7 @@ import EventFeed from './components/EventFeed.jsx';
 import DarkSkySpots from './components/DarkSkySpots.jsx';
 import Glossary from './components/Glossary.jsx';
 import MoonPanel from './components/MoonPanel.jsx';
+import SunTest from './components/SunTest.jsx';
 import {
   DAY,
   loadLoc,
@@ -298,6 +299,9 @@ export default function App() {
                 </GridSpan>
                 <AuroraPanel loc={loc} viewDate={viewDate} />
                 <PassesPanel loc={loc} bundledTles={tles} fromDate={anchorDay} />
+                <GridSpan columns="full">
+                  <SunTest loc={loc} />
+                </GridSpan>
                 <GridSpan columns="full">
                   <MoonPanel asOf={anchorDay} loc={loc} />
                 </GridSpan>
