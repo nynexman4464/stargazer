@@ -197,11 +197,12 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
   });
   // Bright named stars get their own label style — near-white and
   // semibold, a step up from the gray constellation names. How
-  // many get labels follows the zoom (Alex, 2026-10-21: at 91
-  // degrees wide the full list was clutter): wide views label
-  // only the magnitude-1.6 stars, zoomed-in views go to 2.0.
+  // many get labels follows the zoom (Alex, 2026-10-21: the
+  // wider cutoffs still read dense — at 55 degrees Orion alone
+  // carried six labels): wide views label only the
+  // magnitude-1.3 stars, zoomed-in views go to 1.6.
   // Polaris (1.97) is labeled at every zoom — asked for by name.
-  const labelCut = fov > 60 ? 1.6 : 2.0;
+  const labelCut = fov > 60 ? 1.3 : 1.6;
   skyAltAz.named.forEach((s, i) => {
     if (s.mag > labelCut && s.name !== 'Polaris') return;
     const p = proj(s.alt, s.az);
