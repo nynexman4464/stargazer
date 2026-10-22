@@ -170,8 +170,10 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
      convert, done — the slerp IS the filter. Euler fallback:
      glide the displayed heading and pointing toward the filtered
      sensor targets, snapping the last fraction of a degree.
-     Either way the displayed aim then passes a hold-steady gate
-     (see below), and state updates only when it actually moved. */
+     State updates only when the displayed aim actually moved.
+     (A hold-steady deadband on the displayed aim was tried in
+     fadb6f8 and reverted the same night: at the target it made
+     fine corrections stick, then jump — worse, per Alex.) */
   useEffect(() => {
     if (!follow) return;
     let raf = 0;
@@ -179,14 +181,6 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     let shownH = null;
     let shownP = null;
     let srcShown = null;
-    let holdAnchor = null;
-    let holdStill = 0;
-    let holdLock = null;
-    const angDist = (a, b) => {
-      const dAz = ((a.az - b.az + 540) % 360) - 180;
-      const dEl = a.el - b.el;
-      return Math.hypot(dAz * Math.cos((b.el * Math.PI) / 180), dEl);
-    };
     const step = (t) => {
       const dt = Math.min(0.1, (t - last) / 1000);
       last = t;
@@ -249,31 +243,9 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         setHeading(shownH);
       }
       const dp = dispPointRef.current;
-      if (dp) {
-        // Hold-steady (Alex, 2026-10-21: zoning in on the target
-        // was a fight — the aim breathed around it and the 'on
-        // it' state flickered in and out). When the aim has
-        // stayed within a small radius for a few frames, freeze
-        // the displayed aim there so the target can settle into
-        // the ring; movement past a wider radius breaks the hold
-        // immediately. It engages only at rest, so it adds no
-        // lag while moving — unlike heavier smoothing, which
-        // reads as syrup.
-        if (!holdAnchor) { holdAnchor = { ...dp }; holdStill = 0; }
-        if (holdLock) {
-          if (angDist(dp, holdLock) > 1.6) { holdLock = null; holdAnchor = { ...dp }; holdStill = 0; }
-        } else if (angDist(dp, holdAnchor) < 0.4) {
-          holdStill += dt;
-          if (holdStill >= 0.3) holdLock = { ...dp };
-        } else {
-          holdAnchor = { ...dp };
-          holdStill = 0;
-        }
-        const shown = holdLock || dp;
-        if (!shownP || Math.abs(shown.az - shownP.az) > 0.02 || Math.abs(shown.el - shownP.el) > 0.02) {
-          shownP = { ...shown };
-          setPointing(shownP);
-        }
+      if (dp && (!shownP || Math.abs(dp.az - shownP.az) > 0.02 || Math.abs(dp.el - shownP.el) > 0.02)) {
+        shownP = { ...dp };
+        setPointing(shownP);
       }
       raf = requestAnimationFrame(step);
     };
