@@ -34,3 +34,6 @@ tools/bortle-grid/blackmarble-2025/full2025_artificial_mcd.npy
 tools/bortle-grid/blackmarble-2025/cal2015_*.npy
 tools/bortle-grid/blackmarble-2025/__pycache__/
 __pycache__/
+
+# Bortle API server tooling — config.php holds DB password + upload secret; never commit (exposed 2026-10-23 via git add -A)
+tools/bortle-grid/db-api/
