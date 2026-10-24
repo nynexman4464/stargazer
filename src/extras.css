@@ -244,6 +244,14 @@ body {
 .sg-skyview-guidance {
   min-height: 2.9em;
 }
+/* The foot's action rows must wrap inside the panel instead of
+   overflowing it (Alex, 2026-10-23: 'Point my phone at it' next
+   to 'Camera pass-through' ran off the desktop side column).
+   Labels are short now and carry icons; wrapping is the belt to
+   that suspenders. */
+.sg-skyview-actions {
+  flex-wrap: wrap;
+}
 @media (min-width: 900px) {
   .sg-skyview-panel {
     display: grid;

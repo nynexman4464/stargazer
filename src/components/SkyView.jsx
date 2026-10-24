@@ -7,7 +7,7 @@ import { Heading, Text } from '@astryxdesign/core/Text';
 import { Button } from '@astryxdesign/core/Button';
 import { IconButton } from '@astryxdesign/core/IconButton';
 import { Icon } from '@astryxdesign/core/Icon';
-import { X, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
+import { X, ZoomIn, ZoomOut, Maximize2, Camera, LocateFixed } from 'lucide-react';
 import { loadJSON, compass, fmtTime, devicePointing, quatAim, slerpQuat, dirVec, azElOf, frameFrom, clampFrameEl, screenPoint, grabPan } from '../lib/astro.js';
 import SkyWindow from './SkyWindow.jsx';
 
@@ -819,23 +819,25 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             <Text weight="semibold">{guidance}</Text>
           </div>
         )}
-        <HStack gap={2} vAlign="center">
+        <HStack gap={2} vAlign="center" className="sg-skyview-actions">
           <Button
             variant={follow ? 'secondary' : 'primary'}
             size="sm"
-            label={cameraOn ? 'Following — locked by camera' : follow ? 'Stop following my phone' : 'Point my phone at it'}
+            icon={<Icon icon={LocateFixed} size="sm" />}
+            label={follow ? 'Following' : 'Follow'}
             isDisabled={cameraOn}
             onClick={follow ? (cameraOn ? undefined : stopFollow) : startFollow}
           />
           <Button
-            variant="secondary"
+            variant={cameraOn ? 'primary' : 'secondary'}
             size="sm"
-            label={cameraOn ? 'Stop camera' : 'Camera pass-through'}
+            icon={<Icon icon={Camera} size="sm" />}
+            label={cameraOn ? 'Camera on' : 'Camera'}
             onClick={cameraOn ? stopCamera : startCamera}
           />
         </HStack>
         {cameraOn && camDevices.length > 1 && (
-          <HStack gap={2} vAlign="center">
+          <HStack gap={2} vAlign="center" className="sg-skyview-actions">
             {camDevices.map((d) => (
               <Button
                 key={d.deviceId}
