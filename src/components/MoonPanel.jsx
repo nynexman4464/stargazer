@@ -56,7 +56,6 @@ export default function MoonPanel({ asOf, loc }) {
     ? new Date(asOf.getFullYear(), asOf.getMonth(), asOf.getDate(), 21)
     : new Date();
   const { phase, illum } = moonPhase(ref);
-  const name = moonPhaseName(phase);
   // Where the Moon is that night: peak time + direction + angle at a
   // glance, full track in the hover card (same component as the events).
   const moonLooks = useMemo(() => {
@@ -68,10 +67,35 @@ export default function MoonPanel({ asOf, loc }) {
     return [{ label: 'Moon', track: lookTrack((d) => moonEquatorial(d), anchor, loc, { startH: -15, hours: 30, daylightSamples: true }), note: null }];
   }, [loc, asOf]);
   const upcoming = nextMoonPhase(ref);
-  const isFullNow = phase > 0.46 && phase < 0.54;
-  // The full moon we're featuring: tonight's if it's full now, else the next one.
-  const fullTs = (isFullNow ? ref : nextFullMoon(ref)).getTime();
+  // The featured full moon is a MOMENT, not a multi-day window
+  // (Alex, 2026-10-24: the old phase-range test, 0.46-0.54,
+  // crowned three different nights as 'tonight's full moon' and
+  // dated this lunation's Hunter's Moon to Saturday when the
+  // actual moment is Sunday 11:35 PM — flatly contradicting the
+  // Up next row). Tonight is the full-moon night only when a
+  // full moment falls on tonight's own date (the same date the
+  // Up next row prints, so the panel tells one story); the
+  // night after a full moon features the NEXT one ahead, never
+  // yesterday's under a 'next' label.
+  const nextFull = nextFullMoon(ref);
+  const prevFull = nextFullMoon(new Date(ref.getTime() - 30 * DAY));
+  const sameDate = (a, b) => a.getFullYear() === b.getFullYear()
+    && a.getMonth() === b.getMonth()
+    && a.getDate() === b.getDate();
+  const fullMoment = sameDate(prevFull, ref) ? prevFull : nextFull;
+  const isFullTonight = sameDate(fullMoment, ref);
+  const fullTs = fullMoment.getTime();
   const fullDate = new Date(fullTs);
+  // Phase name for the big label: 'Full Moon' on the full
+  // moon's own night; 'Nearly Full Moon' when it is 97%+ lit on
+  // the nights either side (Alex: 'should we be saying nearly
+  // full moon since the real full moon is tomorrow' — yes);
+  // the standard phase names otherwise.
+  const name = isFullTonight
+    ? 'Full Moon'
+    : illum >= 0.97
+      ? 'Nearly Full Moon'
+      : moonPhaseName(phase);
   const [bloodMoon, setBloodMoon] = useState(false);
   const [tonightCond, setTonightCond] = useState(null);
   const [nextCond, setNextCond] = useState(null);
@@ -171,7 +195,7 @@ export default function MoonPanel({ asOf, loc }) {
           )}
           <VStack gap={1}>
             <Text type="label" color="secondary">
-              {isFullNow ? "Tonight's full moon" : 'Next full moon'}
+              {isFullTonight ? "Tonight's full moon" : 'Next full moon'}
             </Text>
             <HStack gap={2} vAlign="center">
               <Token label={fullMoonName(fullDate)} color="default" />
