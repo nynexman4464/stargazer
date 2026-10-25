@@ -16,7 +16,6 @@ import {
   nextFullMoon,
   fullMoonName,
   fmtDate,
-  fmtTime,
   countdown,
   loadJSON,
   cloudCover,
@@ -100,26 +99,6 @@ export default function MoonPanel({ asOf, loc }) {
     : illum >= 0.97
       ? 'Nearly Full Moon'
       : moonPhaseName(phase);
-  // Plain-words timing under the name (Alex, 2026-10-24: 'It
-  // says 99% in tiny text — wasn't clear it wasn't full
-  // tonight'). A percentage in fine print should never be the
-  // only hint: when the moon is full or nearly full, say in
-  // words when the full moment falls. Regular-size text.
-  const fullNote = (() => {
-    if (isFullTonight) return `Full tonight at ${fmtTime(fullMoment)}`;
-    if (illum < 0.97) return null;
-    if (phase < 0.5) {
-      const tomorrow = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate() + 1);
-      if (!sameDate(nextFull, tomorrow)) return `Full ${fmtDate(nextFull)} at ${fmtTime(nextFull)}`;
-      return nextFull.getHours() >= 17
-        ? `Full tomorrow night at ${fmtTime(nextFull)}`
-        : `Full tomorrow at ${fmtTime(nextFull)}`;
-    }
-    const yesterday = new Date(ref.getFullYear(), ref.getMonth(), ref.getDate() - 1);
-    return sameDate(prevFull, yesterday)
-      ? `Full last night at ${fmtTime(prevFull)}`
-      : `Full ${fmtDate(prevFull)} at ${fmtTime(prevFull)}`;
-  })();
   const [bloodMoon, setBloodMoon] = useState(false);
   const [tonightCond, setTonightCond] = useState(null);
   const [nextCond, setNextCond] = useState(null);
@@ -184,7 +163,6 @@ export default function MoonPanel({ asOf, loc }) {
                 {name}
               </Text>
               <Text type="supporting">{Math.round(illum * 100)}% lit</Text>
-              {fullNote && <Text>{fullNote}</Text>}
               {tonightCond && (
                 <HStack gap={1} vAlign="center">
                   <Icon icon={Cloud} size="sm" color="secondary" />
