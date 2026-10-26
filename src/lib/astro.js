@@ -766,6 +766,255 @@ export function eclipseVisibleFrom(ev, loc) {
   );
 }
 
+/* ---- Eclipse estimates for one location (Alex, 2026-10-26) ----
+   Solar: local circumstances computed in the browser from the
+   eclipse's polynomial Besselian elements (NASA GSFC, Fred
+   Espenak) carried in ev.circ — contacts, maximum, magnitude
+   and obscuration for the viewer's exact location. Validated
+   2026-10-26 against published circumstances for 2028 Jan 26
+   and 2029 Jan 14 (times within a minute, magnitudes within
+   0.005). Two conventions matter: the hour angle is
+   H = mu + lon(east) (NASA tabulates mu against west-positive
+   longitude), and the local magnitude that matches published
+   values divides by (L1* + L2*) = twice the Sun's apparent
+   radius, because NASA's L2 is signed (rs - rm).
+   Lunar: circumstances are global, so ev.circ carries
+   Espenak's published contact times (TD) and magnitudes from
+   EclipseWise; the location-specific part — Moon altitude at
+   each contact, moonrise/moonset during the event — is
+   composed here from the app's own Moon positions. */
+function besselPoly(c, t) {
+  return c[0] + t * (c[1] + t * (c[2] + t * (c[3] || 0)));
+}
+
+export function solarCircumstances(circ, isoDate, lat, lon) {
+  if (!circ || lat == null || lon == null) return null;
+  const dayMs = Date.parse(`${isoDate}T00:00:00Z`);
+  if (!Number.isFinite(dayMs)) return null;
+  const elAt = (t) => ({
+    x: besselPoly(circ.x, t), y: besselPoly(circ.y, t),
+    d: besselPoly(circ.d, t) * RAD, mu: besselPoly(circ.mu, t),
+    l1: besselPoly(circ.l1, t), l2: besselPoly(circ.l2, t),
+  });
+  const phi = lat * RAD;
+  const u = Math.atan(0.99664719 * Math.tan(phi));
+  const rhoSin = 0.99664719 * Math.sin(u), rhoCos = Math.cos(u);
+  const obsAt = (t) => {
+    const el = elAt(t);
+    const H = (el.mu + lon) * RAD;
+    const sd = Math.sin(el.d), cd = Math.cos(el.d);
+    const xi = rhoCos * Math.sin(H);
+    const eta = rhoSin * cd - rhoCos * Math.cos(H) * sd;
+    const zeta = rhoSin * sd + rhoCos * Math.cos(H) * cd;
+    return { el, xi, eta, zeta };
+  };
+  const clearance = (t, umbral) => {
+    const { el, xi, eta, zeta } = obsAt(t);
+    const L = umbral
+      ? Math.abs(el.l2 - zeta * circ.tanF2)
+      : el.l1 - zeta * circ.tanF1;
+    return Math.hypot(el.x - xi, el.y - eta) - L;
+  };
+  const bisect = (a, b, umbral) => {
+    let fa = clearance(a, umbral);
+    for (let i = 0; i < 60; i++) {
+      const m = (a + b) / 2, fm = clearance(m, umbral);
+      if (fa * fm <= 0) b = m; else { a = m; fa = fm; }
+    }
+    return (a + b) / 2;
+  };
+  const step = 1 / 30;
+  let best = { t: 0, c: Infinity };
+  const samples = [];
+  for (let t = -4; t <= 4.0001; t += step) {
+    const c = clearance(t, false);
+    samples.push([t, c]);
+    if (c < best.c) best = { t, c };
+  }
+  if (best.c >= 0) return { visible: false };
+  let ga = best.t - step, gb = best.t + step;
+  for (let i = 0; i < 80; i++) {
+    const m1 = ga + (gb - ga) * 0.381966, m2 = ga + (gb - ga) * 0.618034;
+    if (clearance(m1, false) < clearance(m2, false)) gb = m2; else ga = m1;
+  }
+  const tMax = (ga + gb) / 2;
+  const contacts = (umbral) => {
+    let enter = null, exit = null;
+    for (let i = 0; i < samples.length - 1; i++) {
+      const [t1] = samples[i], [t2] = samples[i + 1];
+      const c1v = clearance(t1, umbral), c2v = clearance(t2, umbral);
+      if (c1v >= 0 && c2v < 0 && t2 <= tMax + 1e-9) enter = bisect(t1, t2, umbral);
+      if (c1v < 0 && c2v >= 0 && t1 >= tMax - step) exit = bisect(t1, t2, umbral);
+    }
+    return [enter, exit];
+  };
+  const [c1, c4] = contacts(false);
+  let c2 = null, c3 = null;
+  if (clearance(tMax, true) < 0) [c2, c3] = contacts(true);
+  const { el, xi, eta, zeta } = obsAt(tMax);
+  const L1s = el.l1 - zeta * circ.tanF1;
+  const L2s = el.l2 - zeta * circ.tanF2;
+  const s = Math.hypot(el.x - xi, el.y - eta);
+  /* NASA's L2 is signed as (rs - rm) in these units — positive
+     for annular, negative for total — so L1 + L2 = 2*rs (the
+     Sun's apparent radius, doubled) and L1 - L2 = 2*rm. The
+     magnitude below is the canonical fraction of the Sun's
+     diameter covered; the radii feed the area overlap. */
+  const magnitude = (L1s - s) / (L1s + L2s);
+  const rs = (L1s + L2s) / 2, rm = (L1s - L2s) / 2;
+  let obscuration = 0;
+  if (s <= Math.abs(rm - rs)) obscuration = Math.min(rs, rm) ** 2 / rs ** 2;
+  else if (s < rm + rs) {
+    const a1 = rs * rs * Math.acos((s * s + rs * rs - rm * rm) / (2 * s * rs));
+    const a2 = rm * rm * Math.acos((s * s + rm * rm - rs * rs) / (2 * s * rm));
+    const a3 = 0.5 * Math.sqrt((-s + rs + rm) * (s + rs - rm) * (s - rs + rm) * (s + rs + rm));
+    obscuration = (a1 + a2 - a3) / (Math.PI * rs * rs);
+  }
+  const toDate = (tTT) => new Date(dayMs + (circ.t0 + tTT) * 3600000 - circ.dT * 1000);
+  return {
+    visible: true,
+    c1: c1 !== null ? toDate(c1) : null,
+    c2: c2 !== null ? toDate(c2) : null,
+    c3: c3 !== null ? toDate(c3) : null,
+    c4: c4 !== null ? toDate(c4) : null,
+    /* The central phase's character HERE: signed L2 at the
+       observer is positive for annular, negative for total
+       (a hybrid eclipse can be one here and the other
+       elsewhere along its path). */
+    central: c2 !== null ? (L2s > 0 ? 'annular' : 'total') : null,
+    max: toDate(tMax),
+    magnitude,
+    obscuration,
+  };
+}
+
+/* Published lunar contacts are TD time-of-day on the eclipse's
+   TD calendar date. Anchor on the greatest-eclipse time and
+   place every contact by its signed offset from it (wrapping
+   at 12h), so post-midnight contacts land on the right day. */
+export function lunarCircumstances(circ, isoDate) {
+  if (!circ || !circ.contactsTD || !circ.contactsTD.greatest) return null;
+  const dayMs = Date.parse(`${isoDate}T00:00:00Z`);
+  if (!Number.isFinite(dayMs)) return null;
+  const tod = (s) => {
+    const [h, m, sec] = s.split(':').map(Number);
+    return ((h * 60 + m) * 60 + (sec || 0)) * 1000;
+  };
+  const gTod = tod(circ.contactsTD.greatest);
+  const at = (key) => {
+    const raw = circ.contactsTD[key];
+    if (!raw) return null;
+    let off = tod(raw) - gTod;
+    if (off > 12 * 3600000) off -= 24 * 3600000;
+    if (off < -12 * 3600000) off += 24 * 3600000;
+    return new Date(dayMs + gTod + off - circ.dT * 1000);
+  };
+  return {
+    p1: at('p1'), u1: at('u1'), u2: at('u2'), greatest: at('greatest'),
+    u3: at('u3'), u4: at('u4'), p4: at('p4'),
+    penMag: circ.penMag, umbMag: circ.umbMag,
+  };
+}
+
+function centralDurText(ms) {
+  const sec = Math.round(ms / 1000);
+  return `${Math.floor(sec / 60)}m ${String(sec % 60).padStart(2, '0')}s`;
+}
+
+/* The sky view's "Eclipse estimate" block: per-location lines
+   for an eclipse event, or null when the event carries no
+   circumstance data. locName labels whose sky it is. */
+export function eclipseEstimate(ev, loc, locName) {
+  if (!ev || ev.type !== 'eclipse' || !ev.circ || !loc || loc.lat == null) return null;
+  const isoDate = (ev.id || '').slice(-10);
+  const where = locName || 'your location';
+  const altNote = (body, date) => {
+    const eq = body === 'sun' ? sunRaDec(date) : moonEquatorial(date);
+    const { alt } = altAz(eq.ra, eq.dec, date, loc.lat, loc.lon);
+    if (alt < -0.5) return 'below the horizon';
+    if (alt < 6) return `just ${Math.max(0, Math.round(alt))}° up — find a clear horizon`;
+    return `${Math.round(alt)}° up`;
+  };
+  if (ev.solar) {
+    const c = solarCircumstances(ev.circ, isoDate, loc.lat, loc.lon);
+    if (!c) return null;
+    if (!c.visible) {
+      return {
+        heading: `Eclipse estimate — ${where}`,
+        lines: ['Not visible from here: the Moon’s shadow never reaches your sky for this eclipse.'],
+        credit: 'Computed from NASA Besselian elements — eclipse predictions by Fred Espenak, NASA GSFC.',
+      };
+    }
+    const lines = [];
+    const central = c.c2 && c.c3;
+    if (central) {
+      const word = c.central === 'annular' ? 'Annularity' : 'Totality';
+      lines.push(`${word}: ${fmtTime(c.c2)} – ${fmtTime(c.c3)} (${centralDurText(c.c3 - c.c2)})`);
+    }
+    if (c.c1) lines.push(`Partial phase begins: ${fmtTime(c.c1)} — Sun ${altNote('sun', c.c1)}`);
+    lines.push(
+      `Maximum: ${fmtTime(c.max)} — magnitude ${c.magnitude.toFixed(2)}, about ${Math.round(c.obscuration * 100)}% of the Sun’s disk covered; Sun ${altNote('sun', c.max)}`,
+    );
+    if (c.c4) lines.push(`Partial phase ends: ${fmtTime(c.c4)} — Sun ${altNote('sun', c.c4)}`);
+    return {
+      heading: `Eclipse estimate — ${where}`,
+      lines,
+      credit: 'Computed from NASA Besselian elements — eclipse predictions by Fred Espenak, NASA GSFC.',
+    };
+  }
+  const c = lunarCircumstances(ev.circ, isoDate);
+  if (!c || !c.greatest) return null;
+  const kind = ev.title.toLowerCase().includes('total')
+    ? 'Total'
+    : ev.title.toLowerCase().includes('partial') ? 'Partial' : 'Penumbral';
+  const shade = kind === 'Total'
+    ? 'the Moon passes fully through Earth’s dark inner shadow'
+    : kind === 'Partial'
+      ? 'part of the Moon enters Earth’s dark inner shadow'
+      : 'the Moon passes only through Earth’s faint outer shadow — expect a soft shading on one side, no dark bite';
+  const lines = [];
+  const stepLines = [
+    ['p1', 'Earth’s faint outer shadow first touches the Moon'],
+    ['u1', 'The dark inner shadow first touches the Moon'],
+    ['u2', 'Totality begins — the whole Moon is in the dark shadow'],
+    ['greatest', null],
+    ['u3', 'Totality ends'],
+    ['u4', 'The dark inner shadow leaves the Moon'],
+    ['p4', 'Earth’s shadow leaves the Moon completely'],
+  ];
+  for (const [key, label] of stepLines) {
+    if (!c[key]) continue;
+    if (key === 'greatest') {
+      lines.push(`Greatest eclipse: ${fmtTime(c.greatest)} — ${shade}; Moon ${altNote('moon', c.greatest)}`);
+    } else {
+      lines.push(`${label}: ${fmtTime(c[key])} — Moon ${altNote('moon', c[key])}`);
+    }
+  }
+  /* Moonrise/moonset inside the event window — e.g. the
+     Feb 2027 penumbral peaks just after moonrise in New
+     England, which is the whole story of that eclipse there. */
+  if (c.p1 && c.p4) {
+    const eq0 = moonEquatorial(c.p1);
+    let prev = altAz(eq0.ra, eq0.dec, c.p1, loc.lat, loc.lon).alt;
+    for (let t = c.p1.getTime() + 300000; t <= c.p4.getTime(); t += 300000) {
+      const eq = moonEquatorial(new Date(t));
+      const a = altAz(eq.ra, eq.dec, new Date(t), loc.lat, loc.lon).alt;
+      if (prev < 0 && a >= 0) lines.push(`The Moon rises at ${fmtTime(new Date(t))}, already in eclipse.`);
+      if (prev >= 0 && a < 0) lines.push(`The Moon sets at ${fmtTime(new Date(t))}, before the eclipse ends.`);
+      prev = a;
+    }
+  }
+  const magLine = kind === 'Penumbral'
+    ? `Penumbral magnitude ${c.penMag.toFixed(2)} — how deeply the Moon dips into the faint shadow (1.0 would just touch the dark shadow).`
+    : `Umbral magnitude ${c.umbMag.toFixed(2)} — how deeply the Moon enters the dark shadow (1.0 = fully inside).`;
+  lines.push(magLine);
+  return {
+    heading: `Eclipse estimate — ${where}`,
+    lines,
+    credit: 'Contact times and magnitudes: Fred Espenak, EclipseWise.com.',
+  };
+}
+
 export async function goScore(ev, loc, cache) {
   if (ev.tier === 'expedition' && !eclipseVisibleFrom(ev, loc)) return null;
   const daysOut = (ev.date - Date.now()) / DAY;

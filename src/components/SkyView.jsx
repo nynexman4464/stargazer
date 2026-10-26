@@ -884,6 +884,15 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
           <VStack gap={1}>
             <Text weight="semibold">{detail.title}</Text>
             {detail.text && <Text type="supporting">{detail.text}</Text>}
+            {detail.estimate && (
+              <>
+                <Text weight="semibold">{detail.estimate.heading}</Text>
+                {detail.estimate.lines.map((l) => (
+                  <Text key={l} type="supporting">{l}</Text>
+                ))}
+                <Text type="supporting">{detail.estimate.credit}</Text>
+              </>
+            )}
           </VStack>
         )}
         {orientMsg && <Text type="supporting">{orientMsg}</Text>}

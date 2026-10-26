@@ -18,7 +18,7 @@ import { Icon } from '@astryxdesign/core/Icon';
 import { ClickableCard } from '@astryxdesign/core/ClickableCard';
 import { useMediaQuery } from '@astryxdesign/core/hooks';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Telescope, Map, CalendarDays, Maximize2 } from 'lucide-react';
-import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, fmtDateFar, countdown, DAY, eventImage, eclipseVisibleFrom, planetVisibilityFactors, eventLook } from '../lib/astro.js';
+import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, fmtDateFar, countdown, DAY, eventImage, eclipseVisibleFrom, planetVisibilityFactors, eventLook, eclipseEstimate } from '../lib/astro.js';
 import MapLightbox from './MapLightbox.jsx';
 import ScoreFactors from './ScoreFactors.jsx';
 import GoScore from './GoScore.jsx';
@@ -128,7 +128,7 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
             whenText={ev.solar ? fmtDate(ev.date) : `night of ${fmtDate(ev.date)}`}
             locName={loc?.name}
             loc={loc}
-            detail={{ title: ev.title, text: ev.desc }}
+            detail={{ title: ev.title, text: ev.desc, estimate: eclipseEstimate(ev, loc, loc?.name) }}
           />
         )}
         {!score && notVisible && (
