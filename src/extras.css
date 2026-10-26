@@ -241,6 +241,14 @@ body {
 }
 .sg-skyview-foot {
   padding: var(--spacing-3) var(--spacing-4) max(var(--spacing-4), env(safe-area-inset-bottom));
+  /* The foot grows when mode text appears (camera instructions,
+     follow notes, the lens row). On the stacked layout that
+     growth squeezed the stage — and since the window takes the
+     stage's shape, turning the camera on visibly shrank the
+     chart (Alex, 2026-10-26). Cap the foot and let it scroll
+     internally instead, so the chart's size stays put. */
+  max-height: 48dvh;
+  overflow-y: auto;
 }
 /* The guidance line rewrites itself as the phone moves ("turn
    right 21° · tilt up 18° — …" vs "turn right 19° — …"), and
@@ -277,6 +285,7 @@ body {
     grid-area: foot;
     overflow-y: auto;
     padding-bottom: var(--spacing-4);
+    max-height: none; /* the grid row bounds the column here, not the phone cap */
   }
 }
 
