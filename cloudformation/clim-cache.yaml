@@ -1,0 +1,201 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: >-
+  Stargazer climatology cache — a Lambda (fronted by a Function URL) that
+  serves the reduced 366-day historical cloud-cover climatology for a
+  ~1 km location cell from S3. On a miss it fetches the fixed 2001-2020
+  archive from Open-Meteo once, reduces it exactly as the browser used to
+  (day-of-year means with a +-7-day smoothing window), stores it, and
+  serves it. A filled cell never goes stale: the period never changes,
+  so there is no refresh schedule. The static site asks this endpoint
+  first and falls back to fetching the archive itself if it is down.
+
+Resources:
+  ClimBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub 'stargazer-clim-cache-${AWS::AccountId}'
+      # Private bucket: only the Lambda touches it, via its IAM role.
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  ClimFunctionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal: { Service: lambda.amazonaws.com }
+            Action: sts:AssumeRole
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+      Policies:
+        - PolicyName: clim-cache-s3
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: ['s3:GetObject', 's3:PutObject']
+                Resource: !Sub '${ClimBucket.Arn}/clim/*'
+              # ListBucket on the bucket itself, or S3 answers a
+              # missing key with 403 AccessDenied instead of
+              # NoSuchKey and every cache miss looks like a read
+              # failure (found on the first live test, 2026-10-26).
+              - Effect: Allow
+                Action: ['s3:ListBucket']
+                Resource: !GetAtt ClimBucket.Arn
+
+  ClimFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      Runtime: python3.12
+      Handler: index.handler
+      Role: !GetAtt ClimFunctionRole.Arn
+      Timeout: 120
+      MemorySize: 256
+      Environment:
+        Variables:
+          BUCKET: !Ref ClimBucket
+      Code:
+        ZipFile: |
+          """Climatology cache: serve the reduced 366-day cloud
+          climatology for a ~1 km cell from S3; on a miss, fetch
+          the 2001-2020 Open-Meteo archive, reduce it with the
+          same algorithm the browser ran locally, store it, and
+          serve it. Filled cells are never refreshed."""
+          import json, os, urllib.request
+          import boto3
+          from botocore.exceptions import ClientError
+
+          BUCKET = os.environ['BUCKET']
+          ARCHIVE = ('https://archive-api.open-meteo.com/v1/archive'
+                     '?latitude={lat}&longitude={lon}'
+                     '&start_date=2001-01-01&end_date=2020-12-31'
+                     '&daily=cloud_cover_mean&timezone=auto')
+          UA = {'User-Agent': 'Stargazer-clim-cache/1.0'}
+          s3 = boto3.client('s3')
+
+          def day_of_year(y, m, d):
+              leap = (y % 4 == 0 and y % 100 != 0) or y % 400 == 0
+              ml = [31, 29 if leap else 28, 31, 30, 31, 30,
+                    31, 31, 30, 31, 30, 31]
+              doy = d
+              for i in range(m - 1):
+                  doy += ml[i]
+              return doy
+
+          def reduce_daily(times, vals):
+              buckets = [[] for _ in range(367)]
+              for t, v in zip(times, vals):
+                  if v is None:
+                      continue
+                  y, m, d = (int(x) for x in t.split('-'))
+                  buckets[day_of_year(y, m, d)].append(v)
+              daily = []
+              for doy in range(1, 367):
+                  total = 0.0
+                  n = 0
+                  for k in range(-7, 8):
+                      q = doy + k
+                      if q < 1:
+                          q += 365
+                      if q > 366:
+                          q -= 365
+                      for v in buckets[q]:
+                          total += v
+                          n += 1
+                  daily.append(total / n if n else None)
+              return daily
+
+          def handler(event, context):
+              params = event.get('queryStringParameters') or {}
+              try:
+                  lat = float(params.get('lat'))
+                  lon = float(params.get('lon'))
+              except (TypeError, ValueError):
+                  return _resp(400, {'error': 'lat and lon are required'})
+              if not (-90 <= lat <= 90 and -180 <= lon <= 180):
+                  return _resp(400, {'error': 'lat/lon out of range'})
+              cell_lat = f'{lat:.2f}'
+              cell_lon = f'{lon:.2f}'
+              key = f'clim/v1/{cell_lat}/{cell_lon}.json'
+              try:
+                  o = s3.get_object(Bucket=BUCKET, Key=key)
+                  return _raw(200, o['Body'].read())
+              except ClientError as e:
+                  if e.response['Error']['Code'] not in ('NoSuchKey', '404'):
+                      print('cache read:', e)
+                      return _resp(502, {'error': 'cache read failed'})
+              url = ARCHIVE.format(lat=cell_lat, lon=cell_lon)
+              try:
+                  req = urllib.request.Request(url, headers=UA)
+                  with urllib.request.urlopen(req, timeout=100) as r:
+                      j = json.loads(r.read())
+                  daily = reduce_daily(j['daily']['time'],
+                                       j['daily']['cloud_cover_mean'])
+              except Exception as e:
+                  print('archive fetch:', e)
+                  return _resp(502, {'error': 'archive fetch failed'})
+              if len(daily) != 366 or all(v is None for v in daily):
+                  return _resp(502, {'error': 'archive gave no usable data'})
+              body = json.dumps({'daily': daily})
+              try:
+                  s3.put_object(Bucket=BUCKET, Key=key, Body=body,
+                                ContentType='application/json')
+              except Exception as e:
+                  print('cache write:', e)  # serve the data anyway
+              return _raw(200, body)
+
+          def _resp(status, body):
+              return {'statusCode': status,
+                      'headers': {'Content-Type': 'application/json',
+                                  'Access-Control-Allow-Origin': '*'},
+                      'body': json.dumps(body)}
+
+          def _raw(status, body):
+              if not isinstance(body, str):
+                  body = body.decode('utf-8')
+              return {'statusCode': status,
+                      'headers': {'Content-Type': 'application/json',
+                                  'Access-Control-Allow-Origin': '*',
+                                  'Cache-Control': 'public, max-age=86400'},
+                      'body': body}
+
+  ClimFunctionUrl:
+    Type: AWS::Lambda::Url
+    Properties:
+      TargetFunctionArn: !Ref ClimFunction
+      AuthType: NONE
+      Cors:
+        AllowOrigins: ['*']
+        AllowMethods: ['GET']
+        AllowHeaders: ['*']
+        MaxAge: 86400
+
+  # Post-Oct-2025 Function URLs need BOTH permissions below or the
+  # URL 403s despite AuthType NONE (learned on the TLE stack).
+  ClimFunctionPublicUrlPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ClimFunction
+      Action: lambda:InvokeFunctionUrl
+      Principal: '*'
+      FunctionUrlAuthType: NONE
+  ClimFunctionPublicInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref ClimFunction
+      Action: lambda:InvokeFunction
+      Principal: '*'
+      InvokedViaFunctionUrl: true
+
+Outputs:
+  FunctionUrl:
+    Description: The HTTPS endpoint the site fetches climatology from.
+    Value: !GetAtt ClimFunctionUrl.FunctionUrl
+  BucketName:
+    Description: S3 bucket holding the cached per-cell climatology files.
+    Value: !Ref ClimBucket

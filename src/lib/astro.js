@@ -454,6 +454,11 @@ export async function loadJSON(path) {
  * When set, the app fetches fresh TLEs from this endpoint at boot; the
  * bundled data/tles.json file remains the offline fallback. */
 export const TLE_ENDPOINT = 'https://5qqsnsuufj6mxadrc4g67vqohe0vkkgg.lambda-url.us-east-1.on.aws/';
+/* Cloud climatology cache: a Lambda + S3 cache-aside endpoint
+   (cloudformation/clim-cache.yaml) holding the reduced 366-day
+   climatology per ~1 km cell, computed once for everyone.
+   Any failure falls through to the live archive fetch below. */
+export const CLIM_ENDPOINT = 'https://ygte66nowa5k6y5okuav6xiksi0lrbql.lambda-url.us-east-1.on.aws/';
 
 export async function loadTles(bundledPath) {
   if (TLE_ENDPOINT) {
@@ -836,6 +841,33 @@ async function loadCloudClimatologyInner(loc, key) {
     }
   } catch {
     /* corrupted cache — fall through to a fresh fetch */
+  }
+  /* Our own cache first: one shared copy per cell instead of
+     every visitor live-hitting the 20-year archive (Alex,
+     2026-10-26). A miss on the endpoint still costs one
+     archive fetch, but only for the first visitor to a cell,
+     ever. Any endpoint failure falls through to the direct
+     archive fetch below, unchanged. */
+  if (CLIM_ENDPOINT) {
+    try {
+      const cCtrl = new AbortController();
+      const cTimer = setTimeout(() => cCtrl.abort(), 35000);
+      const cRes = await fetch(`${CLIM_ENDPOINT}?lat=${loc.lat}&lon=${loc.lon}`, { signal: cCtrl.signal });
+      clearTimeout(cTimer);
+      if (cRes.ok) {
+        const cJson = await cRes.json();
+        if (cJson && Array.isArray(cJson.daily) && cJson.daily.length === 366) {
+          try {
+            if (hasStorage()) localStorage.setItem(key, JSON.stringify({ daily: cJson.daily }));
+          } catch {
+            /* quota — the in-memory cache still covers this session */
+          }
+          return cJson.daily;
+        }
+      }
+    } catch {
+      /* endpoint unavailable — direct archive fetch below */
+    }
   }
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), 25000);
