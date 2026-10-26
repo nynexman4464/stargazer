@@ -202,26 +202,32 @@ body {
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  padding: 0 var(--spacing-3);
+  padding: var(--spacing-3);
 }
 .sg-skyview-zoom {
   position: absolute;
   right: var(--spacing-3);
   bottom: var(--spacing-3);
 }
-.sg-skywindow, .sg-skyview-video {
-  width: min(94vw, 44dvh);
-  aspect-ratio: 10 / 13;
+/* The window fills the stage's content box and takes its
+   shape (Alex, 2026-10-26: the old fixed portrait box left
+   dead space beside the chart on wide stages). SkyView
+   measures the stage and hands SkyWindow the matching
+   internal height, so the drawing itself — not a letterbox —
+   fills this box. */
+.sg-skywindow {
+  width: 100%;
+  height: 100%;
   border-radius: var(--radius-lg);
 }
 /* Camera pass-through: the live feed sits in exactly the
-   window's box (same sizing rule), centered in the stage,
-   under the chart. It takes no pointer events — drags and
-   pinches belong to the stage. */
+   window's box (the stage's content box, via the stage's
+   uniform padding), under the chart. It takes no pointer
+   events — drags and pinches belong to the stage. */
 .sg-skyview-video {
   position: absolute;
-  inset: 0;
-  margin: auto;
+  inset: var(--spacing-3);
+  border-radius: var(--radius-lg);
   object-fit: cover;
   pointer-events: none;
   /* Dimmed under the chart (Alex, 2026-10-22: at full brightness
@@ -231,6 +237,7 @@ body {
 }
 .sg-skyview-stage > svg {
   position: relative;
+  display: block;
 }
 .sg-skyview-foot {
   padding: var(--spacing-3) var(--spacing-4) max(var(--spacing-4), env(safe-area-inset-bottom));
@@ -270,14 +277,6 @@ body {
     grid-area: foot;
     overflow-y: auto;
     padding-bottom: var(--spacing-4);
-  }
-  /* Size the window off the panel height instead of the phone
-     rule; aspect-ratio derives the width, and max-width keeps it
-     inside the stage column on squarer viewports. */
-  .sg-skywindow, .sg-skyview-video {
-    width: auto;
-    height: calc(min(900px, 94dvh) - 140px);
-    max-width: calc(96vw - 420px);
   }
 }
 

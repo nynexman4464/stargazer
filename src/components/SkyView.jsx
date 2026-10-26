@@ -42,12 +42,11 @@ function lensClass(label) {
 }
 // The chart width (horizontal degrees across the window) that
 // matches a lens of the given diagonal FOV, given the stream's
-// pixel size and the window's 10/13 box: the full stream's
-// horizontal FOV first, then the cover-crop slice of it the
-// window actually shows.
-function chartFovForLens(diagFov, streamW, streamH) {
+// pixel size and the window's aspect (the window takes the
+// stage's shape): the full stream's horizontal FOV first, then
+// the cover-crop slice of it the window actually shows.
+function chartFovForLens(diagFov, streamW, streamH, boxAspect = 10 / 13) {
   if (!diagFov || !streamW || !streamH) return null;
-  const boxAspect = 10 / 13;
   const a = streamW / streamH;
   const tanH = Math.tan((diagFov * Math.PI) / 360) * (a / Math.hypot(a, 1));
   const dispTan = a >= boxAspect ? tanH * (boxAspect / a) : tanH;
@@ -121,6 +120,22 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
   const dispPointRef = useRef(null);
   const gotSignalRef = useRef(false);
   const stageRef = useRef(null);
+  // The stage's content box in px: the sky window takes this
+  // shape (fills the stage) instead of a fixed portrait box.
+  const [winSize, setWinSize] = useState(null);
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const ro = new ResizeObserver((entries) => {
+      const r = entries[0]?.contentRect;
+      if (!r || r.width < 10 || r.height < 10) return;
+      const w = Math.round(r.width);
+      const h = Math.round(r.height);
+      setWinSize((p) => (p && Math.abs(p.w - w) < 2 && Math.abs(p.h - h) < 2 ? p : { w, h }));
+    });
+    ro.observe(stage);
+    return () => ro.disconnect();
+  }, []);
   const videoRef = useRef(null);
   const streamRef = useRef(null);
   const pointers = useRef(new Map());
@@ -547,7 +562,12 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     const cls = lensClass(label) || (assumeMain ? 'main' : null);
     if (!cls || !track || !track.getSettings) return;
     const s = track.getSettings() || {};
-    const w = chartFovForLens(LENS_DIAG_FOV[cls], s.width, s.height);
+    const w = chartFovForLens(
+      LENS_DIAG_FOV[cls],
+      s.width,
+      s.height,
+      winSize ? winSize.w / winSize.h : undefined,
+    );
     if (w) setFov(w);
   };
 
@@ -783,6 +803,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             up={frameUp}
             fov={Math.round(fov * 2) / 2}
             cameraOn={cameraOn}
+            winH={winSize ? Math.min(1400, Math.max(220, Math.round(400 * (winSize.h / winSize.w)))) : 520}
           />
         )}
         <HStack gap={1} vAlign="center" className="sg-skyview-zoom">

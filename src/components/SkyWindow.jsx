@@ -23,7 +23,13 @@ const PLANET_NAMES = ['Mercury', 'Venus', 'Mars', 'Jupiter', 'Saturn', 'Uranus',
    a fat streak across the view. */
 
 const W = 400;
-const H = 520;
+// H is no longer a constant: the window takes the stage's
+// shape (Alex, 2026-10-26: the fixed 10/13 portrait box left
+// dead space beside the chart on wide stages). SkyView
+// measures the stage and passes winH = 400 * stageH / stageW,
+// so the internal width — and with it the label scale —
+// behaves exactly as before, while the vertical coverage
+// follows the real box.
 const M = 40; // clip margin outside the frame
 const DEG = Math.PI / 180;
 
@@ -36,7 +42,7 @@ function dot(a, b) { return a[0] * b[0] + a[1] * b[1] + a[2] * b[2]; }
 
 /* Liang–Barsky clip of a segment to the frame plus margin.
    Returns [x1, y1, x2, y2] or null when fully outside. */
-function clipSeg(x1, y1, x2, y2) {
+function clipSeg(x1, y1, x2, y2, W, H) {
   let t0 = 0, t1 = 1;
   const dx = x2 - x1, dy = y2 - y1;
   const ps = [-dx, dx, -dy, dy];
@@ -53,7 +59,8 @@ function clipSeg(x1, y1, x2, y2) {
   return [x1 + t0 * dx, y1 + t0 * dy, x1 + t1 * dx, y1 + t1 * dy];
 }
 
-export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov = 55, up = null, cameraOn = false }) {
+export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov = 55, up = null, cameraOn = false, winH = 520 }) {
+  const H = winH;
   const skyAltAz = useMemo(() => {
     if (!sky || !loc || !atTime) return null;
     const altazOf = ([ra, dec]) => altAz(ra, dec, atTime, loc.lat, loc.lon);
@@ -98,7 +105,7 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
     };
   };
   const segPath = (parts, pa, pb) => {
-    const s = clipSeg(pa.x, pa.y, pb.x, pb.y);
+    const s = clipSeg(pa.x, pa.y, pb.x, pb.y, W, H);
     if (s) parts.push(`M${s[0].toFixed(1)},${s[1].toFixed(1)} L${s[2].toFixed(1)},${s[3].toFixed(1)}`);
   };
 
