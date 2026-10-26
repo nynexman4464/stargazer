@@ -84,7 +84,7 @@ function LookDetails({ look, whenText, locName }) {
   );
 }
 
-export default function WhereToLook({ looks, whenText, locName, loc }) {
+export default function WhereToLook({ looks, whenText, locName, loc, detail }) {
   const [skyLook, setSkyLook] = useState(null);
   if (!looks || looks.length === 0) return null;
   const place = locName || 'your location';
@@ -139,6 +139,7 @@ export default function WhereToLook({ looks, whenText, locName, loc }) {
           }]}
           atTime={skyLook.track.peak?.time}
           loc={loc}
+          detail={detail}
         />
       )}
     </VStack>

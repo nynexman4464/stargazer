@@ -91,7 +91,7 @@ function friendlyCamName(label, i) {
    control, pinch and buttons set the view width. Everything
    degrades to a framed, draggable window where no compass is
    available. */
-export default function SkyView({ isOpen, onClose, title, subtitle, targets, atTime, loc }) {
+export default function SkyView({ isOpen, onClose, title, subtitle, targets, atTime, loc, detail }) {
   const [sky, setSky] = useState(null);
   const [follow, setFollow] = useState(false);
   const [heading, setHeading] = useState(null);
@@ -814,6 +814,16 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         </HStack>
       </div>
       <VStack gap={2} className="sg-skyview-foot">
+        {/* What this view is FOR, when it was opened from an event:
+            the event's name and its card description lead the
+            column (Alex, 2026-10-26: the window gave 'just sun
+            visible' with none of the event's story). */}
+        {detail && (
+          <VStack gap={1}>
+            <Text weight="semibold">{detail.title}</Text>
+            {detail.text && <Text type="supporting">{detail.text}</Text>}
+          </VStack>
+        )}
         {guidance && (
           <div className="sg-skyview-guidance">
             <Text weight="semibold">{guidance}</Text>
