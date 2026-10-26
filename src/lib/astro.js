@@ -806,15 +806,31 @@ function dayOfYear(y, m, d) {
 /* Smoothed day-of-year climatology: array of 366 values (index 0 = Jan 1),
    each the mean daily cloud-cover % for that day ± CLIM_SMOOTH_DAYS across
    all 20 years. Null where the archive had no data. */
-export async function loadCloudClimatology(loc) {
+export function loadCloudClimatology(loc) {
   const key = climKey(loc);
-  if (climMemCache.has(key)) return climMemCache.get(key);
+  // Cache the in-flight PROMISE, not just the result: the boot
+  // kick, the scores pipeline and the Moon panel can all ask in
+  // the same first seconds and must share ONE archive fetch
+  // (Alex, 2026-10-26: first load was slow partly because this
+  // 20-year request serialized and duplicated).
+  const hit = climMemCache.get(key);
+  if (hit) return hit;
+  const p = loadCloudClimatologyInner(loc, key);
+  climMemCache.set(key, p);
+  // A failed fetch must not poison the cache — the next caller
+  // retries, as before promise-caching.
+  p.catch(() => {
+    if (climMemCache.get(key) === p) climMemCache.delete(key);
+  });
+  return p;
+}
+
+async function loadCloudClimatologyInner(loc, key) {
   try {
     const raw = hasStorage() && localStorage.getItem(key);
     if (raw) {
       const parsed = JSON.parse(raw);
       if (parsed && Array.isArray(parsed.daily) && parsed.daily.length === 366) {
-        climMemCache.set(key, parsed.daily);
         return parsed.daily;
       }
     }
@@ -864,7 +880,6 @@ export async function loadCloudClimatology(loc) {
   } catch {
     /* quota — the in-memory cache still covers this session */
   }
-  climMemCache.set(key, daily);
   return daily;
 }
 

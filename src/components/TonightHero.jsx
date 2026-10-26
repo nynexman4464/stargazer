@@ -106,7 +106,7 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc, pla
                         {`Not visible from ${loc?.name || 'your location'} — worth traveling for.`}
                       </Text>
                     ) : beyondForecast ? (
-                      <Text type="supporting">Too far out — forecasts only reach about two weeks.</Text>
+                      <Text type="supporting">Too far out for a forecast — its score comes from 20 years of typical skies.</Text>
                     ) : (
                       <Text type="supporting">Scoring the sky…</Text>
                     )}

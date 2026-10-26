@@ -89,22 +89,36 @@ export default function App() {
 
   /* ---- data boot ---- */
   useEffect(() => {
+    // Kick the 20-year climatology fetch NOW, in parallel with
+    // everything else (Alex, 2026-10-26: on first load it used
+    // to start only after the events arrived and then block the
+    // scoring pipeline — the hero's number waited on the
+    // slowest archive request Open-Meteo serves). The promise
+    // is cached inside loadCloudClimatology, so later callers
+    // share this fetch. The location a mid-session change picks
+    // fetches its own, on demand, as before.
+    loadCloudClimatology(loc).catch(() => {});
     (async () => {
-      const [showers, eclipses, conjs, comets, spotsData, man, tlesData] = await Promise.all([
+      const [showers, eclipses, conjs, comets, spotsData, man] = await Promise.all([
         loadJSON(`${base}data/showers.json`),
         loadJSON(`${base}data/eclipses.json`),
         loadJSON(`${base}data/conjunctions.json`),
         loadJSON(`${base}data/comets.json`),
         loadJSON(`${base}data/darksky.json`),
         loadJSON(`${base}data/_manifest.json`),
-        loadTles(`${base}data/tles.json`),
       ]);
       setEvents(normalizeEvents(showers, eclipses, conjs, comets));
       setSpots(spotsData?.sites || []);
-      setTles(tlesData);
       if (man?.sources) setSources('Data: ' + man.sources.join(' · '));
       setLoaded(true);
     })();
+    // Satellite elements are NOT part of the boot gate: only
+    // the flyovers panel needs them, and it already shows its
+    // own computing state. The Lambda round trip (cold starts
+    // can run seconds) used to hold the events — and the hero —
+    // hostage on every first load.
+    loadTles(`${base}data/tles.json`).then((t) => setTles(t));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* ---- go-scores (async, non-blocking) ----
@@ -119,26 +133,15 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      /* Estimated scores first: one climatology fetch, then pure math for
-         every event beyond the forecast range. These land before the slower
-         forecast fetches below, so far-future cards/hero populate quickly. */
-      let climDaily = null;
-      try {
-        climDaily = await loadCloudClimatology(loc);
-      } catch {
-        /* historical data unavailable — forecast path below is unaffected */
-      }
-      if (cancelled) return;
-      if (climDaily) {
-        const est = {};
-        for (const e of events) {
-          if ((e.date - Date.now()) / DAY > 15) {
-            const sc = estimatedGoScore(e, climDaily, loc);
-            if (sc) est[e.id] = sc;
-          }
-        }
-        if (!cancelled) setScores((prev) => ({ ...est, ...prev }));
-      }
+      /* Start the climatology fetch but do NOT await it yet:
+         the forecast scores below are what the hero is usually
+         waiting on, and they used to queue behind a 20-year
+         archive download they never use (Alex, 2026-10-26).
+         Estimates (events beyond the forecast range) are pure
+         math once the archive lands, so they apply last — the
+         two sets are disjoint (>15d vs <=15d), so applying in
+         this order changes no result. */
+      const climPromise = loadCloudClimatology(loc).catch(() => null);
       /* Forecast scores for the hero candidates (existing behavior). */
       let targets;
       if (anchorDay) {
@@ -167,6 +170,18 @@ export default function App() {
         if (cancelled || !sc) continue;
         setScores((prev) => (prev[e.id] ? prev : { ...prev, [e.id]: sc }));
       }
+      /* Estimated scores for everything beyond the forecast
+         range, pure math once the archive data is in. */
+      const climDaily = await climPromise;
+      if (cancelled || !climDaily) return;
+      const est = {};
+      for (const e of events) {
+        if ((e.date - Date.now()) / DAY > 15) {
+          const sc = estimatedGoScore(e, climDaily, loc);
+          if (sc) est[e.id] = sc;
+        }
+      }
+      if (!cancelled) setScores((prev) => ({ ...est, ...prev }));
     })();
     return () => {
       cancelled = true;
