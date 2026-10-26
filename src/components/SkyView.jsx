@@ -814,16 +814,6 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         </HStack>
       </div>
       <VStack gap={2} className="sg-skyview-foot">
-        {/* What this view is FOR, when it was opened from an event:
-            the event's name and its card description lead the
-            column (Alex, 2026-10-26: the window gave 'just sun
-            visible' with none of the event's story). */}
-        {detail && (
-          <VStack gap={1}>
-            <Text weight="semibold">{detail.title}</Text>
-            {detail.text && <Text type="supporting">{detail.text}</Text>}
-          </VStack>
-        )}
         {guidance && (
           <div className="sg-skyview-guidance">
             <Text weight="semibold">{guidance}</Text>
@@ -858,6 +848,17 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
               />
             ))}
           </HStack>
+        )}
+        {/* What this view is FOR, when it was opened from an event:
+            the event's name and its card description, below the
+            directions and the buttons (order set by Alex,
+            2026-10-26: directions, buttons, event title,
+            description). */}
+        {detail && (
+          <VStack gap={1}>
+            <Text weight="semibold">{detail.title}</Text>
+            {detail.text && <Text type="supporting">{detail.text}</Text>}
+          </VStack>
         )}
         {orientMsg && <Text type="supporting">{orientMsg}</Text>}
         {cameraMsg && <Text type="supporting">{cameraMsg}</Text>}
