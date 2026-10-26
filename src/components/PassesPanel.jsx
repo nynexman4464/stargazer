@@ -18,6 +18,7 @@ import { IconButton } from '@astryxdesign/core/IconButton';
 import { Satellite, Clock, Telescope } from 'lucide-react';
 import {
   SATS,
+  DAY,
   fetchTLE,
   computePasses,
   passScore,
@@ -65,12 +66,16 @@ function PassTrack({ p, satName }) {
   );
 }
 
-/* Bright flyovers: ISS / Tiangong / Hubble tabs with visible-pass predictions.
-   Each pass gets a 0-100 visibility score from peak elevation, the satellite's
-   typical visual magnitude, and forecast cloud cover at pass time. Tabs show
-   the best score at a glance. */
+/* Bright flyovers: visible-pass predictions for ISS / Tiangong /
+   Hubble, tabbed by DATE (Alex, 2026-10-26: tabs by date instead
+   of by satellite — 'what's on Tuesday' is how you plan around a
+   pass, and one night's passes read in time order). Each pass
+   gets a 0-100 visibility score from peak elevation, the
+   satellite's typical visual magnitude, and forecast cloud
+   cover at pass time. A date tab's badge is that day's best
+   score at a glance. */
 export default function PassesPanel({ loc, bundledTles, fromDate }) {
-  const [norad, setNorad] = useState(SATS[0].norad);
+  const [dayKey, setDayKey] = useState(null);
   const [skyPass, setSkyPass] = useState(null);
   const [allPasses, setAllPasses] = useState(null); // null = loading, else { [norad]: scored passes }
   const [failedSats, setFailedSats] = useState([]);
@@ -104,7 +109,9 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
             const scored = await Promise.all(
               passes.map(async (p) => {
                 const sc = await passScore(p, s.mag, loc, wxCache.current);
-                return { ...p, score: sc.score, label: sc.label };
+                // Tag the satellite onto each pass: the list
+                // mixes satellites now that tabs are dates.
+                return { ...p, score: sc.score, label: sc.label, norad: s.norad, satName: s.name };
               }),
             );
             if (cancelled) return;
@@ -122,18 +129,54 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
     };
   }, [loc, bundledTles, fromMs]);
 
-  const satName = SATS.find((s) => s.norad === norad)?.name || '';
-  const passes = allPasses?.[norad] ?? null;
-  const failed = failedSats.includes(norad);
+  // Group every satellite's passes by local calendar day.
+  const days = (() => {
+    if (!allPasses) return [];
+    const byDay = new Map();
+    for (const list of Object.values(allPasses)) {
+      for (const p of list) {
+        const d = p.start;
+        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        if (!byDay.has(key)) {
+          byDay.set(key, {
+            key,
+            date: new Date(d.getFullYear(), d.getMonth(), d.getDate()),
+            passes: [],
+          });
+        }
+        byDay.get(key).passes.push(p);
+      }
+    }
+    const out = [...byDay.values()].sort((a, b) => a.date - b.date);
+    for (const d of out) d.passes.sort((a, b) => a.start - b.start);
+    return out;
+  })();
+  const selDay = days.find((d) => d.key === dayKey) || days[0] || null;
+  const passes = selDay ? selDay.passes : null;
+  // Satellites resolve one by one; the panel is still loading
+  // until each has either delivered passes or failed.
+  const resolvedCount =
+    (allPasses ? Object.keys(allPasses).length : 0) + failedSats.length;
+  const loading = resolvedCount < SATS.length;
+  const allFailed = failedSats.length === SATS.length;
+  const failedNames = SATS.filter((s) => failedSats.includes(s.norad))
+    .map((s) => s.name)
+    .join(', ');
 
-  // Best-scoring pass per satellite, for the tab badges.
-  const bestPass = (id) => {
-    const p = allPasses?.[id];
-    if (!p || p.length === 0) return null;
-    return p.reduce((a, b) => (a.score >= b.score ? a : b));
-  };
+  // Best-scoring pass of a day, for the tab badge.
+  const bestOf = (list) =>
+    list.length ? list.reduce((a, b) => (a.score >= b.score ? a : b)) : null;
   const scoreVariant = (label) =>
     label === 'Excellent' ? 'success' : label === 'Good' ? 'warning' : 'neutral';
+  const dayLabel = (d) => {
+    if (fromDate) return fmtDate(d.date);
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const diff = Math.round((d.date - today) / DAY);
+    if (diff === 0) return 'Today';
+    if (diff === 1) return 'Tomorrow';
+    return fmtDate(d.date);
+  };
 
   return (
     <Card padding={4}>
@@ -142,27 +185,27 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
           <Heading level={2}>Bright flyovers</Heading>
           <Text type="supporting">
             ISS · Tiangong · Hubble —{' '}
-            {fromDate ? `3 days from ${fmtDate(fromDate)}` : 'next 3 days'}. Tab badge is the
-            visibility score (0–100): height, brightness, clouds.
+            {fromDate ? `3 days from ${fmtDate(fromDate)}` : 'next 3 days'}, by day. Tab badge
+            is the day's best visibility score (0–100): height, brightness, clouds.
           </Text>
         </VStack>
         <VStack gap={3}>
           <TabList
-            value={String(norad)}
-            onChange={(v) => setNorad(Number(v))}
+            value={selDay ? selDay.key : ''}
+            onChange={(v) => setDayKey(v)}
             role="tablist"
-            aria-label="Satellite"
+            aria-label="Day"
           >
-            {SATS.map((s) => {
-              const best = bestPass(s.norad);
+            {days.map((d) => {
+              const best = bestOf(d.passes);
               return (
                 <Tab
-                  key={s.norad}
-                  value={String(s.norad)}
-                  label={s.name}
-                  panelId={`passes-${s.norad}`}
+                  key={d.key}
+                  value={d.key}
+                  label={dayLabel(d)}
+                  panelId={`passes-${d.key}`}
                   endContent={
-                    best !== null ? (
+                    best ? (
                       <Badge label={`${best.score}`} variant={scoreVariant(best.label)} />
                     ) : null
                   }
@@ -170,21 +213,21 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
               );
             })}
           </TabList>
-        <div id={`passes-${norad}`} role="tabpanel">
-            {failed ? (
+        <div id={selDay ? `passes-${selDay.key}` : 'passes-none'} role="tabpanel">
+            {allFailed ? (
               <Text type="supporting">
                 Could not load orbital data (CelesTrak unreachable). Try again later.
               </Text>
-            ) : passes === null ? (
+            ) : loading && passes === null ? (
               <VStack gap={2}>
                 <Skeleton height={56} />
                 <Skeleton height={56} />
                 <Text type="supporting">Computing orbits…</Text>
               </VStack>
-            ) : passes.length === 0 ? (
+            ) : !passes || passes.length === 0 ? (
               <EmptyState
                 title={`No good visible passes`}
-                description={`${satName} won't make a good visible pass ${
+                description={`Nothing makes a good visible pass ${
                   fromDate ? `in the 3 days from ${fmtDate(fromDate)}` : 'in the next 3 days'
                 } from ${loc.name}.`}
                 icon={<Icon icon={Satellite} size="lg" color="secondary" />}
@@ -194,7 +237,7 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
               <List hasDividers density="balanced">
                 {passes.map((p, i) => {
                   const dur = Math.round((p.end - p.start) / 60000);
-                  const label = `${fmtDate(p.start)} · ${fmtTime(p.start)}`;
+                  const label = `${p.satName} · ${fmtTime(p.start)}`;
                   const cd = countdown(p.start);
                   const live = cd === 'now';
                   // Imminent passes (under 24h out, or in progress) get the
@@ -224,7 +267,7 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
                       description={
                         <Text type="supporting">
                           {compass(p.startAz)} → {compass(p.endAz)} · peaks {Math.round(p.maxEl)}°
-                          at {fmtTime(p.maxT)} · <Mag value={p.mag} exclude={satName}>mag {p.mag}</Mag> ({brightnessWords(p.mag)}) · {dur} min · score {p.score} — {p.label.toLowerCase()}
+                          at {fmtTime(p.maxT)} · <Mag value={p.mag} exclude={p.satName}>mag {p.mag}</Mag> ({brightnessWords(p.mag)}) · {dur} min · score {p.score} — {p.label.toLowerCase()}
                         </Text>
                       }
                       endContent={
@@ -232,15 +275,15 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
                           {p.track?.length > 1 && (
                             <IconButton
                               icon={<Icon icon={Telescope} size="sm" />}
-                              label={`Sky chart for this ${satName} pass`}
+                              label={`Sky chart for this ${p.satName} pass`}
                               variant="ghost"
                               size="sm"
                               onClick={() => setSkyPass(p)}
                             />
                           )}
                           <HoverCard
-                            label={`${satName} pass track`}
-                            content={<PassTrack p={p} satName={satName} />}
+                            label={`${p.satName} pass track`}
+                            content={<PassTrack p={p} satName={p.satName} />}
                             placement="above"
                             hasHoverIndication={false}
                             touchTrigger="tap"
@@ -259,6 +302,12 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
                 })}
               </List>
             )}
+            {failedSats.length > 0 && !allFailed && passes && passes.length > 0 && (
+              <Text type="supporting">
+                Could not load orbital data for {failedNames} — any of its passes are missing
+                above.
+              </Text>
+            )}
           </div>
           </VStack>
       </VStack>
@@ -266,10 +315,10 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
         <SkyView
           isOpen
           onClose={() => setSkyPass(null)}
-          title={`${satName} — find in the sky`}
+          title={`${skyPass.satName} — find in the sky`}
           subtitle={`${fmtDate(skyPass.start)} · appears ${fmtTime(skyPass.start)} in the ${compass(skyPass.startAz)} · peaks ${Math.round(skyPass.maxEl)}° at ${fmtTime(skyPass.maxT)}`}
           targets={[{
-            label: satName,
+            label: skyPass.satName,
             path: skyPass.track,
             peak: {
               time: skyPass.maxT,
