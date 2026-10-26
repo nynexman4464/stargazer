@@ -1,5 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<!-- data-theme / data-astryx-theme are set statically, per the
+     Astryx Theme docs ('set data-theme on <html> ... to avoid a
+     flash of wrong theme before hydration'): the Theme provider
+     syncs these same attributes on mount, but until it did, the
+     theme's @scope'd CSS and light-dark() tokens did not apply
+     and cards painted transparent for a few frames on cold
+     loads (Alex's screen recording, 2026-10-26). -->
+<html lang="en" data-theme="dark" data-astryx-theme="stargazer">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
