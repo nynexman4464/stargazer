@@ -241,14 +241,38 @@ body {
 }
 .sg-skyview-foot {
   padding: var(--spacing-3) var(--spacing-4) max(var(--spacing-4), env(safe-area-inset-bottom));
-  /* The foot grows when mode text appears (camera instructions,
-     follow notes, the lens row). On the stacked layout that
+  /* The foot's text grows when mode content appears (camera
+     instructions, follow notes). On the stacked layout that
      growth squeezed the stage — and since the window takes the
-     stage's shape, turning the camera on visibly shrank the
-     chart (Alex, 2026-10-26). Cap the foot and let it scroll
-     internally instead, so the chart's size stays put. */
+     stage's shape, the chart visibly shrank (Alex, 2026-10-26).
+     Cap the whole foot; inside it, only the text region below
+     the directions and buttons scrolls — the controls stay
+     pinned (Alex: 'the buttons shouldn't be part of the
+     scrolling'). */
   max-height: 48dvh;
+}
+/* The directions and the button rows never shrink or scroll —
+   the text region below them absorbs all the squeezing. */
+.sg-skyview-foot > .sg-skyview-guidance,
+.sg-skyview-foot > .sg-skyview-actions {
+  flex: none;
+}
+/* The scrollable text region under the pinned directions and
+   buttons: event detail, status messages, help text. */
+.sg-skyview-scroll {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-2);
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
+}
+/* Camera up: the aim view is the point — shrink the text
+   region to a strip on the stacked layout so the chart keeps
+   a tall, portrait-like shape instead of collapsing wide. */
+.sg-camera-on .sg-skyview-scroll {
+  max-height: 16dvh;
+  flex: none;
 }
 /* The guidance line rewrites itself as the phone moves ("turn
    right 21° · tilt up 18° — …" vs "turn right 19° — …"), and
@@ -283,9 +307,15 @@ body {
   .sg-skyview-stage { grid-area: stage; }
   .sg-skyview-foot {
     grid-area: foot;
-    overflow-y: auto;
     padding-bottom: var(--spacing-4);
     max-height: none; /* the grid row bounds the column here, not the phone cap */
+    min-height: 0;
+  }
+  /* Desktop: the column is the tall one; the camera strip cap
+     is a phone-layout rule only. */
+  .sg-camera-on .sg-skyview-scroll {
+    max-height: none;
+    flex: 1 1 auto;
   }
 }
 

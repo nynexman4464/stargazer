@@ -766,7 +766,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
       aria-label={title}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="sg-skyview-panel">
+      <div className={`sg-skyview-panel${cameraOn ? ' sg-camera-on' : ''}`}>
       <HStack gap={2} vAlign="start" hAlign="between" className="sg-skyview-head">
         <VStack gap={0}>
           <Heading level={2}>{title}</Heading>
@@ -870,6 +870,11 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             ))}
           </HStack>
         )}
+        {/* Everything below the directions and buttons lives in
+            its own scroll region: the controls stay pinned no
+            matter how much text there is (Alex, 2026-10-26:
+            'the buttons shouldn't be part of the scrolling'). */}
+        <div className="sg-skyview-scroll">
         {/* What this view is FOR, when it was opened from an event:
             the event's name and its card description, below the
             directions and the buttons (order set by Alex,
@@ -898,6 +903,7 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             Dotted line: the satellite is above the horizon there but not visible — in Earth’s shadow, or the sky still too bright. It lights up where the line turns solid.
           </Text>
         )}
+        </div>
       </VStack>
       </div>
     </div>,
