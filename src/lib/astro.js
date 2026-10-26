@@ -401,6 +401,15 @@ export function fmtTime(d) {
 export function fmtDate(d) {
   return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
 }
+/* fmtDate with the year appended when the date is a year or
+   more out (Alex, 2026-10-26: in Upcoming events, dates 1+
+   year out include the year — "Sun, Jan 14" otherwise reads
+   as this coming January). The 365-day threshold mirrors
+   countdown()'s switch to its "Ny Nd" form. */
+export function fmtDateFar(d, ref = new Date()) {
+  const base = fmtDate(d);
+  return d - ref >= 365 * DAY ? `${base}, ${d.getFullYear()}` : base;
+}
 export function countdown(to) {
   const ms = to - Date.now();
   if (ms < 0) return 'now';

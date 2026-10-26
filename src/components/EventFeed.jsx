@@ -18,7 +18,7 @@ import { Icon } from '@astryxdesign/core/Icon';
 import { ClickableCard } from '@astryxdesign/core/ClickableCard';
 import { useMediaQuery } from '@astryxdesign/core/hooks';
 import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Telescope, Map, CalendarDays, Maximize2 } from 'lucide-react';
-import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, countdown, DAY, eventImage, eclipseVisibleFrom, planetVisibilityFactors, eventLook } from '../lib/astro.js';
+import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDate, fmtDateFar, countdown, DAY, eventImage, eclipseVisibleFrom, planetVisibilityFactors, eventLook } from '../lib/astro.js';
 import MapLightbox from './MapLightbox.jsx';
 import ScoreFactors from './ScoreFactors.jsx';
 import GoScore from './GoScore.jsx';
@@ -47,8 +47,8 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
     : 'White area: where the eclipse is visible. Map: NASA.';
   const dateStr =
     ev.end && ev.end - ev.date > 2 * DAY
-      ? `${fmtDate(ev.date)} – ${fmtDate(ev.end)}`
-      : fmtDate(ev.date);
+      ? `${fmtDateFar(ev.date)} – ${fmtDateFar(ev.end)}`
+      : fmtDateFar(ev.date);
   const img = eventImage(ev);
   return (
     <VStack gap={2}>
@@ -274,7 +274,7 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
   return (
     <Card padding={4} style={{ minWidth: 0 }}>
       <VStack gap={3}>
-        <Heading level={2}>{anchor ? `Events · from ${fmtDate(anchor)}` : 'Upcoming events'}</Heading>
+        <Heading level={2}>{anchor ? `Events · from ${fmtDateFar(anchor)}` : 'Upcoming events'}</Heading>
         {filterBar}
         {!loaded ? (
           <Grid columns={isNarrow ? 1 : { minWidth: 300 }} gap={3}>
