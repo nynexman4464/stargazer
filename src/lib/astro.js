@@ -440,6 +440,37 @@ export function dayKeyTz(d) {
   const get = (t) => parts.find((p) => p.type === t).value;
   return `${get('year')}-${get('month')}-${get('day')}`;
 }
+/* The UTC instant of local midnight starting the calendar
+   day that contains `date` in an IANA timezone (null when
+   the tz is missing or invalid). Solved from the zone's
+   wall-clock reading with two refinement passes. Track
+   windows anchor to this so a far-away location's day is
+   covered in ITS day, not the viewer's — the old 9 PM
+   browser-local anchor opened the Nov 2030 South Africa
+   solar track at 7:00 AM local, cutting the first 100
+   minutes of the Sun's path (Alex, 2026-10-27). */
+export function zonedDayStart(date, tz) {
+  if (!date || !tz) return null;
+  try {
+    const dtf = new Intl.DateTimeFormat('en-US', {
+      timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit', hourCycle: 'h23',
+    });
+    const partsOf = (d) => Object.fromEntries(dtf.formatToParts(d).map((p) => [p.type, p.value]));
+    const wallAsUtc = (d) => {
+      const p = partsOf(d);
+      return Date.UTC(+p.year, +p.month - 1, +p.day, +p.hour, +p.minute, +p.second);
+    };
+    const p0 = partsOf(date);
+    const dayUtc = Date.UTC(+p0.year, +p0.month - 1, +p0.day);
+    let utc = dayUtc - (wallAsUtc(new Date(dayUtc)) - dayUtc);
+    utc = dayUtc - (wallAsUtc(new Date(utc)) - utc);
+    return new Date(utc);
+  } catch {
+    return null;
+  }
+}
+
 /* Resolve a location's IANA timezone from its coordinates
    (Open-Meteo, timezone=auto) — for saved locations that
    predate tz storage. Null on any failure; callers fall back
@@ -2456,6 +2487,28 @@ export function lookTrack(raDecAt, anchor, loc, { startH = -6, hours = 24, darkB
    2026-10-27). Swap the track's peak for the body's position
    at greatest eclipse when circumstances are available; the
    rest of the track (path, rise/set, samples) is unchanged. */
+/* Mark an eclipse track's path with the satellite-style
+   visibility flags the sky chart already renders: points
+   inside the eclipse span (first to last contact) stay
+   solid, the rest of the body's day goes dotted (Alex,
+   2026-10-27 — "show dotted line for entire sun movement
+   for times outside of eclipse, similar to how we handle
+   satellites in earth shadow"). When circumstances exist
+   but there is no local span (a shadow miss, or contacts
+   that fall while the body is down), every point is
+   dotted — the honest picture. No circumstances, no
+   marking: the track stays plain. */
+export function markEclipseSpan(track, circ, from, to) {
+  if (!track || !track.path || !circ) return track;
+  const a = from ? from.getTime() : null;
+  const b = to ? to.getTime() : null;
+  const path = track.path.map((p) => ({
+    ...p,
+    vis: a != null && b != null ? (p.time.getTime() >= a && p.time.getTime() <= b) : false,
+  }));
+  return { ...track, path };
+}
+
 export function withEclipsePeak(ev, loc, track) {
   if (!ev || !ev.circ || !track) return track;
   const isoDate = (ev.id || '').slice(-10);
@@ -2733,22 +2786,46 @@ export function eventLook(ev, loc) {
     return looks.length ? looks : null;
   }
   if (ev.type === 'eclipse' && !ev.solar) {
+    const iso = (ev.id || '').slice(-10);
+    const circ = ev.circ ? lunarCircumstances(ev.circ, iso) : null;
     return [{
       label: 'Moon',
       // The Moon is up in daylight too: widen the window to that morning
       // and keep samples from rise to set, not just after sunset.
-      track: withEclipsePeak(ev, loc, lookTrack((d) => moonEquatorial(d), ev.date, loc, { startH: -15, hours: 30, daylightSamples: true })),
+      // Anchor the window on the TRUE greatest instant, not
+      // ev.date: catalog dates are UT dates, so an early-UTC
+      // eclipse (greatest 03:22 UTC) happens the PREVIOUS
+      // local evening in the Americas — anchoring on ev.date
+      // drew the next night's passage while the estimate and
+      // peak described the real one (found 2026-10-27 when
+      // the contact-span marking found no overlap).
+      track: withEclipsePeak(ev, loc, markEclipseSpan(
+        lookTrack((d) => moonEquatorial(d), circ?.greatest || ev.date, loc, { startH: -15, hours: 30, daylightSamples: true }),
+        circ, circ?.p1, circ?.p4,
+      )),
       note: null,
     }];
   }
   if (ev.type === 'eclipse' && ev.solar) {
     const visible = eclipseVisibleFrom(ev, loc);
+    const iso = (ev.id || '').slice(-10);
+    const circ = ev.circ ? solarCircumstances(ev.circ, iso, loc.lat, loc.lon) : null;
+    /* Scan the LOCATION's eclipse day, not the viewer's:
+       the window anchors at local midnight of the day
+       containing greatest eclipse (in the location's own
+       timezone) when the tz is known, with an hour of
+       margin each side; the passage restriction inside
+       lookTrack trims any spill into the adjacent days.
+       Without a tz, fall back to the old browser-day scan. */
+    const dayStart = circ && circ.max && loc.tz ? zonedDayStart(circ.max, loc.tz) : null;
+    const scanned = dayStart
+      ? lookTrack((d) => sunRaDec(d), dayStart, loc, { startH: -1, hours: 26, daytime: true })
+      : lookTrack((d) => sunRaDec(d), ev.date, loc, { startH: -21, hours: 24, daytime: true });
     return [{
       label: 'Sun',
-      // ev.date is 9 PM on eclipse day; scan that whole calendar day.
-      track: withEclipsePeak(ev, loc, lookTrack((d) => sunRaDec(d), ev.date, loc, { startH: -21, hours: 24, daytime: true })),
+      track: withEclipsePeak(ev, loc, markEclipseSpan(scanned, circ, circ?.c1, circ?.c4)),
       note: visible
-        ? 'A daytime event — this is the Sun’s path across your sky that day. Never look at the Sun without eclipse glasses or a proper solar filter.'
+        ? 'A daytime event — this is the Sun’s path across your sky that day. The solid stretch of the line is the eclipse itself, first contact to last; dotted is the rest of the Sun’s day. Never look at the Sun without eclipse glasses or a proper solar filter.'
         : `This eclipse isn’t visible from ${loc.name || 'your location'} — this is the Sun’s path at home that day.`,
     }];
   }

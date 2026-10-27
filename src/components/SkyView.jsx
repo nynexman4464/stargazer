@@ -1009,7 +1009,9 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
         </Text>
         {primary?.path?.some((p) => p.vis === false) && (
           <Text type="supporting">
-            Dotted line: the satellite is above the horizon there but not visible — in Earth’s shadow, or the sky still too bright. It lights up where the line turns solid.
+            {detail?.estimate
+              ? 'Dotted line: the path outside the eclipse’s hours. Where the line turns solid is the eclipse itself, first contact to last.'
+              : 'Dotted line: the satellite is above the horizon there but not visible — in Earth’s shadow, or the sky still too bright. It lights up where the line turns solid.'}
           </Text>
         )}
         </div>
