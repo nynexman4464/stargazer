@@ -1,8 +1,10 @@
 {
-  "_note": "Only one credible naked-eye-class prospect (mag ~6 or brighter) was found for late 2026–2027, and even it is a severe twilight target. Per the project rules, no fainter comets were padded in and no dates were guessed. Newly discovered comets can always outburst, so this list should be re-checked closer to 2027.",
+  "_note": "Only one credible naked-eye-class prospect (mag ~6 or brighter) was found for late 2026–2027, and even it is a severe twilight target. 1P/Halley is the exception: included for its 2061 return, the one long-range comet arrival that is a certainty rather than a prospect. Per the project rules, no fainter comets were padded in and no dates were guessed. Newly discovered comets can always outburst, so this list should be re-checked closer to 2027.",
   "_source": [
     "J. D. Shanklin — Comet prospects for 2027 (people.ast.cam.ac.uk/~jds/preds27.pdf)",
-    "Orbital elements for 2P/Encke: Minor Planet Center, epoch 2026 Oct 18 (q, e, i, node, argPeri, time of perihelion as Julian date) — used only for approximate where-to-look positions"
+    "Orbital elements for 2P/Encke: Minor Planet Center, epoch 2026 Oct 18 (q, e, i, node, argPeri, time of perihelion as Julian date) — used only for approximate where-to-look positions",
+    "Orbital elements for 1P/Halley: Minor Planet Center (MPC 191592), epoch 2026 Oct 23 (q, e, i, node, argPeri, time of perihelion as Julian date) — used only for approximate where-to-look positions",
+    "2061 return of 1P/Halley: perihelion 28 July 2061 and predicted peak apparent magnitude about −0.3 (vs +2.1 in 1986), as published in the standard references for the return"
   ],
   "events": [
     {
@@ -20,6 +22,23 @@
         "node": 334.0198,
         "argPeri": 187.2873,
         "tpJd": 2461446.7276
+      }
+    },
+    {
+      "date": "2061-07-28",
+      "id": "1p-halley-2061",
+      "magnitude_peak": "~-0.3",
+      "name": "1P/Halley",
+      "note": "The famous one, back after 75 years — and this return is the good kind: unlike 1986, when it was on the far side of the Sun, in 2061 it is on Earth's side at perihelion and closest to Earth a day later, so published predictions put the peak around magnitude −0.3 (some say nearer 0) — an easy naked-eye comet. At perihelion it sits only ~25° from the Sun, a pre-dawn twilight target; through August it pulls away to ~40° and becomes an early-evening object. Positions here come from two-body Kepler motion with no planetary perturbations, so treat them as where-to-look guidance, not an ephemeris.",
+      "perihelion": "2061-07-28",
+      "source": "Minor Planet Center elements (MPC 191592), epoch 2026 Oct 23; 2061 return predictions",
+      "orbit": {
+        "q": 0.570914,
+        "e": 0.968032,
+        "i": 162.1923,
+        "node": 59.2567,
+        "argPeri": 112.1573,
+        "tpJd": 2474037.807
       }
     }
   ]
