@@ -2839,7 +2839,25 @@ export function eventLook(ev, loc) {
   }
   if (ev.type === 'comet') {
     if (!ev.orbit) return null;
-    const track = lookTrack((d) => cometEquatorial(ev.orbit, d), ev.date, loc, { darkBelow: 0 });
+    const raDecAt = (d) => cometEquatorial(ev.orbit, d);
+    let track = lookTrack(raDecAt, ev.date, loc, { darkBelow: 0 });
+    /* A comet rides near the Sun, so its above-horizon
+       passage straddles the default scan window's 3 PM edge
+       and the drawn track stopped mid-sky where the window
+       ran out (Halley 'randomly ending at 3pm', Alex,
+       2026-10-27; Encke had the same cut). Re-scan across
+       exactly the peak passage's rise-to-set span and take
+       that path; the first pass's peak/rise/set stand. */
+    if (track.rise && track.set) {
+      const a = track.rise.time.getTime() - 1800000;
+      const b = track.set.time.getTime() + 1800000;
+      const full = lookTrack(raDecAt, ev.date, loc, {
+        darkBelow: 0,
+        startH: (a - ev.date.getTime()) / 3600000,
+        hours: (b - a) / 3600000,
+      });
+      track = { ...full, peak: track.peak, rise: track.rise, set: track.set };
+    }
     const { elong } = cometEquatorial(ev.orbit, ev.date);
     return [{
       label: ev.name,
