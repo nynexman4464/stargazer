@@ -104,6 +104,11 @@ export default function App() {
   const [events, setEvents] = useState([]);
   const [spots, setSpots] = useState([]);
   const [scores, setScores] = useState({});
+  // True once a scoring pass has run to completion for the
+  // current events/location: only then may the feed show
+  // the disabled placeholder bar for events that have no
+  // score by design (see GoScorePlaceholder).
+  const [scoresSettled, setScoresSettled] = useState(false);
   const [sources, setSources] = useState('');
   const [tles, setTles] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -175,10 +180,12 @@ export default function App() {
   useEffect(() => {
     weatherCache.current = {};
     setScores({});
+    setScoresSettled(false);
   }, [loc]);
 
   useEffect(() => {
     let cancelled = false;
+    setScoresSettled(false);
     (async () => {
       /* Start the climatology fetch but do NOT await it yet:
          the forecast scores below are what the hero is usually
@@ -220,7 +227,13 @@ export default function App() {
       /* Estimated scores for everything beyond the forecast
          range, pure math once the archive data is in. */
       const climDaily = await climPromise;
-      if (cancelled || !climDaily) return;
+      if (cancelled) return;
+      if (!climDaily) {
+        // No climatology, so no estimates are coming: what
+        // scores exist are final for this pass.
+        setScoresSettled(true);
+        return;
+      }
       const est = {};
       for (const e of events) {
         if ((e.date - Date.now()) / DAY > 15) {
@@ -228,7 +241,10 @@ export default function App() {
           if (sc) est[e.id] = sc;
         }
       }
-      if (!cancelled) setScores((prev) => ({ ...est, ...prev }));
+      if (!cancelled) {
+        setScores((prev) => ({ ...est, ...prev }));
+        setScoresSettled(true);
+      }
     })();
     return () => {
       cancelled = true;
@@ -371,6 +387,7 @@ export default function App() {
                   <EventFeed
                     events={feedEvents}
                     scores={scores}
+                    scoresSettled={scoresSettled}
                     loaded={loaded}
                     tier={tier}
                     setTier={setTier}

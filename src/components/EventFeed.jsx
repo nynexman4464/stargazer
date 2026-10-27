@@ -23,7 +23,7 @@ import { House, Car, Plane, Sparkles, Eclipse, Orbit, Star, Telescope, Map, Cale
 import { TIER_META, TYPE_META, RANGE_META, inTimeRange, fmtDateFar, countdown, DAY, eventImage, eclipseVisibleFrom, planetVisibilityFactors, eventLook, eclipseEstimate } from '../lib/astro.js';
 import MapLightbox from './MapLightbox.jsx';
 import ScoreFactors from './ScoreFactors.jsx';
-import GoScore from './GoScore.jsx';
+import GoScore, { GoScorePlaceholder } from './GoScore.jsx';
 import WhereToLook from './WhereToLook.jsx';
 import { TermText } from './Term.jsx';
 
@@ -122,7 +122,16 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
             onClose={() => setLightbox(false)}
           />
         )}
-        {score && <GoScore score={score} exclude={ev.bodies} />}
+        {score
+          ? <GoScore score={score} exclude={ev.bodies} />
+          : scoresSettled
+            ? (
+              <GoScorePlaceholder
+                estimated={(ev.date - Date.now()) / 86400000 > 15}
+                locName={loc && loc.name}
+              />
+            )
+            : null}
         {visFactors && <ScoreFactors factors={visFactors} exclude={ev.bodies} />}
         {looks && (
           <WhereToLook
@@ -142,7 +151,7 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
   );
 }
 
-export default function EventFeed({ events, scores, loaded, tier, setTier, hiddenTypes, setHiddenTypes, range, setRange, showFaint, setShowFaint, anchor, loc, planetRows, visWhen }) {
+export default function EventFeed({ events, scores, scoresSettled, loaded, tier, setTier, hiddenTypes, setHiddenTypes, range, setRange, showFaint, setShowFaint, anchor, loc, planetRows, visWhen }) {
   // Responsive contract: below 640px the filter bar wraps onto multiple lines
   // and the event cards stack in a single column.
   const isNarrow = useMediaQuery('(max-width: 640px)');
