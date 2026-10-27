@@ -749,21 +749,53 @@ function scoreCore(ev, cloud, cloudText) {
   };
 }
 
+/* Is the Sun above the horizon for any part of a computed
+   solar eclipse at this location? The Besselian geometry
+   alone says only that the Moon's shadow reaches the ground
+   — it happily reports a full set of contacts for a shadow
+   pass in the middle of the night (Jul 2028 from South
+   Africa: contacts with the Sun 30-55 degrees below the
+   horizon, while the event card correctly said not visible
+   and the estimate drew the diagram anyway — Alex,
+   2026-10-27). Samples the Sun's altitude at the contacts
+   and midway between them; -0.83 degrees is the conventional
+   horizon for the Sun's center (its radius plus refraction). */
+export function sunUpDuringEvent(c, loc) {
+  if (!c || !c.visible || !loc || loc.lat == null) return false;
+  const pts = [c.c1, c.max, c.c4].filter(Boolean);
+  const samples = [...pts];
+  for (let i = 0; i + 1 < pts.length; i++) {
+    samples.push(new Date((pts[i].getTime() + pts[i + 1].getTime()) / 2));
+  }
+  return samples.some((d) => {
+    const s = sunRaDec(d);
+    return altAz(s.ra, s.dec, d, loc.lat, loc.lon).alt > -0.83;
+  });
+}
+
 /* Expedition-tier events are total solar eclipses: only worth a go-score when
    the eclipse is at all visible (even partially) from the viewer's location.
    Each total solar eclipse record carries `vis`, a generous lat/lon bounding
    box covering the full partial-visibility zone (sources documented in the
    data file's _note). Missing data or location -> visible: a score is never
-   hidden without evidence. */
+   hidden without evidence. When the event carries Besselian
+   circumstances, they overrule the box: the shadow may pass
+   over a boxed location entirely at night. */
 export function eclipseVisibleFrom(ev, loc) {
   const vis = ev.vis;
   if (!vis || !loc || loc.lat == null || loc.lon == null) return true;
-  return (
+  const inBox = (
     loc.lat >= vis.lat[0] &&
     loc.lat <= vis.lat[1] &&
     loc.lon >= vis.lon[0] &&
     loc.lon <= vis.lon[1]
   );
+  if (!inBox) return false;
+  if (ev.solar && ev.circ) {
+    const c = solarCircumstances(ev.circ, (ev.id || '').slice(-10), loc.lat, loc.lon);
+    if (c) return sunUpDuringEvent(c, loc);
+  }
+  return true;
 }
 
 /* ---- Eclipse estimates for one location (Alex, 2026-10-26) ----
@@ -973,6 +1005,14 @@ export function eclipseEstimate(ev, loc, locName) {
       return {
         heading: `Eclipse estimate — ${where}`,
         lines: ['Not visible from here: the Moon’s shadow never reaches your sky for this eclipse.'],
+        animUrl,
+        credit: 'Computed from NASA Besselian elements — eclipse predictions by Fred Espenak, NASA GSFC.',
+      };
+    }
+    if (!sunUpDuringEvent(c, loc)) {
+      return {
+        heading: `Eclipse estimate — ${where}`,
+        lines: ['Not visible from here: the Moon’s shadow passes over you at night, while the Sun is below the horizon.'],
         animUrl,
         credit: 'Computed from NASA Besselian elements — eclipse predictions by Fred Espenak, NASA GSFC.',
       };
