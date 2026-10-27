@@ -7,6 +7,7 @@ import { Heading, Text } from '@astryxdesign/core/Text';
 import { Button } from '@astryxdesign/core/Button';
 import { IconButton } from '@astryxdesign/core/IconButton';
 import { Icon } from '@astryxdesign/core/Icon';
+import { Link } from '@astryxdesign/core/Link';
 import { X, ZoomIn, ZoomOut, Maximize2, Camera, LocateFixed } from 'lucide-react';
 import { loadJSON, compass, fmtTime, devicePointing, quatAim, slerpQuat, dirVec, azElOf, frameFrom, clampFrameEl, screenPoint, grabPan } from '../lib/astro.js';
 import SkyWindow from './SkyWindow.jsx';
@@ -975,6 +976,11 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
                   <Text key={l} type="supporting">{l}</Text>
                 ))}
                 <Text type="supporting">{detail.estimate.credit}</Text>
+                {detail.estimate.animUrl && (
+                  <Link href={detail.estimate.animUrl} target="_blank">
+                    See an animation of this eclipse on timeanddate.com
+                  </Link>
+                )}
               </>
             )}
           </VStack>

@@ -954,6 +954,11 @@ export function eclipseEstimate(ev, loc, locName) {
   if (!ev || ev.type !== 'eclipse' || !ev.circ || !loc || loc.lat == null) return null;
   const isoDate = (ev.id || '').slice(-10);
   const where = locName || 'your location';
+  /* timeanddate's animated "what it looks like from here"
+     page for this eclipse and location (Alex, 2026-10-27).
+     Their /eclipse/in/@lat,lon?iso=YYYYMMDD form takes raw
+     coordinates — verified live, no city slug needed. */
+  const animUrl = `https://www.timeanddate.com/eclipse/in/@${Number(loc.lat.toFixed(4))},${Number(loc.lon.toFixed(4))}?iso=${isoDate.replace(/-/g, '')}`;
   const altNote = (body, date) => {
     const eq = body === 'sun' ? sunRaDec(date) : moonEquatorial(date);
     const { alt, az } = altAz(eq.ra, eq.dec, date, loc.lat, loc.lon);
@@ -968,6 +973,7 @@ export function eclipseEstimate(ev, loc, locName) {
       return {
         heading: `Eclipse estimate — ${where}`,
         lines: ['Not visible from here: the Moon’s shadow never reaches your sky for this eclipse.'],
+        animUrl,
         credit: 'Computed from NASA Besselian elements — eclipse predictions by Fred Espenak, NASA GSFC.',
       };
     }
@@ -1020,6 +1026,7 @@ export function eclipseEstimate(ev, loc, locName) {
         moonR: c.moonR,
         caption: 'The Moon’s path across the Sun — each disc is the Moon at a contact point, shown the way it will look in the sky.',
       },
+      animUrl,
       credit: 'Computed from NASA Besselian elements — eclipse predictions by Fred Espenak, NASA GSFC.',
     };
   }
@@ -1114,6 +1121,7 @@ export function eclipseEstimate(ev, loc, locName) {
     heading: `Eclipse estimate — ${where}`,
     lines,
     diagram,
+    animUrl,
     credit: 'Contact times and magnitudes: Fred Espenak, EclipseWise.com.',
   };
 }
