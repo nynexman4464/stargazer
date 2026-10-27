@@ -34,7 +34,10 @@ const quant = (v) => Math.round(v * 20) / 20; // 0.05-degree steps for the memoi
    the estimate lines use (C1..C4 / P1..P4). Geometry comes
    from eclipseEstimate() in astro.js, already normalized:
    Sun radius = 1 on the solar side, Moon radius = 1 on the
-   lunar side; north is up in both. Labels alternate above
+   lunar side. Orientation differs by kind on purpose: solar
+   is rotated into the as-it-will-look view (zenith up, like
+   timeanddate's figures), lunar keeps the bulletin figure's
+   north-up. Labels alternate above
    and below the path — with every label on top, the middle
    contacts of a total eclipse (U2/Greatest/U3, C2/Greatest/
    C3) sit nearly on top of each other and their labels

@@ -956,10 +956,10 @@ export function eclipseEstimate(ev, loc, locName) {
   const where = locName || 'your location';
   const altNote = (body, date) => {
     const eq = body === 'sun' ? sunRaDec(date) : moonEquatorial(date);
-    const { alt } = altAz(eq.ra, eq.dec, date, loc.lat, loc.lon);
+    const { alt, az } = altAz(eq.ra, eq.dec, date, loc.lat, loc.lon);
     if (alt < -0.5) return 'below the horizon';
-    if (alt < 6) return `just ${Math.max(0, Math.round(alt))}° up — find a clear horizon`;
-    return `${Math.round(alt)}° up`;
+    if (alt < 6) return `just ${Math.max(0, Math.round(alt))}° up toward the ${compass(az)} — find a clear horizon`;
+    return `${Math.round(alt)}° up toward the ${compass(az)}`;
   };
   if (ev.solar) {
     const c = solarCircumstances(ev.circ, isoDate, loc.lat, loc.lon);
@@ -985,16 +985,32 @@ export function eclipseEstimate(ev, loc, locName) {
     /* Contact-strip diagram, sharing the lunar figure's
        model (fixed body at center, Moon discs at the
        contacts along its path). Positions arrive from the
-       Besselian circumstances in plane coordinates — x
-       mirrors to screen (east to the left), y negates
-       (north up). Units: Sun radii. */
+       Besselian circumstances in plane coordinates
+       (east/north, Sun radii) and are rotated here by each
+       instant's parallactic angle, so the figure shows the
+       eclipse the way it will actually look in the sky —
+       "up" toward the zenith, not celestial north (the
+       timeanddate presentation Alex pointed at, 2026-10-27;
+       the view rotates ~30 degrees across a long event, so
+       each disc takes its own instant's angle). */
     const codes = { c1: 'C1', c2: 'C2', max: 'Greatest', c3: 'C3', c4: 'C4' };
-    const discs = c.strip.map((pt) => ({
-      code: codes[pt.key],
-      sx: -pt.dx,
-      sy: -pt.dy,
-      greatest: pt.key === 'max',
-    }));
+    const dates = { c1: c.c1, c2: c.c2, max: c.max, c3: c.c3, c4: c.c4 };
+    const discs = c.strip.map((pt) => {
+      const sunEq = sunRaDec(dates[pt.key]);
+      const H = (lstDeg(dates[pt.key], loc.lon) - sunEq.ra) * RAD;
+      const dec = sunEq.dec * RAD, la = loc.lat * RAD;
+      const q = Math.atan2(
+        Math.sin(H),
+        Math.tan(la) * Math.cos(dec) - Math.sin(dec) * Math.cos(H),
+      );
+      const E = pt.dx, N = pt.dy;
+      return {
+        code: codes[pt.key],
+        sx: -E * Math.cos(q) + N * Math.sin(q),
+        sy: -(E * Math.sin(q) + N * Math.cos(q)),
+        greatest: pt.key === 'max',
+      };
+    });
     return {
       heading: `Eclipse estimate — ${where}`,
       lines,
@@ -1002,7 +1018,7 @@ export function eclipseEstimate(ev, loc, locName) {
         kind: 'solar',
         discs,
         moonR: c.moonR,
-        caption: 'The Moon’s path across the Sun — each disc is the Moon at a contact point (north up).',
+        caption: 'The Moon’s path across the Sun — each disc is the Moon at a contact point, shown the way it will look in the sky.',
       },
       credit: 'Computed from NASA Besselian elements — eclipse predictions by Fred Espenak, NASA GSFC.',
     };
