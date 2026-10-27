@@ -828,6 +828,27 @@ export function sunUpDuringEvent(c, loc) {
   });
 }
 
+/* The sunrise or sunset nearest to a moment (scans ±12h) —
+   for saying how far an eclipse moment sits from daylight,
+   e.g. "about 3h 18m before sunrise". */
+export function nearestSunCrossing(date, loc) {
+  const step = 5 * 60e3;
+  const t0 = date.getTime();
+  let best = null;
+  let prevT = t0 - 12 * 3600e3;
+  let prevA = sunElev(new Date(prevT), loc.lat, loc.lon);
+  for (let t = prevT + step; t <= t0 + 12 * 3600e3; t += step) {
+    const a = sunElev(new Date(t), loc.lat, loc.lon);
+    if ((prevA <= 0 && a > 0) || (prevA > 0 && a <= 0)) {
+      if (!best || Math.abs(t - t0) < Math.abs(best.time.getTime() - t0)) {
+        best = { time: new Date(t), rising: a > 0 };
+      }
+    }
+    prevT = t; prevA = a;
+  }
+  return best;
+}
+
 /* Expedition-tier events are total solar eclipses: only worth a go-score when
    the eclipse is at all visible (even partially) from the viewer's location.
    Each total solar eclipse record carries `vis`, a generous lat/lon bounding
@@ -918,7 +939,21 @@ export function solarCircumstances(circ, isoDate, lat, lon) {
     samples.push([t, c]);
     if (c < best.c) best = { t, c };
   }
-  if (best.c >= 0) return { visible: false };
+  if (best.c >= 0) {
+    /* A true miss: report how far off it is, in Sun widths
+       (edge to edge at closest approach), so a "not visible"
+       can say whether it was close (Alex, 2026-10-27). */
+    const o = obsAt(best.t);
+    const l1 = o.el.l1 - o.zeta * circ.tanF1;
+    const l2 = o.el.l2 - o.zeta * circ.tanF2;
+    const rsM = (l1 + l2) / 2, rmM = (l1 - l2) / 2;
+    const sM = Math.hypot(o.el.x - o.xi, o.el.y - o.eta);
+    return {
+      visible: false,
+      missAt: new Date(dayMs + (circ.t0 + best.t) * 3600000 - circ.dT * 1000),
+      missGapWidths: (sM - (rsM + rmM)) / (2 * rsM),
+    };
+  }
   let ga = best.t - step, gb = best.t + step;
   for (let i = 0; i < 80; i++) {
     const m1 = ga + (gb - ga) * 0.381966, m2 = ga + (gb - ga) * 0.618034;
@@ -1057,17 +1092,48 @@ export function eclipseEstimate(ev, loc, locName) {
     const c = solarCircumstances(ev.circ, isoDate, loc.lat, loc.lon);
     if (!c) return null;
     if (!c.visible) {
+      const gap = c.missGapWidths;
+      const gapRounded = gap == null ? null : Math.round(gap * 2) / 2;
+      const gapText = gap == null ? null
+        : gap < 0.75 ? 'about half a Sun-width'
+        : gapRounded === 1 ? 'about 1 Sun-width'
+        : `about ${gapRounded} Sun-widths`;
       return {
         heading: `Eclipse estimate — ${where}`,
-        lines: ['Not visible from here: the Moon’s shadow never reaches your sky for this eclipse.'],
+        lines: [
+          'Not visible from here: the Moon’s shadow never reaches your sky for this eclipse.',
+          ...(gapText && c.missAt
+            ? [`Closest approach is ${fmtTime(c.missAt)} — the Moon’s edge passes ${gapText} from the Sun’s edge in your sky.`]
+            : []),
+        ],
         animUrl,
         credit: 'Computed from NASA Besselian elements — eclipse predictions by Fred Espenak, NASA GSFC.',
       };
     }
     if (!sunUpDuringEvent(c, loc)) {
+      /* Not a miss in alignment — a miss in timing. Say how
+         far off it was: when greatest eclipse happens, how
+         deep the Sun is, how far that is from daylight, and
+         what the coverage would have been (Alex, 2026-10-27:
+         "Is it just a near miss? Should we show how far off
+         or something?"). */
+      const eq = sunRaDec(c.max);
+      const depth = Math.max(1, Math.round(-altAz(eq.ra, eq.dec, c.max, loc.lat, loc.lon).alt));
+      const cross = nearestSunCrossing(c.max, loc);
+      let rel = '';
+      if (cross) {
+        const mins = Math.round(Math.abs(cross.time.getTime() - c.max.getTime()) / 60000);
+        const dur = mins >= 60 ? `${Math.floor(mins / 60)}h ${String(mins % 60).padStart(2, '0')}m` : `${mins} minutes`;
+        rel = cross.rising
+          ? ` — about ${dur} before sunrise (${fmtTime(cross.time)})`
+          : ` — about ${dur} after sunset (${fmtTime(cross.time)})`;
+      }
       return {
         heading: `Eclipse estimate — ${where}`,
-        lines: ['Not visible from here: the Moon’s shadow passes over you at night, while the Sun is below the horizon.'],
+        lines: [
+          'Not visible from here: the Moon’s shadow passes over you at night, while the Sun is below the horizon.',
+          `Greatest eclipse is at ${fmtTime(c.max)}, with the Sun ${depth}° below the horizon${rel}. The alignment is real — the Moon would cover about ${Math.round(c.obscuration * 100)}% of the Sun if it happened in daylight.`,
+        ],
         animUrl,
         credit: 'Computed from NASA Besselian elements — eclipse predictions by Fred Espenak, NASA GSFC.',
       };
