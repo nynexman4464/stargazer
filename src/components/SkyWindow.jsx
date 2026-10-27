@@ -238,36 +238,87 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
     );
   });
 
+  // Body glyphs, shared by the landmarks below and the target
+  // peak marker: the Sun as a rayed disc (never reads as the
+  // Moon or a planet), the Moon as a phase disc whose lit side
+  // faces the Sun. withLabel adds the side name tag the
+  // landmarks carry; the peak marker names itself separately.
+  const sunDisc = (p, withLabel) => {
+    const rays = [];
+    for (let i = 0; i < 8; i++) {
+      const a = (i * Math.PI) / 4;
+      rays.push(
+        <line key={i}
+          x1={p.x + Math.cos(a) * 9.5} y1={p.y + Math.sin(a) * 9.5}
+          x2={p.x + Math.cos(a) * 12.5} y2={p.y + Math.sin(a) * 12.5}
+          stroke="var(--color-text-yellow)" strokeWidth="1.4" strokeLinecap="round" />,
+      );
+    }
+    return (
+      <g>
+        <circle cx={p.x} cy={p.y} r="6.5" fill="var(--color-text-yellow)" />
+        {rays}
+        {withLabel && <text x={p.x + 15} y={p.y + 3} fontSize="10.5" fill="var(--color-text-secondary)">Sun</text>}
+      </g>
+    );
+  };
+  const moonDisc = (p, mAlt, mAz, illum, sunAlt, sunAz, withLabel) => {
+    const R = 9;
+    const cosI = 2 * illum - 1; // +1 at full, -1 at new
+    const Dm = dirOf(mAz, mAlt);
+    const Ds = dirOf(sunAz, sunAlt);
+    const dm = dot(Ds, Dm);
+    const v = [Ds[0] - dm * Dm[0], Ds[1] - dm * Dm[1], Ds[2] - dm * Dm[2]];
+    const eAlt = [-Math.sin(mAlt * DEG) * Math.sin(mAz * DEG), -Math.sin(mAlt * DEG) * Math.cos(mAz * DEG), Math.cos(mAlt * DEG)];
+    const eAz = [Math.cos(mAz * DEG), -Math.sin(mAz * DEG), 0];
+    const vAlt = dot(v, eAlt);
+    const vAz = dot(v, eAz) / Math.max(0.2, Math.cos(mAlt * DEG));
+    const pA = proj(mAlt + 1, mAz, 0.05);
+    const pZ = proj(mAlt, mAz + 1, 0.05);
+    let rot = 0;
+    if (pA && pZ
+      && Math.hypot(pA.x - p.x, pA.y - p.y) < 80 && Math.hypot(pZ.x - p.x, pZ.y - p.y) < 80) {
+      rot = Math.atan2(
+        vAlt * (pA.y - p.y) + vAz * (pZ.y - p.y),
+        vAlt * (pA.x - p.x) + vAz * (pZ.x - p.x),
+      ) / DEG;
+    }
+    const litPts = [];
+    for (let k = 0; k <= 24; k++) {
+      const a = -Math.PI / 2 + (k / 24) * Math.PI;
+      litPts.push([Math.cos(a), Math.sin(a)]);
+    }
+    for (let k = 1; k <= 24; k++) {
+      const b = Math.PI / 2 - (k / 24) * Math.PI;
+      litPts.push([-cosI * Math.cos(b), Math.sin(b)]);
+    }
+    const ca = Math.cos(rot * DEG), sa = Math.sin(rot * DEG);
+    const litStr = litPts.map(([ux, uy]) => {
+      const fx = ux, fy = -uy; // canonical y-up -> screen y-down
+      return `${(p.x + R * (fx * ca - fy * sa)).toFixed(1)},${(p.y + R * (fx * sa + fy * ca)).toFixed(1)}`;
+    }).join(' ');
+    return (
+      <g>
+        <circle cx={p.x} cy={p.y} r={R} fill="var(--color-background-muted)" stroke="var(--color-border-emphasized)" strokeWidth="0.75" />
+        <polygon points={litStr} fill="var(--color-text-yellow)" opacity="0.95" />
+        {withLabel && <text x={p.x + 13} y={p.y + 3} fontSize="10" fill="var(--color-text-secondary)">Moon</text>}
+      </g>
+    );
+  };
+
   // The Sun as a landmark (Alex, 2026-10-22 — 'show the sun in
   // all sky views, like we do for moon, even if below horizon').
   // Same rules as the Moon: drawn wherever it falls in frame,
   // faded under the ground wash when below the horizon — at
   // night it tells you where the Sun is sitting, how long ago
-  // it set, how soon it rises. A rayed disc, so it never reads
-  // as the Moon or a planet. Skipped when the Sun is the
-  // target itself (the aim test).
+  // it set, how soon it rises. Skipped when the Sun is the
+  // target itself (its peak marker draws the body instead).
   let sunEl = null;
   if (!targets.some((t) => t.label === 'Sun')) {
     const s = skyAltAz.sun;
     const p = proj(s.alt, s.az);
     if (p && p.x > -50 && p.x < W + 50 && p.y > -50 && p.y < H + 50) {
-      const rays = [];
-      for (let i = 0; i < 8; i++) {
-        const a = (i * Math.PI) / 4;
-        rays.push(
-          <line key={i}
-            x1={p.x + Math.cos(a) * 9.5} y1={p.y + Math.sin(a) * 9.5}
-            x2={p.x + Math.cos(a) * 12.5} y2={p.y + Math.sin(a) * 12.5}
-            stroke="var(--color-text-yellow)" strokeWidth="1.4" strokeLinecap="round" />,
-        );
-      }
-      sunEl = (
-        <g>
-          <circle cx={p.x} cy={p.y} r="6.5" fill="var(--color-text-yellow)" />
-          {rays}
-          <text x={p.x + 15} y={p.y + 3} fontSize="10.5" fill="var(--color-text-secondary)">Sun</text>
-        </g>
-      );
+      sunEl = sunDisc(p, true);
     }
   }
 
@@ -277,63 +328,13 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
   // below the horizon too and the fade wash dims it there (it
   // used to vanish under -2 degrees, which is why it was missing
   // from the Leonids 6 AM view — set by then, 55 degrees down,
-  // but still findable by dragging down to it).
+  // but still findable by dragging down to it). The phase disc
+  // (moonDisc above) draws the lit part with the real
+  // terminator shape, rotated so the lit side faces the Sun.
   if (!targets.some((t) => t.label === 'Moon')) {
     const p = proj(m.alt, m.az);
     if (p && p.x > -50 && p.x < W + 50 && p.y > -50 && p.y < H + 50) {
-      // The Moon drawn in its approximate phase for the view's
-      // date (Alex, 2026-10-21): the lit part of the disc with
-      // the real terminator shape — a half-ellipse whose width
-      // follows the illumination — rotated so the lit side faces
-      // the Sun on screen. The Sun is usually below the horizon
-      // in this view and cannot be projected, so its direction
-      // comes from the Moon's own tangent plane: the direction
-      // from Moon to Sun, read against the screen vectors of the
-      // Moon's local up and east.
-      const R = 9;
-      const cosI = 2 * skyAltAz.moonIllum - 1; // +1 at full, -1 at new
-      const Dm = dirOf(m.az, m.alt);
-      const Ds = dirOf(skyAltAz.sun.az, skyAltAz.sun.alt);
-      const dm = dot(Ds, Dm);
-      const v = [Ds[0] - dm * Dm[0], Ds[1] - dm * Dm[1], Ds[2] - dm * Dm[2]];
-      const eAlt = [-Math.sin(m.alt * DEG) * Math.sin(m.az * DEG), -Math.sin(m.alt * DEG) * Math.cos(m.az * DEG), Math.cos(m.alt * DEG)];
-      const eAz = [Math.cos(m.az * DEG), -Math.sin(m.az * DEG), 0];
-      const vAlt = dot(v, eAlt);
-      const vAz = dot(v, eAz) / Math.max(0.2, Math.cos(m.alt * DEG));
-      const pA = proj(m.alt + 1, m.az, 0.05);
-      const pZ = proj(m.alt, m.az + 1, 0.05);
-      let rot = 0;
-      if (pA && pZ
-        && Math.hypot(pA.x - p.x, pA.y - p.y) < 80 && Math.hypot(pZ.x - p.x, pZ.y - p.y) < 80) {
-        rot = Math.atan2(
-          vAlt * (pA.y - p.y) + vAz * (pZ.y - p.y),
-          vAlt * (pA.x - p.x) + vAz * (pZ.x - p.x),
-        ) / DEG;
-      }
-      // Lit polygon, canonical (lit side toward +x, y up): the
-      // Sun-facing half of the limb, then the terminator
-      // half-ellipse x = -cosI * sqrt(1 - y^2) back around.
-      const litPts = [];
-      for (let k = 0; k <= 24; k++) {
-        const a = -Math.PI / 2 + (k / 24) * Math.PI;
-        litPts.push([Math.cos(a), Math.sin(a)]);
-      }
-      for (let k = 1; k <= 24; k++) {
-        const b = Math.PI / 2 - (k / 24) * Math.PI;
-        litPts.push([-cosI * Math.cos(b), Math.sin(b)]);
-      }
-      const ca = Math.cos(rot * DEG), sa = Math.sin(rot * DEG);
-      const litStr = litPts.map(([ux, uy]) => {
-        const fx = ux, fy = -uy; // canonical y-up -> screen y-down
-        return `${(p.x + R * (fx * ca - fy * sa)).toFixed(1)},${(p.y + R * (fx * sa + fy * ca)).toFixed(1)}`;
-      }).join(' ');
-      moonEl = (
-        <g>
-          <circle cx={p.x} cy={p.y} r={R} fill="var(--color-background-muted)" stroke="var(--color-border-emphasized)" strokeWidth="0.75" />
-          <polygon points={litStr} fill="var(--color-text-yellow)" opacity="0.95" />
-          <text x={p.x + 13} y={p.y + 3} fontSize="10" fill="var(--color-text-secondary)">Moon</text>
-        </g>
-      );
+      moonEl = moonDisc(p, m.alt, m.az, skyAltAz.moonIllum, skyAltAz.sun.alt, skyAltAz.sun.az, true);
     }
   }
 
@@ -406,16 +407,32 @@ export default memo(function SkyWindow({ sky, atTime, loc, targets, center, fov 
     // sit close together near the peak — the labels keep them from
     // reading as one dot.
     let peakP = null;
-    if (t.peak && t.peak.alt > 0) {
+    if (t.peak) {
       peakP = proj(t.peak.alt, t.peak.az);
       if (peakP) {
+        /* No altitude gate (Alex, 2026-10-27): a target whose
+           peak is below the horizon — the Sun at a night-side
+           eclipse, the Moon at a daytime lunar eclipse — drew
+           its track and its edge arrow but never the body
+           itself, so the view pointed at something invisible.
+           Like everything else below the horizon it renders
+           here and the ground wash fades it. Sun and Moon
+           targets draw their actual body glyph; other targets
+           keep the gold dot. */
+        const body = t.label === 'Sun'
+          ? sunDisc(peakP, false)
+          : t.label === 'Moon'
+            ? moonDisc(peakP, t.peak.alt, t.peak.az, skyAltAz.moonIllum, skyAltAz.sun.alt, skyAltAz.sun.az, false)
+            : <circle cx={peakP.x} cy={peakP.y} r="6" fill="var(--color-text-yellow)" stroke="var(--color-background-body)" strokeWidth="2" />;
+        const labelUp = t.label === 'Sun' ? 19 : t.label === 'Moon' ? 14 : 12;
+        const timeDown = t.label === 'Sun' ? 24 : 20;
         targetEls.push(
           <g key={`tg${ti}`}>
-            <circle cx={peakP.x} cy={peakP.y} r="6" fill="var(--color-text-yellow)" stroke="var(--color-background-body)" strokeWidth="2" />
-            <text x={peakP.x} y={peakP.y - 12} textAnchor="middle" fontSize="12" fontWeight="bold" fill="var(--color-text-primary)">
+            {body}
+            <text x={peakP.x} y={peakP.y - labelUp} textAnchor="middle" fontSize="12" fontWeight="bold" fill="var(--color-text-primary)">
               {t.label}
             </text>
-            <text x={peakP.x} y={peakP.y + 20} textAnchor="middle" fontSize="10" fill="var(--color-text-secondary)">
+            <text x={peakP.x} y={peakP.y + timeDown} textAnchor="middle" fontSize="10" fill="var(--color-text-secondary)">
               {fmtTime(t.peak.time)}
             </text>
           </g>,
