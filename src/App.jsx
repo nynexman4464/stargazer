@@ -45,12 +45,24 @@ const base = import.meta.env.BASE_URL;
 export default function App() {
   const [loc, setLoc] = useState(loadLoc);
   const [home, setHome] = useState(loadHome);
+  const [lastAway, setLastAway] = useState(() => {
+    const saved = loadLastAway();
+    if (saved) return saved;
+    // Seed from the current spot so travelers who are already away
+    // get an Away option in the menu on first run.
+    const cur = loadLoc();
+    return isAway(cur, loadHome()) ? cur : null;
+  });
   // Display timezone follows the viewed location (Alex,
   // 2026-10-27): clock times render in the location's own
   // timezone, not the viewer's. Locations picked from search
   // carry a tz; older saves get theirs resolved once from
   // coordinates and persisted with the location. The tick
   // state exists only to re-render once the tz lands.
+  // NOTE: this effect must stay BELOW the state declarations
+  // it depends on — its deps array is evaluated during render,
+  // and referencing lastAway above its useState crashed the
+  // app at load with a TDZ ReferenceError (2026-10-27).
   const [, setDisplayTzTick] = useState(0);
   useEffect(() => {
     if (loc?.tz) {
@@ -78,14 +90,6 @@ export default function App() {
     });
     return () => { cancelled = true; };
   }, [loc, home, lastAway]);
-  const [lastAway, setLastAway] = useState(() => {
-    const saved = loadLastAway();
-    if (saved) return saved;
-    // Seed from the current spot so travelers who are already away
-    // get an Away option in the menu on first run.
-    const cur = loadLoc();
-    return isAway(cur, loadHome()) ? cur : null;
-  });
   const [tier, setTier] = useState('all');
   const [type, setType] = useState('all');
   const [range, setRange] = useState('all');
