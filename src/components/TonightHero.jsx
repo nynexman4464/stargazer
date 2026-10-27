@@ -12,7 +12,7 @@ import ScoreFactors from './ScoreFactors.jsx';
 import GoScore from './GoScore.jsx';
 import Starfield from './Starfield.jsx';
 import { TermText } from './Term.jsx';
-import { TIER_META, TYPE_META, DAY, fmtDate, countdown, moonIllum, moonName, eventImage, eclipseVisibleFrom, planetVisibilityFactors, eventLook, eclipseEstimate } from '../lib/astro.js';
+import { TIER_META, TYPE_META, DAY, fmtDate, fmtDateFar, countdown, moonIllum, moonName, eventImage, eclipseVisibleFrom, planetVisibilityFactors, eventLook, eclipseEstimate } from '../lib/astro.js';
 import WhereToLook from './WhereToLook.jsx';
 
 const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
@@ -127,7 +127,7 @@ export default function TonightHero({ pick, score, isTonight, viewDate, loc, pla
                     </Text>
                     <WhereToLook
                       looks={looks}
-                      whenText={pick.solar ? fmtDate(pick.date) : `night of ${fmtDate(pick.date)}`}
+                      whenText={pick.solar ? fmtDateFar(pick.date) : `night of ${fmtDateFar(pick.date)}`}
                       locName={loc?.name}
                       loc={loc}
                       detail={{ title: pick.title, text: pick.desc, estimate: eclipseEstimate(pick, loc, loc?.name) }}
