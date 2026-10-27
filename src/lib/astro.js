@@ -870,15 +870,23 @@ export function solarCircumstances(circ, isoDate, lat, lon) {
     const a3 = 0.5 * Math.sqrt((-s + rs + rm) * (s + rs - rm) * (s - rs + rm) * (s + rs + rm));
     obscuration = (a1 + a2 - a3) / (Math.PI * rs * rs);
   }
-  /* Center distance in Sun radii at any instant — feeds the
-     estimate's contact-strip diagram (at C1/C4 it is exactly
-     1 + moonR: the discs are tangent to the Sun by
-     construction). */
-  const sepAt = (t) => {
+  /* The Moon's center relative to the Sun's at any instant,
+     in Sun radii, in the Besselian plane's own coordinates
+     (x eastward along the celestial equator, y toward
+     celestial north) — feeds the estimate's contact-strip
+     diagram. Position AND distance must come from this one
+     frame: an earlier version took the distance here but the
+     direction from the app's geocentric RA/Dec positions,
+     whose ~1-degree parallax offset (several Sun radii at
+     this scale) bent the drawn path into a steep fake bow
+     (Alex, 2026-10-27). At C1/C4 the magnitude is exactly
+     1 + moonR — the discs are tangent by construction. */
+  const vecAt = (t) => {
     const o = obsAt(t);
     const l1 = o.el.l1 - o.zeta * circ.tanF1;
     const l2 = o.el.l2 - o.zeta * circ.tanF2;
-    return Math.hypot(o.el.x - o.xi, o.el.y - o.eta) / ((l1 + l2) / 2);
+    const rs = (l1 + l2) / 2;
+    return { dx: (o.el.x - o.xi) / rs, dy: (o.el.y - o.eta) / rs };
   };
   const toDate = (tTT) => new Date(dayMs + (circ.t0 + tTT) * 3600000 - circ.dT * 1000);
   return {
@@ -896,11 +904,11 @@ export function solarCircumstances(circ, isoDate, lat, lon) {
     magnitude,
     obscuration,
     strip: [
-      ...(c1 !== null ? [{ key: 'c1', sep: sepAt(c1) }] : []),
-      ...(c2 !== null ? [{ key: 'c2', sep: sepAt(c2) }] : []),
-      { key: 'max', sep: s / rs },
-      ...(c3 !== null ? [{ key: 'c3', sep: sepAt(c3) }] : []),
-      ...(c4 !== null ? [{ key: 'c4', sep: sepAt(c4) }] : []),
+      ...(c1 !== null ? [{ key: 'c1', ...vecAt(c1) }] : []),
+      ...(c2 !== null ? [{ key: 'c2', ...vecAt(c2) }] : []),
+      { key: 'max', dx: (el.x - xi) / rs, dy: (el.y - eta) / rs },
+      ...(c3 !== null ? [{ key: 'c3', ...vecAt(c3) }] : []),
+      ...(c4 !== null ? [{ key: 'c4', ...vecAt(c4) }] : []),
     ],
     moonR: rm / rs,
   };
@@ -976,27 +984,17 @@ export function eclipseEstimate(ev, loc, locName) {
     if (c.c4) lines.push(`C4 — Partial phase ends: ${fmtTime(c.c4)} — Sun ${altNote('sun', c.c4)}`);
     /* Contact-strip diagram, sharing the lunar figure's
        model (fixed body at center, Moon discs at the
-       contacts along its path): the separation at each
-       contact comes from the Besselian circumstances; the
-       direction is the Moon's offset from the Sun in
-       equatorial terms at that instant (the app's own
-       positions — arcminute-grade, fine for a direction).
-       Units: Sun radii, north up, east to the left. */
+       contacts along its path). Positions arrive from the
+       Besselian circumstances in plane coordinates — x
+       mirrors to screen (east to the left), y negates
+       (north up). Units: Sun radii. */
     const codes = { c1: 'C1', c2: 'C2', max: 'Greatest', c3: 'C3', c4: 'C4' };
-    const dates = { c1: c.c1, c2: c.c2, max: c.max, c3: c.c3, c4: c.c4 };
-    const discs = c.strip.map((pt) => {
-      const date = dates[pt.key];
-      const sunEq = sunRaDec(date), moonEq = moonEquatorial(date);
-      const dE = (((moonEq.ra - sunEq.ra + 540) % 360) - 180) * Math.cos(sunEq.dec * RAD);
-      const dN = moonEq.dec - sunEq.dec;
-      const mLen = Math.hypot(dE, dN) || 1;
-      return {
-        code: codes[pt.key],
-        sx: (-dE / mLen) * pt.sep,
-        sy: (-dN / mLen) * pt.sep,
-        greatest: pt.key === 'max',
-      };
-    });
+    const discs = c.strip.map((pt) => ({
+      code: codes[pt.key],
+      sx: -pt.dx,
+      sy: -pt.dy,
+      greatest: pt.key === 'max',
+    }));
     return {
       heading: `Eclipse estimate — ${where}`,
       lines,

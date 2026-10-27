@@ -477,8 +477,9 @@ body {
   height: calc(var(--spacing-12) * 2);
 }
 
-/* Eclipse estimate diagrams in the sky view (solar: Moon over
-   Sun at maximum; lunar: Moon in Earth's shadow at greatest). */
+/* Eclipse estimate diagrams in the sky view: one figure for
+   both kinds — fixed body at center (Sun, or Earth's shadow
+   circles), Moon discs at the contact points along its path. */
 .sg-ecl-diagram {
   display: block;
   margin: 0 auto;
@@ -488,12 +489,13 @@ body {
 }
 .sg-ecl-moon-s {
   fill: var(--color-background);
-  stroke: var(--color-border);
+  fill-opacity: 0.55;
+  stroke: var(--color-text-secondary);
   stroke-width: 1;
-  opacity: 0.85;
 }
 .sg-ecl-moon-s-g {
   fill: var(--color-background);
+  fill-opacity: 0.8;
   stroke: var(--color-text-primary);
   stroke-width: 1;
 }
@@ -527,6 +529,11 @@ body {
   fill: var(--color-text-secondary);
   font-size: 8.5px;
   text-anchor: middle;
+  /* Halo so labels stay readable where they land on the
+     gold Sun or the umbra fill. */
+  stroke: var(--color-background);
+  stroke-width: 2.5px;
+  paint-order: stroke;
 }
 
 /* NOAA OVATION aurora prediction map: square polar view, full card width. */
