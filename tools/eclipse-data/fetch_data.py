@@ -176,6 +176,23 @@ def parse_lunar(iso, text):
     if umb is None:
         note(f"lunar {iso}: Umbral Magnitude not found")
 
+    m = re.search(r"\bGamma\s+(-?[\d.]+)", txt)
+    gamma = float(m.group(1)) if m else None
+    if gamma is None:
+        note(f"lunar {iso}: Gamma not found")
+
+    # Shadow radii at t0 from the Besselian elements table
+    # (row n=0: n, x, y, d, f1, f2, f3) — feeds the sky view's
+    # eclipse diagram (radii in Earth radii at the Moon).
+    m = re.search(
+        r"\b0\s+-?\d+\.\d+\s+-?\d+\.\d+\s+-?\d+\.\d+\s+"
+        r"(\d+\.\d+)\s+(\d+\.\d+)\s+(\d+\.\d+)", txt)
+    f1 = f2 = f3 = None
+    if m:
+        f1, f2, f3 = (float(m.group(i)) for i in (1, 2, 3))
+    else:
+        note(f"lunar {iso}: shadow radii (f1/f2/f3) not found")
+
     contacts = {k: None for k in
                 ("p1", "u1", "u2", "greatest", "u3", "u4", "p4")}
     seen = set()
@@ -193,7 +210,8 @@ def parse_lunar(iso, text):
     for req in ("p1", "greatest", "p4"):
         if contacts[req] is None:
             note(f"lunar {iso}: required contact {req} not found")
-    return {"dT": dT, "penMag": pen, "umbMag": umb, "contactsTD": contacts}
+    return {"dT": dT, "penMag": pen, "umbMag": umb, "gamma": gamma,
+            "f1": f1, "f2": f2, "f3": f3, "contactsTD": contacts}
 
 
 # ---------------------------------------------------------------- main

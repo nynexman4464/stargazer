@@ -477,6 +477,33 @@ body {
   height: calc(var(--spacing-12) * 2);
 }
 
+/* Eclipse estimate diagrams in the sky view (solar: Moon over
+   Sun at maximum; lunar: Moon in Earth's shadow at greatest). */
+.sg-ecl-diagram {
+  display: block;
+  margin: 0 auto;
+}
+.sg-ecl-sun {
+  fill: var(--color-warning);
+}
+.sg-ecl-moon-s {
+  fill: var(--color-background);
+  stroke: var(--color-border);
+  stroke-width: 1.5;
+}
+.sg-ecl-pen {
+  fill: var(--color-text-primary);
+  opacity: 0.08;
+}
+.sg-ecl-umb {
+  fill: var(--color-text-primary);
+  opacity: 0.3;
+}
+.sg-ecl-moon-l {
+  fill: var(--color-text-primary);
+  opacity: 0.88;
+}
+
 /* NOAA OVATION aurora prediction map: square polar view, full card width. */
 .sg-aurora-map {
   width: 100%;

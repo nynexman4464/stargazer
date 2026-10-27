@@ -885,6 +885,9 @@ export function solarCircumstances(circ, isoDate, lat, lon) {
     max: toDate(tMax),
     magnitude,
     obscuration,
+    /* For the estimate's at-maximum diagram: center distance
+       and the Moon's radius, both in Sun radii. */
+    diagram: { sep: s / rs, moonR: rm / rs },
   };
 }
 
@@ -956,9 +959,26 @@ export function eclipseEstimate(ev, loc, locName) {
       `Maximum: ${fmtTime(c.max)} — magnitude ${c.magnitude.toFixed(2)}, about ${Math.round(c.obscuration * 100)}% of the Sun’s disk covered; Sun ${altNote('sun', c.max)}`,
     );
     if (c.c4) lines.push(`Partial phase ends: ${fmtTime(c.c4)} — Sun ${altNote('sun', c.c4)}`);
+    /* Which way the Moon crosses the Sun, for the diagram:
+       the Moon's offset from the Sun at maximum in equatorial
+       terms (the app's own positions — arcminute-grade, fine
+       for a direction; the depth comes from the Besselian
+       separation above). Screen convention: north up, east
+       to the left, as in a sky chart. */
+    const sunEq = sunRaDec(c.max), moonEq = moonEquatorial(c.max);
+    const dE = (((moonEq.ra - sunEq.ra + 540) % 360) - 180) * Math.cos(sunEq.dec * RAD);
+    const dN = moonEq.dec - sunEq.dec;
+    const mLen = Math.hypot(dE, dN) || 1;
     return {
       heading: `Eclipse estimate — ${where}`,
       lines,
+      diagram: {
+        kind: 'solar',
+        sep: c.diagram.sep,
+        moonR: c.diagram.moonR,
+        dir: { x: -dE / mLen, y: -dN / mLen },
+        caption: 'The Moon over the Sun at maximum, as it will appear in the sky (north up).',
+      },
       credit: 'Computed from NASA Besselian elements — eclipse predictions by Fred Espenak, NASA GSFC.',
     };
   }
@@ -1008,9 +1028,27 @@ export function eclipseEstimate(ev, loc, locName) {
     ? `Penumbral magnitude ${c.penMag.toFixed(2)} — how deeply the Moon dips into the faint shadow (1.0 would just touch the dark shadow).`
     : `Umbral magnitude ${c.umbMag.toFixed(2)} — how deeply the Moon enters the dark shadow (1.0 = fully inside).`;
   lines.push(magLine);
+  /* Diagram geometry in Moon radii: the shadow radii come
+     from the elements (f1/f2 against the Moon's f3), and the
+     axis distance at greatest follows from the penumbral
+     magnitude identity penMag = (f1 + f3 - rho) / (2 f3).
+     Gamma's sign says which side of the axis the Moon
+     passes (positive = Moon north of the axis, so the
+     shadow center sits south — below — the Moon). */
+  const diagram = ev.circ.f1 && ev.circ.f3
+    ? {
+        kind: 'lunar',
+        penR: ev.circ.f1 / ev.circ.f3,
+        umbR: ev.circ.f2 / ev.circ.f3,
+        off: (ev.circ.f1 + ev.circ.f3 - 2 * ev.circ.f3 * ev.circ.penMag) / ev.circ.f3,
+        gamma: ev.circ.gamma,
+        caption: 'The Moon in Earth’s shadow at greatest eclipse (north up): the dark circle is the umbra, the faint one the penumbra.',
+      }
+    : null;
   return {
     heading: `Eclipse estimate — ${where}`,
     lines,
+    diagram,
     credit: 'Contact times and magnitudes: Fred Espenak, EclipseWise.com.',
   };
 }

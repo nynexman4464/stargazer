@@ -23,6 +23,35 @@ function clamp(v, lo, hi) {
 }
 const quant = (v) => Math.round(v * 20) / 20; // 0.05-degree steps for the memoized window — fine enough that a slow drag doesn't step visibly (0.2-degree steps were ~1px jumps)
 
+/* The eclipse estimate's at-maximum diagram (Alex, 2026-10-26:
+   "I don't see any graphic"). Solar: the Moon's disc over the
+   Sun's at maximum, at the computed separation and crossing
+   direction. Lunar: the Moon inside Earth's two shadow
+   circles at greatest eclipse. Geometry comes from
+   eclipseEstimate() in astro.js, in true relative sizes
+   (Sun radius = 1 unit on the solar side, Moon radius = 1
+   on the lunar side); north is up in both. */
+function EclipseDiagram({ d }) {
+  if (d.kind === 'solar') {
+    const R = 40;
+    return (
+      <svg viewBox="0 0 120 120" className="sg-ecl-diagram" role="img" aria-label={d.caption}>
+        <circle cx={60} cy={60} r={R} className="sg-ecl-sun" />
+        <circle cx={60 + d.dir.x * d.sep * R} cy={60 + d.dir.y * d.sep * R} r={R * d.moonR} className="sg-ecl-moon-s" />
+      </svg>
+    );
+  }
+  const R = 24;
+  const sy = 75 + Math.sign(d.gamma || 1) * d.off * R;
+  return (
+    <svg viewBox="0 0 150 150" className="sg-ecl-diagram" role="img" aria-label={d.caption}>
+      <circle cx={75} cy={sy} r={R * d.penR} className="sg-ecl-pen" />
+      <circle cx={75} cy={sy} r={R * d.umbR} className="sg-ecl-umb" />
+      <circle cx={75} cy={75} r={R} className="sg-ecl-moon-l" />
+    </svg>
+  );
+}
+
 // Camera lens classes and their typical DIAGONAL field of view.
 // No browser API reports a camera's field of view — and there
 // is no calibration step (Alex, 2026-10-22) — so when a lens
@@ -887,6 +916,12 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
             {detail.estimate && (
               <>
                 <Text weight="semibold">{detail.estimate.heading}</Text>
+                {detail.estimate.diagram && (
+                  <>
+                    <EclipseDiagram d={detail.estimate.diagram} />
+                    <Text type="supporting">{detail.estimate.diagram.caption}</Text>
+                  </>
+                )}
                 {detail.estimate.lines.map((l) => (
                   <Text key={l} type="supporting">{l}</Text>
                 ))}
