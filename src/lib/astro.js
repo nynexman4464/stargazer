@@ -870,6 +870,16 @@ export function solarCircumstances(circ, isoDate, lat, lon) {
     const a3 = 0.5 * Math.sqrt((-s + rs + rm) * (s + rs - rm) * (s - rs + rm) * (s + rs + rm));
     obscuration = (a1 + a2 - a3) / (Math.PI * rs * rs);
   }
+  /* Center distance in Sun radii at any instant — feeds the
+     estimate's contact-strip diagram (at C1/C4 it is exactly
+     1 + moonR: the discs are tangent to the Sun by
+     construction). */
+  const sepAt = (t) => {
+    const o = obsAt(t);
+    const l1 = o.el.l1 - o.zeta * circ.tanF1;
+    const l2 = o.el.l2 - o.zeta * circ.tanF2;
+    return Math.hypot(o.el.x - o.xi, o.el.y - o.eta) / ((l1 + l2) / 2);
+  };
   const toDate = (tTT) => new Date(dayMs + (circ.t0 + tTT) * 3600000 - circ.dT * 1000);
   return {
     visible: true,
@@ -885,9 +895,14 @@ export function solarCircumstances(circ, isoDate, lat, lon) {
     max: toDate(tMax),
     magnitude,
     obscuration,
-    /* For the estimate's at-maximum diagram: center distance
-       and the Moon's radius, both in Sun radii. */
-    diagram: { sep: s / rs, moonR: rm / rs },
+    strip: [
+      ...(c1 !== null ? [{ key: 'c1', sep: sepAt(c1) }] : []),
+      ...(c2 !== null ? [{ key: 'c2', sep: sepAt(c2) }] : []),
+      { key: 'max', sep: s / rs },
+      ...(c3 !== null ? [{ key: 'c3', sep: sepAt(c3) }] : []),
+      ...(c4 !== null ? [{ key: 'c4', sep: sepAt(c4) }] : []),
+    ],
+    moonR: rm / rs,
   };
 }
 
@@ -952,32 +967,44 @@ export function eclipseEstimate(ev, loc, locName) {
     const central = c.c2 && c.c3;
     if (central) {
       const word = c.central === 'annular' ? 'Annularity' : 'Totality';
-      lines.push(`${word}: ${fmtTime(c.c2)} – ${fmtTime(c.c3)} (${centralDurText(c.c3 - c.c2)})`);
+      lines.push(`C2–C3 — ${word}: ${fmtTime(c.c2)} – ${fmtTime(c.c3)} (${centralDurText(c.c3 - c.c2)})`);
     }
-    if (c.c1) lines.push(`Partial phase begins: ${fmtTime(c.c1)} — Sun ${altNote('sun', c.c1)}`);
+    if (c.c1) lines.push(`C1 — Partial phase begins: ${fmtTime(c.c1)} — Sun ${altNote('sun', c.c1)}`);
     lines.push(
-      `Maximum: ${fmtTime(c.max)} — magnitude ${c.magnitude.toFixed(2)}, about ${Math.round(c.obscuration * 100)}% of the Sun’s disk covered; Sun ${altNote('sun', c.max)}`,
+      `Greatest — Maximum: ${fmtTime(c.max)} — magnitude ${c.magnitude.toFixed(2)}, about ${Math.round(c.obscuration * 100)}% of the Sun’s disk covered; Sun ${altNote('sun', c.max)}`,
     );
-    if (c.c4) lines.push(`Partial phase ends: ${fmtTime(c.c4)} — Sun ${altNote('sun', c.c4)}`);
-    /* Which way the Moon crosses the Sun, for the diagram:
-       the Moon's offset from the Sun at maximum in equatorial
-       terms (the app's own positions — arcminute-grade, fine
-       for a direction; the depth comes from the Besselian
-       separation above). Screen convention: north up, east
-       to the left, as in a sky chart. */
-    const sunEq = sunRaDec(c.max), moonEq = moonEquatorial(c.max);
-    const dE = (((moonEq.ra - sunEq.ra + 540) % 360) - 180) * Math.cos(sunEq.dec * RAD);
-    const dN = moonEq.dec - sunEq.dec;
-    const mLen = Math.hypot(dE, dN) || 1;
+    if (c.c4) lines.push(`C4 — Partial phase ends: ${fmtTime(c.c4)} — Sun ${altNote('sun', c.c4)}`);
+    /* Contact-strip diagram, sharing the lunar figure's
+       model (fixed body at center, Moon discs at the
+       contacts along its path): the separation at each
+       contact comes from the Besselian circumstances; the
+       direction is the Moon's offset from the Sun in
+       equatorial terms at that instant (the app's own
+       positions — arcminute-grade, fine for a direction).
+       Units: Sun radii, north up, east to the left. */
+    const codes = { c1: 'C1', c2: 'C2', max: 'Greatest', c3: 'C3', c4: 'C4' };
+    const dates = { c1: c.c1, c2: c.c2, max: c.max, c3: c.c3, c4: c.c4 };
+    const discs = c.strip.map((pt) => {
+      const date = dates[pt.key];
+      const sunEq = sunRaDec(date), moonEq = moonEquatorial(date);
+      const dE = (((moonEq.ra - sunEq.ra + 540) % 360) - 180) * Math.cos(sunEq.dec * RAD);
+      const dN = moonEq.dec - sunEq.dec;
+      const mLen = Math.hypot(dE, dN) || 1;
+      return {
+        code: codes[pt.key],
+        sx: (-dE / mLen) * pt.sep,
+        sy: (-dN / mLen) * pt.sep,
+        greatest: pt.key === 'max',
+      };
+    });
     return {
       heading: `Eclipse estimate — ${where}`,
       lines,
       diagram: {
         kind: 'solar',
-        sep: c.diagram.sep,
-        moonR: c.diagram.moonR,
-        dir: { x: -dE / mLen, y: -dN / mLen },
-        caption: 'The Moon over the Sun at maximum, as it will appear in the sky (north up).',
+        discs,
+        moonR: c.moonR,
+        caption: 'The Moon’s path across the Sun — each disc is the Moon at a contact point (north up).',
       },
       credit: 'Computed from NASA Besselian elements — eclipse predictions by Fred Espenak, NASA GSFC.',
     };
@@ -1049,14 +1076,22 @@ export function eclipseEstimate(ev, loc, locName) {
         ]) {
           if (!c[key]) continue;
           const p = posAt(c[key]);
-          discs.push({ code, sx: -p.x, sy: -p.y, greatest: key === 'greatest' });
+          /* Normalized to Moon radii so the sky view's one
+             diagram renderer serves both eclipse kinds
+             (solar is normalized to Sun radii). */
+          discs.push({
+            code,
+            sx: -p.x / ev.circ.f3,
+            sy: -p.y / ev.circ.f3,
+            greatest: key === 'greatest',
+          });
         }
         return {
           kind: 'lunar',
           discs,
-          penR: ev.circ.f1,
-          umbR: ev.circ.f2,
-          moonR: ev.circ.f3,
+          penR: ev.circ.f1 / ev.circ.f3,
+          umbR: ev.circ.f2 / ev.circ.f3,
+          moonR: 1,
           caption: 'The Moon’s path through Earth’s shadow — each disc is the Moon at a contact point (north up). The dark circle is the umbra, the faint one the penumbra.',
         };
       })()

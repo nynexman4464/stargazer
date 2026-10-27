@@ -489,7 +489,13 @@ body {
 .sg-ecl-moon-s {
   fill: var(--color-background);
   stroke: var(--color-border);
-  stroke-width: 1.5;
+  stroke-width: 1;
+  opacity: 0.85;
+}
+.sg-ecl-moon-s-g {
+  fill: var(--color-background);
+  stroke: var(--color-text-primary);
+  stroke-width: 1;
 }
 .sg-ecl-pen {
   fill: var(--color-text-primary);

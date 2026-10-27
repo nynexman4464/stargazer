@@ -23,54 +23,76 @@ function clamp(v, lo, hi) {
 }
 const quant = (v) => Math.round(v * 20) / 20; // 0.05-degree steps for the memoized window — fine enough that a slow drag doesn't step visibly (0.2-degree steps were ~1px jumps)
 
-/* The eclipse estimate's at-maximum diagram (Alex, 2026-10-26:
-   "I don't see any graphic"). Solar: the Moon's disc over the
-   Sun's at maximum, at the computed separation and crossing
-   direction. Lunar: the Moon inside Earth's two shadow
-   circles at greatest eclipse. Geometry comes from
-   eclipseEstimate() in astro.js, in true relative sizes
-   (Sun radius = 1 unit on the solar side, Moon radius = 1
-   on the lunar side); north is up in both. */
+/* The eclipse estimate's diagram, one renderer for both
+   kinds (Alex, 2026-10-26/27: "I don't see any graphic",
+   then "The diagram you make does not look like the diagram
+   I sent", then "they should be using very similar rendering
+   code and appearance"). The fixed body sits at the center —
+   the Sun for a solar eclipse, Earth's two shadow circles
+   for a lunar one — and the Moon is drawn at every contact
+   point along its dashed path, labeled with the same codes
+   the estimate lines use (C1..C4 / P1..P4). Geometry comes
+   from eclipseEstimate() in astro.js, already normalized:
+   Sun radius = 1 on the solar side, Moon radius = 1 on the
+   lunar side; north is up in both. Labels alternate above
+   and below the path — with every label on top, the middle
+   contacts of a total eclipse (U2/Greatest/U3, C2/Greatest/
+   C3) sit nearly on top of each other and their labels
+   collide into mush (Alex's screenshot, 2026-10-27). */
 function EclipseDiagram({ d }) {
-  if (d.kind === 'solar') {
-    const R = 40;
-    return (
-      <svg viewBox="0 0 120 120" className="sg-ecl-diagram" role="img" aria-label={d.caption}>
-        <circle cx={60} cy={60} r={R} className="sg-ecl-sun" />
-        <circle cx={60 + d.dir.x * d.sep * R} cy={60 + d.dir.y * d.sep * R} r={R * d.moonR} className="sg-ecl-moon-s" />
-      </svg>
-    );
-  }
-  /* Lunar, in the NASA bulletin figure's style (Alex,
-     2026-10-27): the shadow circles sit at the center and
-     the Moon is drawn at every contact point along its
-     path, labeled P1/U1/.../P4. Everything arrives in
-     Earth radii; scale so the widest element just fits. */
+  const fixedR = d.kind === 'solar' ? 1 : d.penR;
   const extent = Math.max(
-    d.penR,
+    fixedR,
     ...d.discs.map((p) => Math.hypot(p.sx, p.sy) + d.moonR),
-  ) * 1.05;
+  ) * 1.08;
   const S = 95 / extent;
   const C = 95;
   const px = (v) => C + v * S;
+  /* Label placement: alternate above/below along the path,
+     then spread each side's labels to a minimum horizontal
+     gap — the central pair (C2/C3 around totality or
+     annularity) can land nearly on the same spot, and
+     same-side labels there would still overlap. */
+  const labels = d.discs.map((p, i) => ({
+    code: p.code,
+    x: px(p.sx),
+    y: i % 2 === 0 ? px(p.sy) - d.moonR * S - 3 : px(p.sy) + d.moonR * S + 11,
+    above: i % 2 === 0,
+  }));
+  for (const side of [true, false]) {
+    const group = labels.filter((l) => l.above === side).sort((a, b) => a.x - b.x);
+    for (let k = 1; k < group.length; k++) {
+      if (group[k].x - group[k - 1].x < 17) group[k].x = group[k - 1].x + 17;
+    }
+    const over = group.length && group[group.length - 1].x > 182
+      ? group[group.length - 1].x - 182 : 0;
+    if (over) group.forEach((l) => { l.x -= over; });
+  }
   return (
     <svg viewBox="0 0 190 190" className="sg-ecl-diagram" role="img" aria-label={d.caption}>
-      <circle cx={C} cy={C} r={d.penR * S} className="sg-ecl-pen" />
-      <circle cx={C} cy={C} r={d.umbR * S} className="sg-ecl-umb" />
+      {d.kind === 'solar' ? (
+        <circle cx={C} cy={C} r={S} className="sg-ecl-sun" />
+      ) : (
+        <>
+          <circle cx={C} cy={C} r={d.penR * S} className="sg-ecl-pen" />
+          <circle cx={C} cy={C} r={d.umbR * S} className="sg-ecl-umb" />
+        </>
+      )}
       <polyline
         points={d.discs.map((p) => `${px(p.sx)},${px(p.sy)}`).join(' ')}
         className="sg-ecl-path"
       />
       {d.discs.map((p) => (
-        <g key={p.code}>
-          <circle
-            cx={px(p.sx)} cy={px(p.sy)} r={d.moonR * S}
-            className={p.greatest ? 'sg-ecl-disc-g' : 'sg-ecl-disc'}
-          />
-          <text x={px(p.sx)} y={px(p.sy) - d.moonR * S - 3} className="sg-ecl-lab">
-            {p.code}
-          </text>
-        </g>
+        <circle
+          key={p.code}
+          cx={px(p.sx)} cy={px(p.sy)} r={d.moonR * S}
+          className={d.kind === 'solar'
+            ? (p.greatest ? 'sg-ecl-moon-s-g' : 'sg-ecl-moon-s')
+            : (p.greatest ? 'sg-ecl-disc-g' : 'sg-ecl-disc')}
+        />
+      ))}
+      {labels.map((l) => (
+        <text key={l.code} x={l.x} y={l.y} className="sg-ecl-lab">{l.code}</text>
       ))}
     </svg>
   );
