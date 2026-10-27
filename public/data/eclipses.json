@@ -615,6 +615,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2033-04-14.gif",
       "circ": {
         "dT": 75.5,
         "penMag": 2.17223,
@@ -654,6 +655,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2033-10-08.gif",
       "circ": {
         "dT": 75.8,
         "penMag": 2.30682,
@@ -693,6 +695,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2034-04-03.gif",
       "circ": {
         "dT": 76.0,
         "penMag": 0.85566,
@@ -732,6 +735,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2034-09-28.gif",
       "circ": {
         "dT": 76.3,
         "penMag": 0.99223,
@@ -771,6 +775,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2035-02-22.gif",
       "circ": {
         "dT": 76.5,
         "penMag": 0.96629,
@@ -810,6 +815,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2035-08-19.gif",
       "circ": {
         "dT": 76.7,
         "penMag": 1.15186,
@@ -849,6 +855,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2036-02-11.gif",
       "circ": {
         "dT": 77.0,
         "penMag": 2.27624,
@@ -888,6 +895,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2036-08-07.gif",
       "circ": {
         "dT": 77.2,
         "penMag": 2.52786,
@@ -927,6 +935,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2037-01-31.gif",
       "circ": {
         "dT": 77.5,
         "penMag": 2.18148,
@@ -966,6 +975,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2037-07-27.gif",
       "circ": {
         "dT": 77.8,
         "penMag": 1.85965,
@@ -1005,6 +1015,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2038-01-21.gif",
       "circ": {
         "dT": 78.0,
         "penMag": 0.90085,
@@ -1044,6 +1055,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2038-06-17.gif",
       "circ": {
         "dT": 78.2,
         "penMag": 0.44376,
@@ -1083,6 +1095,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2038-07-16.gif",
       "circ": {
         "dT": 78.3,
         "penMag": 0.50125,
@@ -1122,6 +1135,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2038-12-11.gif",
       "circ": {
         "dT": 78.5,
         "penMag": 0.80623,
@@ -1161,6 +1175,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2039-06-06.gif",
       "circ": {
         "dT": 78.8,
         "penMag": 1.82885,
@@ -1200,6 +1215,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2039-11-30.gif",
       "circ": {
         "dT": 79.1,
         "penMag": 2.04346,
@@ -1239,6 +1255,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2040-05-26.gif",
       "circ": {
         "dT": 79.3,
         "penMag": 2.49551,
@@ -1278,6 +1295,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2040-11-18.gif",
       "circ": {
         "dT": 79.6,
         "penMag": 2.45427,
@@ -1317,6 +1335,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2041-05-16.gif",
       "circ": {
         "dT": 79.9,
         "penMag": 1.07651,
@@ -1356,6 +1375,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2041-11-08.gif",
       "circ": {
         "dT": 80.2,
         "penMag": 1.16747,
@@ -1395,6 +1415,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2042-04-05.gif",
       "circ": {
         "dT": 80.4,
         "penMag": 0.87002,
@@ -1434,6 +1455,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2042-09-29.gif",
       "circ": {
         "dT": 80.7,
         "penMag": 0.95481,
@@ -1473,6 +1495,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2043-03-25.gif",
       "circ": {
         "dT": 81.0,
         "penMag": 2.19197,
@@ -1512,6 +1535,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2043-09-19.gif",
       "circ": {
         "dT": 81.2,
         "penMag": 2.2452,
@@ -1551,6 +1575,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2044-03-13.gif",
       "circ": {
         "dT": 81.5,
         "penMag": 2.23223,
@@ -1590,6 +1615,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2044-09-07.gif",
       "circ": {
         "dT": 81.8,
         "penMag": 2.08792,
@@ -1629,6 +1655,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2045-03-03.gif",
       "circ": {
         "dT": 82.1,
         "penMag": 0.96431,
@@ -1668,6 +1695,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2045-08-27.gif",
       "circ": {
         "dT": 82.4,
         "penMag": 0.68449,
@@ -1707,6 +1735,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2046-01-22.gif",
       "circ": {
         "dT": 82.6,
         "penMag": 1.0365,
@@ -1746,6 +1775,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2046-07-18.gif",
       "circ": {
         "dT": 82.9,
         "penMag": 1.28236,
@@ -1785,6 +1815,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2047-01-12.gif",
       "circ": {
         "dT": 83.2,
         "penMag": 2.26653,
@@ -1824,6 +1855,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2047-07-07.gif",
       "circ": {
         "dT": 83.5,
         "penMag": 2.73257,
@@ -1863,6 +1895,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2048-01-01.gif",
       "circ": {
         "dT": 83.8,
         "penMag": 2.21576,
@@ -1902,6 +1935,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2048-06-26.gif",
       "circ": {
         "dT": 84.1,
         "penMag": 1.58412,
@@ -1941,6 +1975,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2048-12-20.gif",
       "circ": {
         "dT": 84.4,
         "penMag": 0.96321,
@@ -1980,6 +2015,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2049-05-17.gif",
       "circ": {
         "dT": 84.7,
         "penMag": 0.76505,
@@ -2019,6 +2055,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2049-06-15.gif",
       "circ": {
         "dT": 84.8,
         "penMag": 0.2526,
@@ -2058,6 +2095,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2049-11-09.gif",
       "circ": {
         "dT": 85.0,
         "penMag": 0.68206,
@@ -2097,6 +2135,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2050-05-06.gif",
       "circ": {
         "dT": 85.3,
         "penMag": 2.10642,
@@ -2136,6 +2175,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2050-10-30.gif",
       "circ": {
         "dT": 85.6,
         "penMag": 2.03564,
@@ -2175,6 +2215,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2051-04-26.gif",
       "circ": {
         "dT": 85.9,
         "penMag": 2.27848,
@@ -2214,6 +2255,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2051-10-19.gif",
       "circ": {
         "dT": 86.3,
         "penMag": 2.37193,
@@ -2253,6 +2295,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2052-04-14.gif",
       "circ": {
         "dT": 86.6,
         "penMag": 0.94777,
@@ -2292,6 +2335,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2052-10-08.gif",
       "circ": {
         "dT": 86.9,
         "penMag": 1.06533,
@@ -2331,6 +2375,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2053-03-04.gif",
       "circ": {
         "dT": 87.2,
         "penMag": 0.93338,
@@ -2370,6 +2415,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2053-08-29.gif",
       "circ": {
         "dT": 87.5,
         "penMag": 1.02028,
@@ -2409,6 +2455,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2054-02-22.gif",
       "circ": {
         "dT": 87.8,
         "penMag": 2.25022,
@@ -2448,6 +2495,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2054-08-18.gif",
       "circ": {
         "dT": 88.1,
         "penMag": 2.38166,
@@ -2487,6 +2535,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2055-02-11.gif",
       "circ": {
         "dT": 88.5,
         "penMag": 2.19816,
@@ -2526,6 +2575,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2055-08-07.gif",
       "circ": {
         "dT": 88.8,
         "penMag": 2.00808,
@@ -2565,6 +2615,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2056-02-01.gif",
       "circ": {
         "dT": 89.1,
         "penMag": 0.90685,
@@ -2604,6 +2655,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2056-06-27.gif",
       "circ": {
         "dT": 89.4,
         "penMag": 0.3158,
@@ -2643,6 +2695,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2056-07-26.gif",
       "circ": {
         "dT": 89.5,
         "penMag": 0.64477,
@@ -2682,6 +2735,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2056-12-22.gif",
       "circ": {
         "dT": 89.8,
         "penMag": 0.78724,
@@ -2721,6 +2775,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2057-06-17.gif",
       "circ": {
         "dT": 90.1,
         "penMag": 1.69822,
@@ -2760,6 +2815,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2057-12-11.gif",
       "circ": {
         "dT": 90.4,
         "penMag": 2.01938,
@@ -2799,6 +2855,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2058-06-06.gif",
       "circ": {
         "dT": 90.8,
         "penMag": 2.62261,
@@ -2838,6 +2895,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2058-11-30.gif",
       "circ": {
         "dT": 91.1,
         "penMag": 2.48193,
@@ -2877,6 +2935,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2059-05-27.gif",
       "circ": {
         "dT": 91.5,
         "penMag": 1.19628,
@@ -2916,6 +2975,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2059-11-19.gif",
       "circ": {
         "dT": 91.8,
         "penMag": 1.20551,
@@ -2955,6 +3015,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2060-04-15.gif",
       "circ": {
         "dT": 92.1,
         "penMag": 0.76938,
@@ -2994,6 +3055,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2060-10-09.gif",
       "circ": {
         "dT": 92.5,
         "penMag": 0.88163,
@@ -3033,6 +3095,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2060-11-08.gif",
       "circ": {
         "dT": 92.5,
         "penMag": 0.0286,
@@ -3072,6 +3135,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2061-04-04.gif",
       "circ": {
         "dT": 92.8,
         "penMag": 2.10637,
@@ -3111,6 +3175,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2061-09-29.gif",
       "circ": {
         "dT": 93.2,
         "penMag": 2.15756,
@@ -3150,6 +3215,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2062-03-25.gif",
       "circ": {
         "dT": 93.5,
         "penMag": 2.2925,
@@ -3189,6 +3255,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2062-09-18.gif",
       "circ": {
         "dT": 93.9,
         "penMag": 2.19786,
@@ -3228,6 +3295,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2063-03-14.gif",
       "circ": {
         "dT": 94.2,
         "penMag": 1.01084,
@@ -3267,6 +3335,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2063-09-07.gif",
       "circ": {
         "dT": 94.6,
         "penMag": 0.81214,
@@ -3306,6 +3375,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2064-02-02.gif",
       "circ": {
         "dT": 94.9,
         "penMag": 1.02149,
@@ -3345,6 +3415,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2064-07-28.gif",
       "circ": {
         "dT": 95.3,
         "penMag": 1.13784,
@@ -3384,6 +3455,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2065-01-22.gif",
       "circ": {
         "dT": 95.6,
         "penMag": 2.25786,
@@ -3423,6 +3495,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2065-07-17.gif",
       "circ": {
         "dT": 96.0,
         "penMag": 2.59069,
@@ -3462,6 +3535,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2066-01-11.gif",
       "circ": {
         "dT": 96.4,
         "penMag": 2.22759,
@@ -3501,6 +3575,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2066-07-07.gif",
       "circ": {
         "dT": 96.7,
         "penMag": 1.71958,
@@ -3540,6 +3615,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2066-12-31.gif",
       "circ": {
         "dT": 97.1,
         "penMag": 0.97893,
@@ -3579,6 +3655,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2067-05-28.gif",
       "circ": {
         "dT": 97.4,
         "penMag": 0.6416,
@@ -3618,6 +3695,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2067-06-27.gif",
       "circ": {
         "dT": 97.5,
         "penMag": 0.37704,
@@ -3657,6 +3735,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2067-11-21.gif",
       "circ": {
         "dT": 97.8,
         "penMag": 0.65569,
@@ -3696,6 +3775,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2068-05-17.gif",
       "circ": {
         "dT": 98.2,
         "penMag": 1.98386,
@@ -3735,6 +3815,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2068-11-09.gif",
       "circ": {
         "dT": 98.6,
         "penMag": 1.99736,
@@ -3774,6 +3855,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2069-05-06.gif",
       "circ": {
         "dT": 99.0,
         "penMag": 2.39773,
@@ -3813,6 +3895,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2069-10-30.gif",
       "circ": {
         "dT": 99.3,
         "penMag": 2.4247,
@@ -3852,6 +3935,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2070-04-25.gif",
       "circ": {
         "dT": 99.7,
         "penMag": 1.05273,
@@ -3891,6 +3975,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2070-10-19.gif",
       "circ": {
         "dT": 100.1,
         "penMag": 1.12697,
@@ -3930,6 +4015,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2071-03-16.gif",
       "circ": {
         "dT": 100.4,
         "penMag": 0.88898,
@@ -3969,6 +4055,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2071-09-09.gif",
       "circ": {
         "dT": 100.8,
         "penMag": 0.9,
@@ -4008,6 +4095,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2072-03-04.gif",
       "circ": {
         "dT": 101.2,
         "penMag": 2.21373,
@@ -4047,6 +4135,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2072-08-28.gif",
       "circ": {
         "dT": 101.6,
         "penMag": 2.24389,
@@ -4086,6 +4175,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2073-02-22.gif",
       "circ": {
         "dT": 102.0,
         "penMag": 2.22295,
@@ -4125,6 +4215,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2073-08-17.gif",
       "circ": {
         "dT": 102.4,
         "penMag": 2.14903,
@@ -4164,6 +4255,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2074-02-11.gif",
       "circ": {
         "dT": 102.8,
         "penMag": 0.92031,
@@ -4203,6 +4295,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2074-07-08.gif",
       "circ": {
         "dT": 103.2,
         "penMag": 0.18837,
@@ -4242,6 +4335,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2074-08-07.gif",
       "circ": {
         "dT": 103.2,
         "penMag": 0.78256,
@@ -4281,6 +4375,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2075-01-02.gif",
       "circ": {
         "dT": 103.6,
         "penMag": 0.77288,
@@ -4320,6 +4415,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2075-06-28.gif",
       "circ": {
         "dT": 104.0,
         "penMag": 1.56389,
@@ -4359,6 +4455,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2075-12-22.gif",
       "circ": {
         "dT": 104.4,
         "penMag": 2.00237,
@@ -4398,6 +4495,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2076-06-17.gif",
       "circ": {
         "dT": 104.8,
         "penMag": 2.75698,
@@ -4437,6 +4535,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2076-12-10.gif",
       "circ": {
         "dT": 105.2,
         "penMag": 2.50056,
@@ -4476,6 +4575,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2077-06-06.gif",
       "circ": {
         "dT": 105.6,
         "penMag": 1.32736,
@@ -4515,6 +4615,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2077-11-29.gif",
       "circ": {
         "dT": 106.0,
         "penMag": 1.23257,
@@ -4554,6 +4655,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2078-04-27.gif",
       "circ": {
         "dT": 106.4,
         "penMag": 0.65769,
@@ -4593,6 +4695,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2078-10-21.gif",
       "circ": {
         "dT": 106.8,
         "penMag": 0.81912,
@@ -4632,6 +4735,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2078-11-19.gif",
       "circ": {
         "dT": 106.9,
         "penMag": 0.0633,
@@ -4671,6 +4775,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2079-04-16.gif",
       "circ": {
         "dT": 107.2,
         "penMag": 2.0119,
@@ -4710,6 +4815,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2079-10-10.gif",
       "circ": {
         "dT": 107.7,
         "penMag": 2.08055,
@@ -4749,6 +4855,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2080-04-04.gif",
       "circ": {
         "dT": 108.1,
         "penMag": 2.36263,
@@ -4788,6 +4895,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2080-09-29.gif",
       "circ": {
         "dT": 108.5,
         "penMag": 2.29863,
@@ -4827,6 +4935,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2081-03-25.gif",
       "circ": {
         "dT": 108.9,
         "penMag": 1.06726,
@@ -4866,6 +4975,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2081-09-18.gif",
       "circ": {
         "dT": 109.4,
         "penMag": 0.92905,
@@ -4905,6 +5015,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2082-02-13.gif",
       "circ": {
         "dT": 109.7,
         "penMag": 0.99744,
@@ -4944,6 +5055,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2082-08-08.gif",
       "circ": {
         "dT": 110.2,
         "penMag": 1.00297,
@@ -4983,6 +5095,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2083-02-02.gif",
       "circ": {
         "dT": 110.6,
         "penMag": 2.24178,
@@ -5022,6 +5135,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2083-07-29.gif",
       "circ": {
         "dT": 111.0,
         "penMag": 2.45375,
@@ -5061,6 +5175,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2084-01-22.gif",
       "circ": {
         "dT": 111.5,
         "penMag": 2.24251,
@@ -5100,6 +5215,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2084-07-17.gif",
       "circ": {
         "dT": 111.9,
         "penMag": 1.85574,
@@ -5139,6 +5255,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2085-01-10.gif",
       "circ": {
         "dT": 112.4,
         "penMag": 0.99442,
@@ -5178,6 +5295,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2085-06-08.gif",
       "circ": {
         "dT": 112.7,
         "penMag": 0.50788,
@@ -5217,6 +5335,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2085-07-07.gif",
       "circ": {
         "dT": 112.8,
         "penMag": 0.50641,
@@ -5256,6 +5375,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2085-12-01.gif",
       "circ": {
         "dT": 113.2,
         "penMag": 0.64001,
@@ -5295,6 +5415,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2086-05-28.gif",
       "circ": {
         "dT": 113.6,
         "penMag": 1.84993,
@@ -5334,6 +5455,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2086-11-20.gif",
       "circ": {
         "dT": 114.1,
         "penMag": 1.96921,
@@ -5373,6 +5495,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2087-05-17.gif",
       "circ": {
         "dT": 114.5,
         "penMag": 2.52894,
@@ -5412,6 +5535,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2087-11-10.gif",
       "circ": {
         "dT": 115.0,
         "penMag": 2.46669,
@@ -5451,6 +5575,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2088-05-05.gif",
       "circ": {
         "dT": 115.4,
         "penMag": 1.17078,
@@ -5490,6 +5615,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2088-10-30.gif",
       "circ": {
         "dT": 115.9,
         "penMag": 1.1773,
@@ -5529,6 +5655,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2089-03-26.gif",
       "circ": {
         "dT": 116.3,
         "penMag": 0.83427,
@@ -5568,6 +5695,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2089-09-19.gif",
       "circ": {
         "dT": 116.8,
         "penMag": 0.79041,
@@ -5607,6 +5735,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2090-03-15.gif",
       "circ": {
         "dT": 117.2,
         "penMag": 2.16701,
@@ -5646,6 +5775,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2090-09-08.gif",
       "circ": {
         "dT": 117.7,
         "penMag": 2.11781,
@@ -5685,6 +5815,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2091-03-05.gif",
       "circ": {
         "dT": 118.2,
         "penMag": 2.25477,
@@ -5724,6 +5855,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2091-08-29.gif",
       "circ": {
         "dT": 118.6,
         "penMag": 2.28215,
@@ -5763,6 +5895,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2092-02-23.gif",
       "circ": {
         "dT": 119.1,
         "penMag": 0.93945,
@@ -5802,6 +5935,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2092-07-19.gif",
       "circ": {
         "dT": 119.5,
         "penMag": 0.06339,
@@ -5841,6 +5975,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2092-08-17.gif",
       "circ": {
         "dT": 119.6,
         "penMag": 0.91429,
@@ -5880,6 +6015,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2093-01-12.gif",
       "circ": {
         "dT": 120.0,
         "penMag": 0.7567,
@@ -5919,6 +6055,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2093-07-08.gif",
       "circ": {
         "dT": 120.4,
         "penMag": 1.42886,
@@ -5958,6 +6095,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2094-01-01.gif",
       "circ": {
         "dT": 120.9,
         "penMag": 1.98724,
@@ -5997,6 +6135,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2094-06-28.gif",
       "circ": {
         "dT": 121.4,
         "penMag": 2.78793,
@@ -6036,6 +6175,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2094-12-21.gif",
       "circ": {
         "dT": 121.9,
         "penMag": 2.51527,
@@ -6075,6 +6215,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2095-06-17.gif",
       "circ": {
         "dT": 122.4,
         "penMag": 1.46321,
@@ -6114,6 +6255,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2095-12-11.gif",
       "circ": {
         "dT": 122.8,
         "penMag": 1.2526,
@@ -6153,6 +6295,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2096-05-07.gif",
       "circ": {
         "dT": 123.3,
         "penMag": 0.53272,
@@ -6192,6 +6335,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2096-06-06.gif",
       "circ": {
         "dT": 123.3,
         "penMag": 0.00637,
@@ -6231,6 +6375,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2096-10-31.gif",
       "circ": {
         "dT": 123.7,
         "penMag": 0.7685,
@@ -6270,6 +6415,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2096-11-29.gif",
       "circ": {
         "dT": 123.8,
         "penMag": 0.08794,
@@ -6309,6 +6455,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2097-04-26.gif",
       "circ": {
         "dT": 124.2,
         "penMag": 1.90316,
@@ -6348,6 +6495,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2097-10-21.gif",
       "circ": {
         "dT": 124.7,
         "penMag": 2.01707,
@@ -6387,6 +6535,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2098-04-15.gif",
       "circ": {
         "dT": 125.2,
         "penMag": 2.44735,
@@ -6426,6 +6575,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "total",
+      "map": "/img/eclipse-maps/lunar-2098-10-10.gif",
       "circ": {
         "dT": 125.7,
         "penMag": 2.38502,
@@ -6465,6 +6615,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "partial",
+      "map": "/img/eclipse-maps/lunar-2099-04-05.gif",
       "circ": {
         "dT": 126.2,
         "penMag": 1.13534,
@@ -6504,6 +6655,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2099-09-29.gif",
       "circ": {
         "dT": 126.7,
         "penMag": 1.03602,
@@ -6543,6 +6695,7 @@
       "new_england": false,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2100-02-24.gif",
       "circ": {
         "dT": 127.1,
         "penMag": 0.9669,
@@ -6582,6 +6735,7 @@
       "new_england": true,
       "regions": "Night side of Earth — see NASA catalog for the exact map.",
       "type": "penumbral",
+      "map": "/img/eclipse-maps/lunar-2100-08-19.gif",
       "circ": {
         "dT": 127.6,
         "penMag": 0.87346,
@@ -7367,6 +7521,7 @@
       "new_england": true,
       "regions": "Total: e Russia, Alaska. Partial: North America.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2033-03-30.gif",
       "vis": {
         "lat": [
           3,
@@ -7427,6 +7582,7 @@
       "new_england": false,
       "regions": "Partial: southern South America, Antarctica.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2033-09-23.gif",
       "circ": {
         "t0": 14.0,
         "dT": 80.1,
@@ -7477,6 +7633,7 @@
       "new_england": false,
       "regions": "Total: Nigeria, Cameroon, Chad, Sudan, Egypt, Saudi Arabia, Iran, Afghanistan, Pakistan, India, China. Partial: Africa, Europe, western Asia.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2034-03-20.gif",
       "vis": {
         "lat": [
           -37,
@@ -7537,6 +7694,7 @@
       "new_england": false,
       "regions": "Annular: Chile, Bolivia, Argentina, Paraguay, Brazil. Partial: Central America, South America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2034-09-12.gif",
       "circ": {
         "t0": 16.0,
         "dT": 80.7,
@@ -7587,6 +7745,7 @@
       "new_england": false,
       "regions": "Annular: New Zealand, Pacific. Partial: Australia, New Zealand, southern Pacific, Mexico, Antarctica.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2035-03-09.gif",
       "circ": {
         "t0": 23.0,
         "dT": 81.1,
@@ -7637,6 +7796,7 @@
       "new_england": false,
       "regions": "Total: China, Korea, Japan, Pacific. Partial: eastern Asia, Pacific.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2035-09-02.gif",
       "vis": {
         "lat": [
           -32,
@@ -7697,6 +7857,7 @@
       "new_england": false,
       "regions": "Partial: Antarctica, southern Australia, New Zealand.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2036-02-27.gif",
       "circ": {
         "t0": 5.0,
         "dT": 81.8,
@@ -7747,6 +7908,7 @@
       "new_england": false,
       "regions": "Partial: southern Atlantic.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2036-07-23.gif",
       "circ": {
         "t0": 11.0,
         "dT": 82.1,
@@ -7797,6 +7959,7 @@
       "new_england": false,
       "regions": "Partial: Alaska, Canada, Arctic, western Europe, northwestern Africa.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2036-08-21.gif",
       "circ": {
         "t0": 17.0,
         "dT": 82.1,
@@ -7847,6 +8010,7 @@
       "new_england": false,
       "regions": "Partial: northern Africa, Europe, Mid East, western Asia.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2037-01-16.gif",
       "circ": {
         "t0": 10.0,
         "dT": 82.4,
@@ -7897,6 +8061,7 @@
       "new_england": false,
       "regions": "Total: Australia, New Zealand. Partial: East Indies, Australia, Pacific.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2037-07-13.gif",
       "vis": {
         "lat": [
           -72,
@@ -7957,6 +8122,7 @@
       "new_england": true,
       "regions": "Annular: Cuba, Dom.Rep., Cote d'Ivoire, Ghana, Niger, Chad, Egypt. Partial: eastern North America, northern South America, Atlantic, Africa, Europe.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2038-01-05.gif",
       "circ": {
         "t0": 14.0,
         "dT": 83.2,
@@ -8007,6 +8173,7 @@
       "new_england": true,
       "regions": "Annular: Colombia, Venezuela, Mauritania, Morocco, Mali, Niger, Chad, Sudan, Ethiopia, Kenya. Partial: North and Central America, South America, Africa, Europe, Mid East.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2038-07-02.gif",
       "circ": {
         "t0": 14.0,
         "dT": 83.5,
@@ -8057,6 +8224,7 @@
       "new_england": false,
       "regions": "Total: Australia, New Zealand, s Pacific. Partial: southeastern Asia, East Indies, Australia, New Zealand, southern Pacific, Antarctica.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2038-12-26.gif",
       "vis": {
         "lat": [
           -82,
@@ -8117,6 +8285,7 @@
       "new_england": true,
       "regions": "Annular: Alaska, n Canada, Norway, Sweden, Finland, Estonia, Russia. Partial: North America, western Europe.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2039-06-21.gif",
       "circ": {
         "t0": 17.0,
         "dT": 84.3,
@@ -8167,6 +8336,7 @@
       "new_england": false,
       "regions": "Total: Antarctica. Partial: southern South America, Antarctica.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2039-12-15.gif",
       "vis": {
         "lat": [
           -90,
@@ -8227,6 +8397,7 @@
       "new_england": false,
       "regions": "Partial: Australia, N.Z., Antarctica.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2040-05-11.gif",
       "circ": {
         "t0": 4.0,
         "dT": 84.9,
@@ -8277,6 +8448,7 @@
       "new_england": true,
       "regions": "Partial: North and Central America.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2040-11-04.gif",
       "circ": {
         "t0": 19.0,
         "dT": 85.3,
@@ -8327,6 +8499,7 @@
       "new_england": false,
       "regions": "Total: Angola, Congo, Uganda, Kenya, Somalia. Partial: Brazil, Africa, Mid East.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2041-04-30.gif",
       "vis": {
         "lat": [
           -82,
@@ -8387,6 +8560,7 @@
       "new_england": false,
       "regions": "Annular: Mongolia, China, Korea, Japan, Pacific. Partial: eastern Asia, Pacific.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2041-10-25.gif",
       "circ": {
         "t0": 2.0,
         "dT": 86.1,
@@ -8437,6 +8611,7 @@
       "new_england": false,
       "regions": "Total: Malaysia, Indondesia, Philippines, n Pacific. Partial: eastern Asia, southeastern Asia, Australia, Pacific.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2042-04-20.gif",
       "vis": {
         "lat": [
           -42,
@@ -8497,6 +8672,7 @@
       "new_england": false,
       "regions": "Annular: Thailand, Malaysia, Indonesia, Australia, New Zealand. Partial: southeastern Asia, East Indies, Australia, , southern Pacific, Antarctica.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2042-10-14.gif",
       "circ": {
         "t0": 2.0,
         "dT": 86.8,
@@ -8547,6 +8723,7 @@
       "new_england": false,
       "regions": "Total: ne Russia. Partial: northern North America, northeastern Asia.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2043-04-09.gif",
       "vis": {
         "lat": [
           -2,
@@ -8607,6 +8784,7 @@
       "new_england": false,
       "regions": "Annular: s Indian Ocean. Partial: Antarctica, southwestern Australia, Indian Ocean.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2043-10-03.gif",
       "circ": {
         "t0": 3.0,
         "dT": 87.6,
@@ -8657,6 +8835,7 @@
       "new_england": false,
       "regions": "Annular: s Atlantic. Partial: Antarctica, South America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2044-02-28.gif",
       "circ": {
         "t0": 20.0,
         "dT": 87.9,
@@ -8707,6 +8886,7 @@
       "new_england": false,
       "regions": "Total: Greenland, n Canada, Montana, N. Dakota. Partial: northern Asia, western North America, Greenland.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2044-08-23.gif",
       "vis": {
         "lat": [
           -7,
@@ -8767,6 +8947,7 @@
       "new_england": false,
       "regions": "Annular: New Zealand, Pacific. Partial: Australia, New Zealand, Pacific, Hawaii.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2045-02-16.gif",
       "circ": {
         "t0": 0.0,
         "dT": 88.7,
@@ -8817,6 +8998,7 @@
       "new_england": true,
       "regions": "Total: s US, Haiti, Dominican Rep., Venezuela, Guyana, Fr. Guyana, Suriname, Brazil. Partial: North and Central America, South America, western Africa.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2045-08-12.gif",
       "vis": {
         "lat": [
           -47,
@@ -8877,6 +9059,7 @@
       "new_england": false,
       "regions": "Annular: Papua New Guinea, Hawaii, California, Oregon, Idaho. Partial: Australia, Papua New Guinea, western US.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2046-02-05.gif",
       "circ": {
         "t0": 23.0,
         "dT": 89.5,
@@ -8927,6 +9110,7 @@
       "new_england": false,
       "regions": "Total: Brazil, Angola, e Namibia, Botswana, S. Africa, Swaziland, s Mozambique. Partial: Brazil, Africa.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2046-08-02.gif",
       "vis": {
         "lat": [
           -77,
@@ -8987,6 +9171,7 @@
       "new_england": false,
       "regions": "Partial: eastern Asia, Alaska.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2047-01-26.gif",
       "circ": {
         "t0": 2.0,
         "dT": 90.4,
@@ -9037,6 +9222,7 @@
       "new_england": false,
       "regions": "Partial: northern Canada, Greenland, northeastern Asia.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2047-06-23.gif",
       "circ": {
         "t0": 11.0,
         "dT": 90.7,
@@ -9087,6 +9273,7 @@
       "new_england": false,
       "regions": "Partial: southeastern Australia, New Zealand.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2047-07-22.gif",
       "circ": {
         "t0": 23.0,
         "dT": 90.8,
@@ -9137,6 +9324,7 @@
       "new_england": false,
       "regions": "Partial: Antarctica, southern Chile, southern Argentina.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2047-12-16.gif",
       "circ": {
         "t0": 0.0,
         "dT": 91.1,
@@ -9187,6 +9375,7 @@
       "new_england": true,
       "regions": "Annular: midwest US, Quebec, Ontario, Greenland, Iceland, Norway, Sweden, Russia, Afganistan. Partial: North America, Caribbean, northern Africa, Europe, western Asia.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2048-06-11.gif",
       "circ": {
         "t0": 13.0,
         "dT": 91.5,
@@ -9237,6 +9426,7 @@
       "new_england": false,
       "regions": "Total: Chile, Argentina, Namibia, Botswana. Partial: southern South America, southwestern Africa.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2048-12-05.gif",
       "vis": {
         "lat": [
           -90,
@@ -9297,6 +9487,7 @@
       "new_england": false,
       "regions": "Annular: Peru, Ecuador, Colombia, Venezuela, Guyana, Senegal, Mali, Burkina Faso, Ghana, Nigeria. Partial: southeastern US, Central America, South America, Africa, southern Europe.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2049-05-31.gif",
       "circ": {
         "t0": 14.0,
         "dT": 92.4,
@@ -9347,6 +9538,7 @@
       "new_england": false,
       "regions": "Hybrid: Saudi Arabia, Yemen, Malaysia, Indonesia. Partial: eastern Africa, southern Asia, East Indies, Australia.",
       "type": "hybrid",
+      "map": "/img/eclipse-maps/solar-2049-11-25.gif",
       "circ": {
         "t0": 6.0,
         "dT": 92.8,
@@ -9397,6 +9589,7 @@
       "new_england": false,
       "regions": "Hybrid: s Pacific. Partial: N.Z., southern Pacific, southwestern South America.",
       "type": "hybrid",
+      "map": "/img/eclipse-maps/solar-2050-05-20.gif",
       "circ": {
         "t0": 21.0,
         "dT": 93.7,
@@ -9447,6 +9640,7 @@
       "new_england": true,
       "regions": "Partial: northeastern US, eastern Canada, northern Africa, Europe.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2050-11-14.gif",
       "circ": {
         "t0": 14.0,
         "dT": 94.7,
@@ -9497,6 +9691,7 @@
       "new_england": false,
       "regions": "Partial: Asia, Alaska, Canada, Greenland.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2051-04-11.gif",
       "circ": {
         "t0": 2.0,
         "dT": 95.5,
@@ -9547,6 +9742,7 @@
       "new_england": false,
       "regions": "Partial: Antarctica, Australia, New Zealand.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2051-10-04.gif",
       "circ": {
         "t0": 21.0,
         "dT": 96.5,
@@ -9597,6 +9793,7 @@
       "new_england": true,
       "regions": "Total: Central Pacific, Mexico, U.S., Central Atlantic. Partial: North America, Central America, northern South America.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2052-03-30.gif",
       "vis": {
         "lat": [
           -32,
@@ -9657,6 +9854,7 @@
       "new_england": false,
       "regions": "Annular: Australia, South Pacific. Partial: Australia, N.Z., Antarctica, western Indies.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2052-09-22.gif",
       "circ": {
         "t0": 0.0,
         "dT": 98.5,
@@ -9707,6 +9905,7 @@
       "new_england": false,
       "regions": "Annular: Central Indian, Indonesia. Partial: Africa, Indies, Australia, Antarctica.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2053-03-20.gif",
       "circ": {
         "t0": 7.0,
         "dT": 99.5,
@@ -9757,6 +9956,7 @@
       "new_england": false,
       "regions": "Total: Morocco, Algeria, Tunisia, Libya, Egypt. Saudi Arabia, Indonesia. Partial: Greenland, Africa, Europe, Asia.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2053-09-12.gif",
       "vis": {
         "lat": [
           -37,
@@ -9817,6 +10017,7 @@
       "new_england": false,
       "regions": "Partial: Antarctica, South Africa, Madagascar, Chile.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2054-03-09.gif",
       "circ": {
         "t0": 13.0,
         "dT": 101.4,
@@ -9867,6 +10068,7 @@
       "new_england": false,
       "regions": "Partial: Antarctica.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2054-08-03.gif",
       "circ": {
         "t0": 18.0,
         "dT": 102.3,
@@ -9917,6 +10119,7 @@
       "new_england": false,
       "regions": "Partial: Asia, U.S., Canada, Greenland.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2054-09-02.gif",
       "circ": {
         "t0": 1.0,
         "dT": 102.4,
@@ -9967,6 +10170,7 @@
       "new_england": true,
       "regions": "Partial: Canada, U.S., Mexico, Cuba.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2055-01-27.gif",
       "circ": {
         "t0": 18.0,
         "dT": 103.3,
@@ -10017,6 +10221,7 @@
       "new_england": false,
       "regions": "Total: South Africa. Partial: Africa, Antarctica.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2055-07-24.gif",
       "vis": {
         "lat": [
           -77,
@@ -10077,6 +10282,7 @@
       "new_england": false,
       "regions": "Annular: Central Pacific, Mexico. Partial: N.Z., Central Pacific, Western North America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2056-01-16.gif",
       "circ": {
         "t0": 22.0,
         "dT": 105.3,
@@ -10127,6 +10333,7 @@
       "new_england": false,
       "regions": "Annular: Central Pacific, Colombia, Ecuador, Peru, Brazil. Partial: southern North America, Central America, northern South America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2056-07-12.gif",
       "circ": {
         "t0": 20.0,
         "dT": 106.3,
@@ -10177,6 +10384,7 @@
       "new_england": false,
       "regions": "Total: Southern Atlantic, Southern Indian. Partial: Africa, Antarctica, Australia.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2057-01-05.gif",
       "vis": {
         "lat": [
           -82,
@@ -10237,6 +10445,7 @@
       "new_england": true,
       "regions": "Annular: China, Mongolia, Russia, Canada, U.S. Partial: Asia, North America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2057-07-01.gif",
       "circ": {
         "t0": 0.0,
         "dT": 108.3,
@@ -10287,6 +10496,7 @@
       "new_england": false,
       "regions": "Total: Antarctica. Partial: Antarctica, Australia.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2057-12-26.gif",
       "vis": {
         "lat": [
           -90,
@@ -10347,6 +10557,7 @@
       "new_england": false,
       "regions": "Partial: South Africa, Madagascar.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2058-05-22.gif",
       "circ": {
         "t0": 11.0,
         "dT": 110.2,
@@ -10397,6 +10608,7 @@
       "new_england": false,
       "regions": "Partial: Russia, Greenland, Norway, Sweden, Finland.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2058-06-21.gif",
       "circ": {
         "t0": 0.0,
         "dT": 110.3,
@@ -10447,6 +10659,7 @@
       "new_england": false,
       "regions": "Partial: Russia, China, Mongolia, Japan.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2058-11-16.gif",
       "circ": {
         "t0": 3.0,
         "dT": 111.2,
@@ -10497,6 +10710,7 @@
       "new_england": false,
       "regions": "Total: Central Pacific, Ecuador, Peru, Brazil. Partial: North America, Central America, South America.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2059-05-11.gif",
       "vis": {
         "lat": [
           -77,
@@ -10557,6 +10771,7 @@
       "new_england": false,
       "regions": "Annular: France, Libya, Egypt, Sudan, Ethiopia, Eritrea, Somalia, Indonesia. Partial: Africa, Europe, Asia.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2059-11-05.gif",
       "circ": {
         "t0": 9.0,
         "dT": 113.2,
@@ -10607,6 +10822,7 @@
       "new_england": false,
       "regions": "Total: Ivory Coast, Ghana, Togo, Benin, Nigeria, Niger, Chad, Libya, Egypt, Turkey, Kazakhstan, Russia. Partial: Africa, Asia.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2060-04-30.gif",
       "vis": {
         "lat": [
           -42,
@@ -10667,6 +10883,7 @@
       "new_england": false,
       "regions": "Annular: Guinea, Sierra Leone, Liberia, Ivory Coast, Angola, Nambia, Botswana, South Africa. Partial: Africa, Antarctica, South America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2060-10-24.gif",
       "circ": {
         "t0": 9.0,
         "dT": 115.2,
@@ -10717,6 +10934,7 @@
       "new_england": false,
       "regions": "Total: Kazakhstan, Russia. Partial: Asia. Middle East, North America.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2061-04-20.gif",
       "vis": {
         "lat": [
           -7,
@@ -10777,6 +10995,7 @@
       "new_england": false,
       "regions": "Annular: Antarctica, Argentina, Chile. Partial: Antarctica, South America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2061-10-13.gif",
       "circ": {
         "t0": 11.0,
         "dT": 117.3,
@@ -10827,6 +11046,7 @@
       "new_england": false,
       "regions": "Partial: Antarctica, Australia, New Zealand.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2062-03-11.gif",
       "circ": {
         "t0": 4.0,
         "dT": 118.1,
@@ -10877,6 +11097,7 @@
       "new_england": false,
       "regions": "Partial: Greenland, Europe, Asia.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2062-09-03.gif",
       "circ": {
         "t0": 9.0,
         "dT": 119.2,
@@ -10927,6 +11148,7 @@
       "new_england": false,
       "regions": "Annular: Indian Ocean, Indonesia, Malaysia. Partial: Africa, Indies, southeastern Asia, Antarctica, Australia.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2063-02-28.gif",
       "circ": {
         "t0": 8.0,
         "dT": 120.2,
@@ -10977,6 +11199,7 @@
       "new_england": false,
       "regions": "Total: China, Mongolia, Japan, Central Pacific. Partial: Asia, Central Pacific.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2063-08-24.gif",
       "vis": {
         "lat": [
           -47,
@@ -11037,6 +11260,7 @@
       "new_england": false,
       "regions": "Annular: Zaire, Zambia, Tanzania, India, Nepal, Bangladesh, Bhutan, China. Partial: Africa, Asia.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2064-02-17.gif",
       "circ": {
         "t0": 7.0,
         "dT": 122.2,
@@ -11087,6 +11311,7 @@
       "new_england": false,
       "regions": "Total: Central Pacific, Chile, Argentina. Partial: Americas, Antarctica.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2064-08-12.gif",
       "vis": {
         "lat": [
           -82,
@@ -11147,6 +11372,7 @@
       "new_england": false,
       "regions": "Partial: North Africa, Europe, West Asia.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2065-02-05.gif",
       "circ": {
         "t0": 10.0,
         "dT": 124.3,
@@ -11197,6 +11423,7 @@
       "new_england": false,
       "regions": "Partial: Northern Europe, Russia.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2065-07-03.gif",
       "circ": {
         "t0": 18.0,
         "dT": 125.2,
@@ -11247,6 +11474,7 @@
       "new_england": false,
       "regions": "Partial: Antarctica, South Africa, Madagascar.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2065-08-02.gif",
       "circ": {
         "t0": 6.0,
         "dT": 125.3,
@@ -11297,6 +11525,7 @@
       "new_england": false,
       "regions": "Partial: Chile Argentina, Antarctica, Australia.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2065-12-27.gif",
       "circ": {
         "t0": 9.0,
         "dT": 126.2,
@@ -11347,6 +11576,7 @@
       "new_england": true,
       "regions": "Annular: Russia, Alaska, Canada. Partial: North America, northern Europe, northern Asia.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2066-06-22.gif",
       "circ": {
         "t0": 19.0,
         "dT": 127.2,
@@ -11397,6 +11627,7 @@
       "new_england": false,
       "regions": "Total: Australia, New Zealand, South Pacific. Partial: Australia, Antarctica, N.Z..",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2066-12-17.gif",
       "vis": {
         "lat": [
           -90,
@@ -11457,6 +11688,7 @@
       "new_england": false,
       "regions": "Annular: Central Pacific, Ecuador, Peru. Partial: Americas.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2067-06-11.gif",
       "circ": {
         "t0": 21.0,
         "dT": 129.3,
@@ -11507,6 +11739,7 @@
       "new_england": true,
       "regions": "Hybrid: Honduras, Nicaragua, Colombia, Venezuela, Guyana, Brazil, Nigeria, Cameroon, Chad, Sudan. Partial: Americas, Africa, southern Europe.",
       "type": "hybrid",
+      "map": "/img/eclipse-maps/solar-2067-12-06.gif",
       "circ": {
         "t0": 14.0,
         "dT": 130.3,
@@ -11557,6 +11790,7 @@
       "new_england": false,
       "regions": "Total: Australia, New Zealand. Partial: Indies, Australia, Antarctica.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2068-05-31.gif",
       "vis": {
         "lat": [
           -72,
@@ -11617,6 +11851,7 @@
       "new_england": false,
       "regions": "Partial: North America, Russia.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2068-11-24.gif",
       "circ": {
         "t0": 22.0,
         "dT": 132.4,
@@ -11667,6 +11902,7 @@
       "new_england": true,
       "regions": "Partial: Europe, Asia, northern Africa, North America.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2069-04-21.gif",
       "circ": {
         "t0": 10.0,
         "dT": 133.3,
@@ -11717,6 +11953,7 @@
       "new_england": false,
       "regions": "Partial: South America, Antarctica.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2069-05-20.gif",
       "circ": {
         "t0": 18.0,
         "dT": 133.5,
@@ -11767,6 +12004,7 @@
       "new_england": false,
       "regions": "Partial: Antarctica.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2069-10-15.gif",
       "circ": {
         "t0": 4.0,
         "dT": 134.3,
@@ -11817,6 +12055,7 @@
       "new_england": false,
       "regions": "Total: Sri Lanka, Myanmar, Thailand, Laos, Vietnam, Philippines. Partial: Asia, Indies, Alaska, Canada.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2070-04-11.gif",
       "vis": {
         "lat": [
           -32,
@@ -11877,6 +12116,7 @@
       "new_england": false,
       "regions": "Annular: Angola, Zambia, Zimbabwe, Mozambique, Madagascar. Partial: Africa, Antarctica, Australia.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2070-10-04.gif",
       "circ": {
         "t0": 7.0,
         "dT": 136.4,
@@ -11927,6 +12167,7 @@
       "new_england": false,
       "regions": "Annular: Chile, Argentina, Paraguay, Brazil, Congo, Zaire. Partial: South America, Africa, Antarctica.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2071-03-31.gif",
       "circ": {
         "t0": 15.0,
         "dT": 137.5,
@@ -11977,6 +12218,7 @@
       "new_england": true,
       "regions": "Total: Mexico, Colombia, Venezuela, Guyana, Suriname, French Guiana, Brazil. Partial: Americas, Africa.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2071-09-23.gif",
       "vis": {
         "lat": [
           -37,
@@ -12037,6 +12279,7 @@
       "new_england": false,
       "regions": "Partial: Antarctica, South America.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2072-03-19.gif",
       "circ": {
         "t0": 20.0,
         "dT": 139.6,
@@ -12087,6 +12330,7 @@
       "new_england": false,
       "regions": "Total: Russia. Partial: Greenland, Europe, Asia.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2072-09-12.gif",
       "vis": {
         "lat": [
           3,
@@ -12147,6 +12391,7 @@
       "new_england": false,
       "regions": "Partial: Asia, Alaska.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2073-02-07.gif",
       "circ": {
         "t0": 2.0,
         "dT": 141.5,
@@ -12197,6 +12442,7 @@
       "new_england": false,
       "regions": "Total: Chile, Argentina. Partial: South America, Antarctica.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2073-08-03.gif",
       "vis": {
         "lat": [
           -77,
@@ -12257,6 +12503,7 @@
       "new_england": false,
       "regions": "Annular: Sudan, Ethiopia, Somalia, Sri Lanka, Myanmar, Thailand, Laos, Vietnam, China, Japan. Partial: Africa, Asia, Indies.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2074-01-27.gif",
       "circ": {
         "t0": 7.0,
         "dT": 143.7,
@@ -12307,6 +12554,7 @@
       "new_england": false,
       "regions": "Annular: Thailand, Cambodia, Vietnam, Philippines. Partial: Asia, Indies, Australia, N.Z..",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2074-07-24.gif",
       "circ": {
         "t0": 3.0,
         "dT": 144.7,
@@ -12357,6 +12605,7 @@
       "new_england": false,
       "regions": "Total: Chile, Argentina, Paraguay, Brazil. Partial: N.Z., South America, Antarctica,.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2075-01-16.gif",
       "vis": {
         "lat": [
           -82,
@@ -12417,6 +12666,7 @@
       "new_england": false,
       "regions": "Annular: s Europe, Russia. Partial: Europe, Asia, Africa, northern North America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2075-07-13.gif",
       "circ": {
         "t0": 6.0,
         "dT": 146.8,
@@ -12467,6 +12717,7 @@
       "new_england": false,
       "regions": "Total: Antarctica. Partial: Antarctica, Australia, South America.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2076-01-06.gif",
       "vis": {
         "lat": [
           -90,
@@ -12527,6 +12778,7 @@
       "new_england": false,
       "regions": "Partial: South America, Antarctica.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2076-06-01.gif",
       "circ": {
         "t0": 18.0,
         "dT": 148.8,
@@ -12577,6 +12829,7 @@
       "new_england": false,
       "regions": "Partial: Russia, North America.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2076-07-01.gif",
       "circ": {
         "t0": 7.0,
         "dT": 149.0,
@@ -12627,6 +12880,7 @@
       "new_england": false,
       "regions": "Partial: Africa, Europe, western Asia.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2076-11-26.gif",
       "circ": {
         "t0": 12.0,
         "dT": 149.9,
@@ -12677,6 +12931,7 @@
       "new_england": false,
       "regions": "Total: Australia. Partial: Indies, Australia, N.Z., Antarctica.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2077-05-22.gif",
       "vis": {
         "lat": [
           -77,
@@ -12737,6 +12992,7 @@
       "new_england": true,
       "regions": "Annular: U.S., Carribean, Colombia, Venezuela, Brazil, Guyana, Suriname, French Guiana. Partial: Americas.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2077-11-15.gif",
       "circ": {
         "t0": 17.0,
         "dT": 152.0,
@@ -12787,6 +13043,7 @@
       "new_england": true,
       "regions": "Total: Mexico, U.S. Partial: Americas.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2078-05-11.gif",
       "vis": {
         "lat": [
           -42,
@@ -12847,6 +13104,7 @@
       "new_england": false,
       "regions": "Annular: Chile, Argentina. Partial: Americas, Antarctica.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2078-11-04.gif",
       "circ": {
         "t0": 17.0,
         "dT": 154.2,
@@ -12897,6 +13155,7 @@
       "new_england": true,
       "regions": "Total: U.S., Canada, Greenland. Partial: western Americas, Europe, Africa, Asia.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2079-05-01.gif",
       "vis": {
         "lat": [
           -7,
@@ -12957,6 +13216,7 @@
       "new_england": false,
       "regions": "Annular: Antarctica, New Zealand. Partial: Antarctica, N.Z., South America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2079-10-24.gif",
       "circ": {
         "t0": 18.0,
         "dT": 156.3,
@@ -13007,6 +13267,7 @@
       "new_england": false,
       "regions": "Partial: Antarctica, Africa.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2080-03-21.gif",
       "circ": {
         "t0": 12.0,
         "dT": 157.2,
@@ -13057,6 +13318,7 @@
       "new_england": false,
       "regions": "Partial: North America, Europe, Africa.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2080-09-13.gif",
       "circ": {
         "t0": 17.0,
         "dT": 158.3,
@@ -13107,6 +13369,7 @@
       "new_england": false,
       "regions": "Annular: Chile, Argentina, Ivory Coast, Ghana, Togo, Benin, Nigeria, Cameroon. Partial: South America, Africa, Antarctica.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2081-03-10.gif",
       "circ": {
         "t0": 15.0,
         "dT": 159.4,
@@ -13157,6 +13420,7 @@
       "new_england": false,
       "regions": "Total: Central Europe, Turkey, Syria, Iraq, Kuwait, Quatar, UAE, Saudi Arabia, Oman. Partial: Africa, Europe, Asia.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2081-09-03.gif",
       "vis": {
         "lat": [
           -42,
@@ -13217,6 +13481,7 @@
       "new_england": true,
       "regions": "Annular: Peru, Brazil, Suriname, French Guiana, Portugal, Spain, France, Italy, Germany, Austria. Partial: Americas, Europe, Africa.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2082-02-27.gif",
       "circ": {
         "t0": 15.0,
         "dT": 161.5,
@@ -13267,6 +13532,7 @@
       "new_england": false,
       "regions": "Total: Indonesia, New Guinea, South Pacific. Partial: Indies, Australia, Antarctica, N.Z..",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2082-08-24.gif",
       "vis": {
         "lat": [
           -82,
@@ -13327,6 +13593,7 @@
       "new_england": true,
       "regions": "Partial: Mexico, U.S, Canada.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2083-02-16.gif",
       "circ": {
         "t0": 18.0,
         "dT": 163.7,
@@ -13377,6 +13644,7 @@
       "new_england": false,
       "regions": "Partial: Greenland.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2083-07-15.gif",
       "circ": {
         "t0": 0.0,
         "dT": 164.6,
@@ -13427,6 +13695,7 @@
       "new_england": false,
       "regions": "Partial: South America, Antarctica.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2083-08-13.gif",
       "circ": {
         "t0": 13.0,
         "dT": 164.8,
@@ -13477,6 +13746,7 @@
       "new_england": false,
       "regions": "Partial: Antarctica, South America.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2084-01-07.gif",
       "circ": {
         "t0": 18.0,
         "dT": 165.7,
@@ -13527,6 +13797,7 @@
       "new_england": false,
       "regions": "Annular: Russia, U.S., Canada. Partial: northern Europe, Asia, North America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2084-07-03.gif",
       "circ": {
         "t0": 2.0,
         "dT": 166.8,
@@ -13577,6 +13848,7 @@
       "new_england": false,
       "regions": "Total: South Atlantic and Indian Ocean. Partial: Africa, Antarctica, Australia.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2084-12-27.gif",
       "vis": {
         "lat": [
           -90,
@@ -13637,6 +13909,7 @@
       "new_england": false,
       "regions": "Annular: India, Myanmar, China, Central Pacific. Partial: Asia, Indies, Australia.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2085-06-22.gif",
       "circ": {
         "t0": 3.0,
         "dT": 169.0,
@@ -13687,6 +13960,7 @@
       "new_england": false,
       "regions": "Annular: Central Pacific. Partial: Australia, North America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2085-12-16.gif",
       "circ": {
         "t0": 23.0,
         "dT": 170.1,
@@ -13737,6 +14011,7 @@
       "new_england": false,
       "regions": "Total: Nambia, Botswana, South Africa. Partial: South America, Africa.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2086-06-11.gif",
       "vis": {
         "lat": [
           -72,
@@ -13797,6 +14072,7 @@
       "new_england": false,
       "regions": "Partial: Asia.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2086-12-06.gif",
       "circ": {
         "t0": 6.0,
         "dT": 172.3,
@@ -13847,6 +14123,7 @@
       "new_england": false,
       "regions": "Partial: northern Europe, northern Asia, North America.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2087-05-02.gif",
       "circ": {
         "t0": 18.0,
         "dT": 173.2,
@@ -13897,6 +14174,7 @@
       "new_england": false,
       "regions": "Partial: New Zealand.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2087-06-01.gif",
       "circ": {
         "t0": 1.0,
         "dT": 173.4,
@@ -13947,6 +14225,7 @@
       "new_england": false,
       "regions": "Partial: South America, Antarctica.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2087-10-26.gif",
       "circ": {
         "t0": 12.0,
         "dT": 174.3,
@@ -13997,6 +14276,7 @@
       "new_england": true,
       "regions": "Total: Mauritania, Western Sahara, Mali, Algeria, Tunisia, Greece, Turkey, Russia, Kazakhstan, China. Partial: North America, Africa, Europe, Asia.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2088-04-21.gif",
       "vis": {
         "lat": [
           -27,
@@ -14057,6 +14337,7 @@
       "new_england": false,
       "regions": "Annular: Chile, Argentina. Partial: South America, Antarctica, Africa.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2088-10-14.gif",
       "circ": {
         "t0": 15.0,
         "dT": 176.5,
@@ -14107,6 +14388,7 @@
       "new_england": false,
       "regions": "Annular: Australia, Central Pacific. Partial: Australia, Antarctica, North America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2089-04-10.gif",
       "circ": {
         "t0": 23.0,
         "dT": 177.6,
@@ -14157,6 +14439,7 @@
       "new_england": false,
       "regions": "Total: China, Central Pacific. Partial: Asia, Indies, Australia.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2089-10-04.gif",
       "vis": {
         "lat": [
           -42,
@@ -14217,6 +14500,7 @@
       "new_england": false,
       "regions": "Partial: Antarctica, Australia, N.Z..",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2090-03-31.gif",
       "circ": {
         "t0": 4.0,
         "dT": 179.8,
@@ -14267,6 +14551,7 @@
       "new_england": true,
       "regions": "Total: Canada, Greenland, U.K., France. Partial: North America, Europe, Africa, northern Asia.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2090-09-23.gif",
       "vis": {
         "lat": [
           -2,
@@ -14327,6 +14612,7 @@
       "new_england": false,
       "regions": "Partial: North Africa, Europe, Asia.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2091-02-18.gif",
       "circ": {
         "t0": 10.0,
         "dT": 181.9,
@@ -14377,6 +14663,7 @@
       "new_england": false,
       "regions": "Total: Southern Ocean (near Antarctica). Partial: Australia, Antarctica, N.Z..",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2091-08-15.gif",
       "vis": {
         "lat": [
           -82,
@@ -14437,6 +14724,7 @@
       "new_england": true,
       "regions": "Annular: Panama, Colombia, Venezuela, Guyana, Morocco, Algeria. Partial: Americas, Europe, Africa.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2092-02-07.gif",
       "circ": {
         "t0": 15.0,
         "dT": 184.1,
@@ -14487,6 +14775,7 @@
       "new_england": false,
       "regions": "Annular: Liberia, Ivory Coast, Ghana, Togo, Benin, Nigeria, Cameroon, Chad, CAR, Sudan, Kenya, Somalia. Partial: Africa.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2092-08-03.gif",
       "circ": {
         "t0": 10.0,
         "dT": 185.2,
@@ -14537,6 +14826,7 @@
       "new_england": false,
       "regions": "Total: Australia. Partial: Indies, Australia, Antarctica, N.Z..",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2093-01-27.gif",
       "vis": {
         "lat": [
           -82,
@@ -14597,6 +14887,7 @@
       "new_england": true,
       "regions": "Annular: U.S., Canada, Central Europe, Turkey, Iraq, Iran, Afghanistan, Pakistan. Partial: Americas, Europe, Africa, Asia.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2093-07-23.gif",
       "circ": {
         "t0": 13.0,
         "dT": 187.5,
@@ -14647,6 +14938,7 @@
       "new_england": false,
       "regions": "Total: Antarctica. Partial: South America, Antarctica, N.Z..",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2094-01-16.gif",
       "vis": {
         "lat": [
           -90,
@@ -14707,6 +14999,7 @@
       "new_england": false,
       "regions": "Partial: Southern Ocean (near Antarctica).",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2094-06-13.gif",
       "circ": {
         "t0": 0.0,
         "dT": 189.5,
@@ -14757,6 +15050,7 @@
       "new_england": false,
       "regions": "Partial: North America, Asia.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2094-07-12.gif",
       "circ": {
         "t0": 13.0,
         "dT": 189.7,
@@ -14807,6 +15101,7 @@
       "new_england": true,
       "regions": "Partial: North America.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2094-12-07.gif",
       "circ": {
         "t0": 20.0,
         "dT": 190.6,
@@ -14857,6 +15152,7 @@
       "new_england": false,
       "regions": "Total: Nambia, South Africa, Botswana, Zambia, Mozambique, Madagascar. Partial: Africa.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2095-06-02.gif",
       "vis": {
         "lat": [
           -72,
@@ -14917,6 +15213,7 @@
       "new_england": false,
       "regions": "Annular: China, Korea, Japan, Central Pacific. Partial: Asia, Indies, Australia.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2095-11-27.gif",
       "circ": {
         "t0": 1.0,
         "dT": 192.9,
@@ -14967,6 +15264,7 @@
       "new_england": false,
       "regions": "Total: Indonesia, Central Pacific. Partial: Asia, Indies, Australia, North America.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2096-05-22.gif",
       "vis": {
         "lat": [
           -42,
@@ -15027,6 +15325,7 @@
       "new_england": false,
       "regions": "Annular: Malaysia, Indonesia, New Guinea, Australia, New Zealand. Partial: Indies, Australia, N.Z., Antarctica.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2096-11-15.gif",
       "circ": {
         "t0": 1.0,
         "dT": 195.2,
@@ -15077,6 +15376,7 @@
       "new_england": false,
       "regions": "Total: Alaska, Russia. Partial: Asia, North America, northern Europe.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2097-05-11.gif",
       "vis": {
         "lat": [
           -7,
@@ -15137,6 +15437,7 @@
       "new_england": false,
       "regions": "Annular: Antarctica. Partial: Antarctica, Australia.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2097-11-04.gif",
       "circ": {
         "t0": 2.0,
         "dT": 197.4,
@@ -15187,6 +15488,7 @@
       "new_england": false,
       "regions": "Partial: Antarctica, South America.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2098-04-01.gif",
       "circ": {
         "t0": 20.0,
         "dT": 198.4,
@@ -15237,6 +15539,7 @@
       "new_england": false,
       "regions": "Partial: Asia, North America.",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2098-09-25.gif",
       "circ": {
         "t0": 1.0,
         "dT": 199.5,
@@ -15287,6 +15590,7 @@
       "new_england": false,
       "regions": "Partial: Southern Ocean (near Antarctica).",
       "type": "partial",
+      "map": "/img/eclipse-maps/solar-2098-10-24.gif",
       "circ": {
         "t0": 11.0,
         "dT": 199.7,
@@ -15337,6 +15641,7 @@
       "new_england": false,
       "regions": "Annular: Central Pacific. Partial: Australia, N.Z., Antarctica, North America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2099-03-21.gif",
       "circ": {
         "t0": 23.0,
         "dT": 200.6,
@@ -15387,6 +15692,7 @@
       "new_england": true,
       "regions": "Total: Canada, U.S., Central Atlantic. Partial: Americas, Africa.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2099-09-14.gif",
       "vis": {
         "lat": [
           -42,
@@ -15447,6 +15753,7 @@
       "new_england": false,
       "regions": "Annular: Central Pacific, U.S. Partial: Australia, North America.",
       "type": "annular",
+      "map": "/img/eclipse-maps/solar-2100-03-10.gif",
       "circ": {
         "t0": 22.0,
         "dT": 202.9,
@@ -15497,6 +15804,7 @@
       "new_england": false,
       "regions": "Total: Central Africa, Madagascar. Partial: Africa, Antarctica.",
       "type": "total",
+      "map": "/img/eclipse-maps/solar-2100-09-04.gif",
       "vis": {
         "lat": [
           -87,
