@@ -797,10 +797,18 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
 
   const minFov = cameraOn ? 12 : 28;
   const primary = withLive[0];
-  const refPoint = primary?.live || primary?.peak;
+  /* The reference point is the live position while the event is
+     near (tonight's targets), but for an event far from now the
+     "right now" framing is nonsense — a 2028 eclipse viewed in
+     2026 got guidance aimed at today's Sun plus a suffix
+     comparing now to the event day's sunrise (Alex, 2026-10-27).
+     Far from now, aim at the event's peak instead. */
+  const farFromNow = !!primary?.peak
+    && Math.abs(primary.peak.time.getTime() - nowMs) > 36 * 3600e3;
+  const refPoint = farFromNow ? primary.peak : (primary?.live || primary?.peak);
   let guidance = null;
   if (primary && refPoint && refPoint.alt > 0) {
-    const when = primary.live ? 'right now' : `at ${fmtTime(refPoint.time)}`;
+    const when = primary.live && refPoint === primary.live ? 'right now' : `at ${fmtTime(refPoint.time)}`;
     if (follow && pointing) {
       const dAz = ((refPoint.az - pointing.az + 540) % 360) - 180;
       const dEl = refPoint.alt - pointing.el;
@@ -822,9 +830,11 @@ export default function SkyView({ isOpen, onClose, title, subtitle, targets, atT
     } else {
       // No live position means the object is not up right now (the
       // Moon at 6 AM, say) — say so, with when it comes back, rather
-      // than silently showing only the peak marker.
+      // than silently showing only the peak marker. Only near-term:
+      // for a far-future event the rise/set belong to the event's
+      // own day, and comparing them to now reads as gibberish.
       let notUp = '';
-      if (primary.nowFn && !primary.live) {
+      if (primary.nowFn && !primary.live && !farFromNow) {
         if (primary.rise && nowMs < primary.rise.time.getTime()) {
           notUp = ` It is not up right now — it rises ${fmtTime(primary.rise.time)}.`;
         } else if (primary.set && nowMs > primary.set.time.getTime()) {

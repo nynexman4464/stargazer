@@ -2327,6 +2327,36 @@ export function lookTrack(raDecAt, anchor, loc, { startH = -6, hours = 24, darkB
   };
 }
 
+/* For an eclipse, the moment that matters is greatest eclipse,
+   not the body's daily culmination — lookTrack's peak is the
+   culmination, which put the Jul 2028 eclipse's sky-view
+   guidance (and peak marker) at solar noon, 6:30 AM in the
+   viewer's timezone, instead of at the eclipse (Alex,
+   2026-10-27). Swap the track's peak for the body's position
+   at greatest eclipse when circumstances are available; the
+   rest of the track (path, rise/set, samples) is unchanged. */
+export function withEclipsePeak(ev, loc, track) {
+  if (!ev || !ev.circ || !track) return track;
+  const isoDate = (ev.id || '').slice(-10);
+  let when = null, raDecAt = null;
+  if (ev.solar) {
+    const c = solarCircumstances(ev.circ, isoDate, loc.lat, loc.lon);
+    if (c && c.max) { when = c.max; raDecAt = sunRaDec; }
+  } else {
+    const c = lunarCircumstances(ev.circ, isoDate);
+    if (c && c.greatest) { when = c.greatest; raDecAt = moonEquatorial; }
+  }
+  if (!when) return track;
+  const eq = raDecAt(when);
+  const aa = altAz(eq.ra, eq.dec, when, loc.lat, loc.lon);
+  const sun = sunElev(when, loc.lat, loc.lon);
+  return {
+    ...track,
+    peak: { time: when, alt: aa.alt, az: aa.az, sun },
+    peakInDark: ev.solar ? true : sun < -6,
+  };
+}
+
 /* Interpolate a track path (lookTrack path or a satellite pass track —
    both are {time, alt, az} point lists) at an arbitrary moment, for the
    sky chart's live "where it is right now" dot. Azimuth takes the short
@@ -2586,7 +2616,7 @@ export function eventLook(ev, loc) {
       label: 'Moon',
       // The Moon is up in daylight too: widen the window to that morning
       // and keep samples from rise to set, not just after sunset.
-      track: lookTrack((d) => moonEquatorial(d), ev.date, loc, { startH: -15, hours: 30, daylightSamples: true }),
+      track: withEclipsePeak(ev, loc, lookTrack((d) => moonEquatorial(d), ev.date, loc, { startH: -15, hours: 30, daylightSamples: true })),
       note: null,
     }];
   }
@@ -2595,7 +2625,7 @@ export function eventLook(ev, loc) {
     return [{
       label: 'Sun',
       // ev.date is 9 PM on eclipse day; scan that whole calendar day.
-      track: lookTrack((d) => sunRaDec(d), ev.date, loc, { startH: -21, hours: 24, daytime: true }),
+      track: withEclipsePeak(ev, loc, lookTrack((d) => sunRaDec(d), ev.date, loc, { startH: -21, hours: 24, daytime: true })),
       note: visible
         ? 'A daytime event — this is the Sun’s path across your sky that day. Never look at the Sun without eclipse glasses or a proper solar filter.'
         : `This eclipse isn’t visible from ${loc.name || 'your location'} — this is the Sun’s path at home that day.`,
