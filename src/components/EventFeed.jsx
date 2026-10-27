@@ -11,6 +11,8 @@ import {
   DropdownMenu,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuCheckboxItem,
+  DropdownMenuDivider,
 } from '@astryxdesign/core/DropdownMenu';
 import { EmptyState } from '@astryxdesign/core/EmptyState';
 import { Skeleton } from '@astryxdesign/core/Skeleton';
@@ -140,7 +142,7 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
   );
 }
 
-export default function EventFeed({ events, scores, loaded, tier, setTier, type, setType, range, setRange, showFaint, setShowFaint, anchor, loc, planetRows, visWhen }) {
+export default function EventFeed({ events, scores, loaded, tier, setTier, hiddenTypes, setHiddenTypes, range, setRange, showFaint, setShowFaint, anchor, loc, planetRows, visWhen }) {
   // Responsive contract: below 640px the filter bar wraps onto multiple lines
   // and the event cards stack in a single column.
   const isNarrow = useMediaQuery('(max-width: 640px)');
@@ -152,7 +154,7 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
   });
   const types = Object.keys(TYPE_META).filter((t) => counts[t]);
   const list = events.filter(
-    (e) => inScope(e) && (type === 'all' || e.type === type),
+    (e) => inScope(e) && !hiddenTypes.has(e.type),
   );
   // The feed shows the first page of cards; "Load more" reveals the rest.
   // Reset to the first page whenever the filters (or viewing date) change.
@@ -167,29 +169,46 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
   const remaining = list.length - shown.length;
   const pickTier = (v) => {
     setTier(v);
-    setType('all');
+    setHiddenTypes(new Set());
     setVisible(PAGE_SIZE);
   };
-  const pickType = (v) => {
-    setType(v);
+  const toggleType = (key) => (checked) => {
+    setHiddenTypes((prev) => {
+      const next = new Set(prev);
+      if (checked) next.delete(key); else next.add(key);
+      return next;
+    });
     setVisible(PAGE_SIZE);
   };
   const pickRange = (v) => {
     setRange(v);
     setVisible(PAGE_SIZE);
   };
-  const pickFaint = (v) => {
-    setShowFaint(v === 'show');
+  const toggleFaint = (checked) => {
+    setShowFaint(checked);
     setVisible(PAGE_SIZE);
   };
   const resetFilters = () => {
     setTier('all');
-    setType('all');
+    setHiddenTypes(new Set());
     setRange('all');
     setShowFaint(false);
     setVisible(PAGE_SIZE);
   };
-  const isFiltered = tier !== 'all' || type !== 'all' || range !== 'all' || showFaint;
+  const isFiltered = tier !== 'all' || hiddenTypes.size > 0 || range !== 'all' || showFaint;
+  // The Type button summarizes the checkbox state: the
+  // default (nothing hidden) still reads 'All types'.
+  const visibleTypes = types.filter((t) => !hiddenTypes.has(t));
+  const typeLabel = hiddenTypes.size === 0
+    ? 'All types'
+    : visibleTypes.length === 1
+      ? TYPE_META[visibleTypes[0]].label
+      : visibleTypes.length === 0
+        ? 'No types'
+        : `${visibleTypes.length} types`;
+  const typeIcon = visibleTypes.length === 1 && hiddenTypes.size > 0
+    ? TYPE_ICON[visibleTypes[0]]
+    : Sparkles;
 
   // Filter bar: one compact row of dropdown clauses (tier / when / type) plus
   // the result count and a reset, instead of three full-width segmented rows.
@@ -247,49 +266,33 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
         button={{
           variant: 'secondary',
           size: 'sm',
-          label: type === 'all' ? 'All types' : TYPE_META[type].label,
-          icon: <Icon icon={TYPE_ICON[type] || Sparkles} size="sm" />,
+          label: typeLabel,
+          icon: <Icon icon={typeIcon} size="sm" />,
           'aria-label': 'Filter by event type',
         }}
       >
-        <DropdownMenuRadioGroup label="Event type" value={type} onChange={pickType}>
-          <DropdownMenuRadioItem value="all" label="All types" icon={Sparkles} />
-          {types.map((t) => (
-            <DropdownMenuRadioItem
-              key={t}
-              value={t}
-              label={TYPE_META[t].label}
-              description={`${counts[t]} event${counts[t] === 1 ? '' : 's'}`}
-              icon={TYPE_ICON[t]}
-            />
-          ))}
-        </DropdownMenuRadioGroup>
-      </DropdownMenu>
-      <DropdownMenu
-        presentation="adaptive"
-        hasChevron
-        button={{
-          variant: 'secondary',
-          size: 'sm',
-          label: showFaint ? 'Faint lunar: shown' : 'Faint lunar: hidden',
-          icon: <Icon icon={Eclipse} size="sm" />,
-          'aria-label': 'Show or hide faint lunar eclipses',
-        }}
-      >
-        <DropdownMenuRadioGroup label="Faint lunar eclipses" value={showFaint ? 'show' : 'hide'} onChange={pickFaint}>
-          <DropdownMenuRadioItem
-            value="hide"
-            label="Hidden"
-            description="Penumbral lunar eclipses stay out of the list — just a subtle shading on the Moon (the default)"
-            icon={Eclipse}
+        {types.map((t) => (
+          <DropdownMenuCheckboxItem
+            key={t}
+            label={TYPE_META[t].label}
+            description={`${counts[t]} event${counts[t] === 1 ? '' : 's'}`}
+            icon={TYPE_ICON[t]}
+            value={!hiddenTypes.has(t)}
+            onChange={toggleType(t)}
           />
-          <DropdownMenuRadioItem
-            value="show"
-            label="Shown"
-            description="Include penumbral lunar eclipses in the list"
-            icon={Eclipse}
-          />
-        </DropdownMenuRadioGroup>
+        ))}
+        <DropdownMenuDivider />
+        {/* One minor kind rides along in the Type menu rather
+            than getting its own filter control (Alex,
+            2026-10-27): faint lunar eclipses, off by
+            default. */}
+        <DropdownMenuCheckboxItem
+          label="Faint lunar eclipses"
+          description="Penumbral — just a subtle shading on the Moon"
+          icon={Eclipse}
+          value={showFaint}
+          onChange={toggleFaint}
+        />
       </DropdownMenu>
       <Text type="supporting">
         {list.length} event{list.length === 1 ? '' : 's'}

@@ -92,7 +92,10 @@ export default function App() {
     return () => { cancelled = true; };
   }, [loc, home, lastAway]);
   const [tier, setTier] = useState('all');
-  const [type, setType] = useState('all');
+  // The Type menu is a checkbox list now: event types the
+  // user has unchecked. Empty = all types shown (the
+  // default), matching the old type === 'all'.
+  const [hiddenTypes, setHiddenTypes] = useState(() => new Set());
   const [range, setRange] = useState('all');
   // Faint (penumbral) lunar eclipses are hidden by default —
   // a subtle smudge, not worth list space next to totals;
@@ -371,8 +374,8 @@ export default function App() {
                     loaded={loaded}
                     tier={tier}
                     setTier={setTier}
-                    type={type}
-                    setType={setType}
+                    hiddenTypes={hiddenTypes}
+                    setHiddenTypes={setHiddenTypes}
                     range={range}
                     setRange={setRange}
                     showFaint={showFaint}
