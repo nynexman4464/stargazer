@@ -25,6 +25,8 @@ import {
   brightnessWords,
   fmtTime,
   fmtDate,
+  fmtDateLoc,
+  dayKeyTz,
   countdown,
   isImminent,
   compass,
@@ -40,7 +42,7 @@ function PassTrack({ p, satName }) {
   return (
     <VStack gap={2}>
       <Text weight="semibold">
-        {satName} — {fmtDate(p.start)} pass
+        {satName} — {fmtDateLoc(p.start)} pass
       </Text>
       <Text type="supporting">
         Appears {fmtTime(p.start)} in the {compass(p.startAz)} · peaks{' '}
@@ -129,18 +131,20 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
     };
   }, [loc, bundledTles, fromMs]);
 
-  // Group every satellite's passes by local calendar day.
+  // Group every satellite's passes by calendar day in the
+  // viewed location's timezone (the same tz fmtTime renders),
+  // so a pass's day tab and its clock time never disagree.
   const days = (() => {
     if (!allPasses) return [];
     const byDay = new Map();
     for (const list of Object.values(allPasses)) {
       for (const p of list) {
         const d = p.start;
-        const key = `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+        const key = dayKeyTz(d);
         if (!byDay.has(key)) {
           byDay.set(key, {
             key,
-            date: new Date(d.getFullYear(), d.getMonth(), d.getDate()),
+            date: d,
             passes: [],
           });
         }
@@ -170,12 +174,10 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
     label === 'Excellent' ? 'success' : label === 'Good' ? 'warning' : 'neutral';
   const dayLabel = (d) => {
     if (fromDate) return fmtDate(d.date);
-    const now = new Date();
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const diff = Math.round((d.date - today) / DAY);
+    const diff = Math.round((Date.parse(dayKeyTz(d.date)) - Date.parse(dayKeyTz(new Date()))) / DAY);
     if (diff === 0) return 'Today';
     if (diff === 1) return 'Tomorrow';
-    return fmtDate(d.date);
+    return fmtDateLoc(d.date);
   };
 
   return (
@@ -316,7 +318,7 @@ export default function PassesPanel({ loc, bundledTles, fromDate }) {
           isOpen
           onClose={() => setSkyPass(null)}
           title={`${skyPass.satName} — find in the sky`}
-          subtitle={`${fmtDate(skyPass.start)} · appears ${fmtTime(skyPass.start)} in the ${compass(skyPass.startAz)} · peaks ${Math.round(skyPass.maxEl)}° at ${fmtTime(skyPass.maxT)}`}
+          subtitle={`${fmtDateLoc(skyPass.start)} · appears ${fmtTime(skyPass.start)} in the ${compass(skyPass.startAz)} · peaks ${Math.round(skyPass.maxEl)}° at ${fmtTime(skyPass.maxT)}`}
           targets={[{
             label: skyPass.satName,
             path: skyPass.track,

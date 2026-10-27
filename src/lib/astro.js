@@ -9,7 +9,7 @@ import {
 import { getRegionSync, ensureRegion, sampleRegionByte } from './bortleRegions.js';
 
 /* ============================== config ============================== */
-export const DEFAULT_LOC = { name: 'Medford, MA', lat: 42.4184, lon: -71.1062 };
+export const DEFAULT_LOC = { name: 'Medford, MA', lat: 42.4184, lon: -71.1062, tz: 'America/New_York' };
 // Medford Bortle 8 inferred from Sky & Telescope zenith SQM in adjacent Arlington (17.9)
 // and Cambridge (17.3-17.4) — no published Medford measurement. Only shown while home is Medford.
 export const HOME_BORTLE = {
@@ -395,11 +395,66 @@ export function compass(azDeg) {
   const dirs = ['N', 'NNE', 'NE', 'ENE', 'E', 'ESE', 'SE', 'SSE', 'S', 'SSW', 'SW', 'WSW', 'W', 'WNW', 'NW', 'NNW'];
   return dirs[Math.round((((azDeg % 360) + 360) % 360) / 22.5) % 16];
 }
+/* Display timezone: clock times render in the VIEWED
+   location's timezone, not the viewer's (Alex, 2026-10-27 —
+   a Cape Town eclipse's 12:30 PM transit read as "6:30 AM"
+   from Boston). App sets this from the current location;
+   locations carry an IANA tz (geocoder results include one;
+   older saves get it resolved once via resolveLocTimeZone).
+   Calendar-date labels (fmtDate) deliberately stay in the
+   viewer's own day semantics — catalog event dates are day
+   anchors, not instants — while fmtDateLoc below serves the
+   places that format a real instant's date (satellite
+   passes), where the date must agree with the tz-shifted
+   time beside it. */
+let displayTz = null;
+export function setDisplayTimeZone(tz) {
+  if (tz) {
+    try {
+      new Intl.DateTimeFormat('en-US', { timeZone: tz });
+      displayTz = tz;
+      return;
+    } catch {}
+  }
+  displayTz = null;
+}
+export function getDisplayTimeZone() {
+  return displayTz;
+}
 export function fmtTime(d) {
-  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+  return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', timeZone: displayTz || undefined });
 }
 export function fmtDate(d) {
   return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+}
+export function fmtDateLoc(d) {
+  return d.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric', timeZone: displayTz || undefined });
+}
+/* The calendar day of an instant in the display timezone, as
+   a comparable YYYY-MM-DD key (pass day-grouping). */
+export function dayKeyTz(d) {
+  const parts = new Intl.DateTimeFormat('en-CA', {
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    timeZone: displayTz || undefined,
+  }).formatToParts(d);
+  const get = (t) => parts.find((p) => p.type === t).value;
+  return `${get('year')}-${get('month')}-${get('day')}`;
+}
+/* Resolve a location's IANA timezone from its coordinates
+   (Open-Meteo, timezone=auto) — for saved locations that
+   predate tz storage. Null on any failure; callers fall back
+   to the viewer's timezone, i.e. the old behavior. */
+export async function resolveLocTimeZone(loc) {
+  if (!loc || loc.lat == null || loc.lon == null) return null;
+  try {
+    const r = await fetch(
+      `https://api.open-meteo.com/v1/forecast?latitude=${loc.lat}&longitude=${loc.lon}&timezone=auto&forecast_days=1`,
+    );
+    const j = await r.json();
+    return typeof j?.timezone === 'string' ? j.timezone : null;
+  } catch {
+    return null;
+  }
 }
 /* fmtDate with the year appended when the date is a year or
    more out (Alex, 2026-10-26: in Upcoming events, dates 1+

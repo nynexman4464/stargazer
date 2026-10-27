@@ -134,7 +134,7 @@ export default function LocationDialog({
           name = await reverseGeocode(lat, lon);
         } catch {}
         setGeoBusy(false);
-        onPick({ name, lat, lon });
+        onPick({ name, lat, lon, tz: Intl.DateTimeFormat().resolvedOptions().timeZone || null });
       },
       () => setGeoBusy(false),
     );
@@ -216,6 +216,7 @@ export default function LocationDialog({
                             name: `${g.name}${g.country_code ? `, ${g.country_code}` : ''}`,
                             lat: g.latitude,
                             lon: g.longitude,
+                            tz: g.timezone || null,
                           })
                         }
                       />

@@ -29,6 +29,8 @@ import {
   isAway,
   loadJSON,
   loadTles,
+  setDisplayTimeZone,
+  resolveLocTimeZone,
   normalizeEvents,
   goScore,
   estimatedGoScore,
@@ -43,6 +45,39 @@ const base = import.meta.env.BASE_URL;
 export default function App() {
   const [loc, setLoc] = useState(loadLoc);
   const [home, setHome] = useState(loadHome);
+  // Display timezone follows the viewed location (Alex,
+  // 2026-10-27): clock times render in the location's own
+  // timezone, not the viewer's. Locations picked from search
+  // carry a tz; older saves get theirs resolved once from
+  // coordinates and persisted with the location. The tick
+  // state exists only to re-render once the tz lands.
+  const [, setDisplayTzTick] = useState(0);
+  useEffect(() => {
+    if (loc?.tz) {
+      setDisplayTimeZone(loc.tz);
+      setDisplayTzTick((n) => n + 1);
+      return;
+    }
+    setDisplayTimeZone(null);
+    setDisplayTzTick((n) => n + 1);
+    if (!loc || loc.lat == null) return;
+    let cancelled = false;
+    resolveLocTimeZone(loc).then((tz) => {
+      if (cancelled || !tz) return;
+      const withTz = { ...loc, tz };
+      setLoc(withTz);
+      saveLoc(withTz);
+      if (!isAway(withTz, home)) {
+        setHome(withTz);
+        saveHome(withTz);
+      }
+      if (lastAway && lastAway.lat === loc.lat && lastAway.lon === loc.lon) {
+        setLastAway(withTz);
+        saveLastAway(withTz);
+      }
+    });
+    return () => { cancelled = true; };
+  }, [loc, home, lastAway]);
   const [lastAway, setLastAway] = useState(() => {
     const saved = loadLastAway();
     if (saved) return saved;
