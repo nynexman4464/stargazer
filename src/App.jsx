@@ -32,6 +32,7 @@ import {
   setDisplayTimeZone,
   resolveLocTimeZone,
   normalizeEvents,
+  isFaintLunar,
   goScore,
   estimatedGoScore,
   loadCloudClimatology,
@@ -93,6 +94,10 @@ export default function App() {
   const [tier, setTier] = useState('all');
   const [type, setType] = useState('all');
   const [range, setRange] = useState('all');
+  // Faint (penumbral) lunar eclipses are hidden by default —
+  // a subtle smudge, not worth list space next to totals;
+  // the feed's filter bar can show them again.
+  const [showFaint, setShowFaint] = useState(false);
   const [events, setEvents] = useState([]);
   const [spots, setSpots] = useState([]);
   const [scores, setScores] = useState({});
@@ -268,6 +273,10 @@ export default function App() {
     setHome(next);
   }, [loc]);
 
+  /* The list the hero and the feed both draw from: faint
+     lunar eclipses removed unless the user asked for them. */
+  const feedEvents = showFaint ? events : events.filter((e) => !isFaintLunar(e));
+
   /* ---- hero pick ----
      Today: soonest events as before. Fast-forwarded: the best-scoring event
      in the 3-day window starting on the viewing date — or, when that window
@@ -276,11 +285,11 @@ export default function App() {
   const heroCands = (() => {
     if (!anchorDay) {
       const nowMs = Date.now();
-      return events.filter((e) => e.date - nowMs < 60 * 3600000 && e.date - nowMs > -6 * 3600000);
+      return feedEvents.filter((e) => e.date - nowMs < 60 * 3600000 && e.date - nowMs > -6 * 3600000);
     }
     const start = anchorDay.getTime();
     const end = start + 3 * DAY;
-    return events.filter((e) => {
+    return feedEvents.filter((e) => {
       const t = e.date instanceof Date ? e.date.getTime() : new Date(e.date).getTime();
       return t >= start && t < end;
     });
@@ -288,9 +297,9 @@ export default function App() {
   // Next event on/after the viewing date (events are future-filtered and
   // date-sorted). For Today this is just events[0], as before.
   const nextAfterAnchor = (() => {
-    if (!anchorDay) return events[0];
+    if (!anchorDay) return feedEvents[0];
     const start = anchorDay.getTime();
-    return events.find((e) => {
+    return feedEvents.find((e) => {
       const t = e.date instanceof Date ? e.date.getTime() : new Date(e.date).getTime();
       return t >= start;
     });
@@ -357,7 +366,7 @@ export default function App() {
                 </GridSpan>
                 <GridSpan columns="full">
                   <EventFeed
-                    events={events}
+                    events={feedEvents}
                     scores={scores}
                     loaded={loaded}
                     tier={tier}
@@ -366,6 +375,8 @@ export default function App() {
                     setType={setType}
                     range={range}
                     setRange={setRange}
+                    showFaint={showFaint}
+                    setShowFaint={setShowFaint}
                     anchor={anchorDay}
                     loc={loc}
                     planetRows={planetRows}

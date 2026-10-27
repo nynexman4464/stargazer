@@ -140,7 +140,7 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
   );
 }
 
-export default function EventFeed({ events, scores, loaded, tier, setTier, type, setType, range, setRange, anchor, loc, planetRows, visWhen }) {
+export default function EventFeed({ events, scores, loaded, tier, setTier, type, setType, range, setRange, showFaint, setShowFaint, anchor, loc, planetRows, visWhen }) {
   // Responsive contract: below 640px the filter bar wraps onto multiple lines
   // and the event cards stack in a single column.
   const isNarrow = useMediaQuery('(max-width: 640px)');
@@ -178,13 +178,18 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
     setRange(v);
     setVisible(PAGE_SIZE);
   };
+  const pickFaint = (v) => {
+    setShowFaint(v === 'show');
+    setVisible(PAGE_SIZE);
+  };
   const resetFilters = () => {
     setTier('all');
     setType('all');
     setRange('all');
+    setShowFaint(false);
     setVisible(PAGE_SIZE);
   };
-  const isFiltered = tier !== 'all' || type !== 'all' || range !== 'all';
+  const isFiltered = tier !== 'all' || type !== 'all' || range !== 'all' || showFaint;
 
   // Filter bar: one compact row of dropdown clauses (tier / when / type) plus
   // the result count and a reset, instead of three full-width segmented rows.
@@ -258,6 +263,32 @@ export default function EventFeed({ events, scores, loaded, tier, setTier, type,
               icon={TYPE_ICON[t]}
             />
           ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenu>
+      <DropdownMenu
+        presentation="adaptive"
+        hasChevron
+        button={{
+          variant: 'secondary',
+          size: 'sm',
+          label: showFaint ? 'Faint lunar: shown' : 'Faint lunar: hidden',
+          icon: <Icon icon={Eclipse} size="sm" />,
+          'aria-label': 'Show or hide faint lunar eclipses',
+        }}
+      >
+        <DropdownMenuRadioGroup label="Faint lunar eclipses" value={showFaint ? 'show' : 'hide'} onChange={pickFaint}>
+          <DropdownMenuRadioItem
+            value="hide"
+            label="Hidden"
+            description="Penumbral lunar eclipses stay out of the list — just a subtle shading on the Moon (the default)"
+            icon={Eclipse}
+          />
+          <DropdownMenuRadioItem
+            value="show"
+            label="Shown"
+            description="Include penumbral lunar eclipses in the list"
+            icon={Eclipse}
+          />
         </DropdownMenuRadioGroup>
       </DropdownMenu>
       <Text type="supporting">

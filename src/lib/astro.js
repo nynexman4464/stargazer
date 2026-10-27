@@ -580,6 +580,15 @@ const ECLIPSE_TYPE_PLAIN = {
   annular: 'Ring-of-fire',
 };
 
+/* A faint lunar eclipse: the Moon only skims Earth's outer
+   (penumbral) shadow — a subtle smudge most people would
+   not notice. The feed hides these by default (Alex,
+   2026-10-27: 'the faint lunar eclipses are not super
+   interesting'); the filter bar can bring them back. */
+export function isFaintLunar(e) {
+  return !!e && e.kind === 'eclipse' && !e.solar && e.eclipseType === 'penumbral';
+}
+
 export function normalizeEvents(showers, eclipses, conjs, comets) {
   const out = [];
   const push = (e) => {
@@ -625,6 +634,7 @@ export function normalizeEvents(showers, eclipses, conjs, comets) {
       ...e,
       kind: 'eclipse',
       type: 'eclipse',
+      eclipseType: e.type,
       tier,
       // plain-language type names ("penumbral"/"annular" mean nothing to most people)
       title: `${ECLIPSE_TYPE_PLAIN[e.type] || cap(e.type)} ${e.solar ? 'solar' : 'lunar'} eclipse`,
