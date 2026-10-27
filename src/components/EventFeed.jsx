@@ -31,7 +31,7 @@ const TIER_ICON = { backyard: House, drive: Car, expedition: Plane };
 const TIER_COLOR = { backyard: 'green', drive: 'orange', expedition: 'red' };
 const TYPE_ICON = { shower: Sparkles, eclipse: Eclipse, planet: Orbit, comet: Star };
 
-function EventCard({ ev, score, loc, planetRows, visWhen }) {
+function EventCard({ ev, score, scoresSettled, scoresAsOf, loc, planetRows, visWhen }) {
   const [mapOpen, setMapOpen] = useState(false);
   const [lightbox, setLightbox] = useState(false);
   const notVisible = ev.tier === 'expedition' && !eclipseVisibleFrom(ev, loc);
@@ -127,7 +127,7 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
           : scoresSettled
             ? (
               <GoScorePlaceholder
-                estimated={(ev.date - Date.now()) / 86400000 > 15}
+                estimated={scoresAsOf != null && (ev.date - scoresAsOf) / 86400000 > 15}
                 locName={loc && loc.name}
               />
             )
@@ -151,7 +151,7 @@ function EventCard({ ev, score, loc, planetRows, visWhen }) {
   );
 }
 
-export default function EventFeed({ events, scores, scoresSettled, loaded, tier, setTier, hiddenTypes, setHiddenTypes, range, setRange, showFaint, setShowFaint, anchor, loc, planetRows, visWhen }) {
+export default function EventFeed({ events, scores, scoresSettled, scoresAsOf, loaded, tier, setTier, hiddenTypes, setHiddenTypes, range, setRange, showFaint, setShowFaint, anchor, loc, planetRows, visWhen }) {
   // Responsive contract: below 640px the filter bar wraps onto multiple lines
   // and the event cards stack in a single column.
   const isNarrow = useMediaQuery('(max-width: 640px)');
@@ -354,7 +354,7 @@ export default function EventFeed({ events, scores, scoresSettled, loaded, tier,
           <VStack gap={3}>
             <Grid columns={isNarrow ? 1 : { minWidth: 300 }} gap={3}>
               {shown.map((e) => (
-                <EventCard key={e.id} ev={e} score={scores[e.id]} loc={loc} planetRows={planetRows} visWhen={visWhen} />
+                <EventCard key={e.id} ev={e} score={scores[e.id]} scoresSettled={scoresSettled} scoresAsOf={scoresAsOf} loc={loc} planetRows={planetRows} visWhen={visWhen} />
               ))}
             </Grid>
             {remaining > 0 && (

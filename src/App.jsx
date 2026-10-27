@@ -109,6 +109,10 @@ export default function App() {
   // the disabled placeholder bar for events that have no
   // score by design (see GoScorePlaceholder).
   const [scoresSettled, setScoresSettled] = useState(false);
+  // When the settled pass ran — the feed's placeholder bars
+  // use it to mirror the forecast/estimate 15-day split
+  // without calling Date.now() during render.
+  const [scoresAsOf, setScoresAsOf] = useState(null);
   const [sources, setSources] = useState('');
   const [tles, setTles] = useState(null);
   const [loaded, setLoaded] = useState(false);
@@ -181,11 +185,13 @@ export default function App() {
     weatherCache.current = {};
     setScores({});
     setScoresSettled(false);
+    setScoresAsOf(null);
   }, [loc]);
 
   useEffect(() => {
     let cancelled = false;
     setScoresSettled(false);
+    setScoresAsOf(null);
     (async () => {
       /* Start the climatology fetch but do NOT await it yet:
          the forecast scores below are what the hero is usually
@@ -232,6 +238,7 @@ export default function App() {
         // No climatology, so no estimates are coming: what
         // scores exist are final for this pass.
         setScoresSettled(true);
+        setScoresAsOf(Date.now());
         return;
       }
       const est = {};
@@ -244,6 +251,7 @@ export default function App() {
       if (!cancelled) {
         setScores((prev) => ({ ...est, ...prev }));
         setScoresSettled(true);
+        setScoresAsOf(Date.now());
       }
     })();
     return () => {
@@ -388,6 +396,7 @@ export default function App() {
                     events={feedEvents}
                     scores={scores}
                     scoresSettled={scoresSettled}
+                    scoresAsOf={scoresAsOf}
                     loaded={loaded}
                     tier={tier}
                     setTier={setTier}
