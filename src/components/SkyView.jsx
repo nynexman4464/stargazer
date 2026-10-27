@@ -41,13 +41,37 @@ function EclipseDiagram({ d }) {
       </svg>
     );
   }
-  const R = 24;
-  const sy = 75 + Math.sign(d.gamma || 1) * d.off * R;
+  /* Lunar, in the NASA bulletin figure's style (Alex,
+     2026-10-27): the shadow circles sit at the center and
+     the Moon is drawn at every contact point along its
+     path, labeled P1/U1/.../P4. Everything arrives in
+     Earth radii; scale so the widest element just fits. */
+  const extent = Math.max(
+    d.penR,
+    ...d.discs.map((p) => Math.hypot(p.sx, p.sy) + d.moonR),
+  ) * 1.05;
+  const S = 95 / extent;
+  const C = 95;
+  const px = (v) => C + v * S;
   return (
-    <svg viewBox="0 0 150 150" className="sg-ecl-diagram" role="img" aria-label={d.caption}>
-      <circle cx={75} cy={sy} r={R * d.penR} className="sg-ecl-pen" />
-      <circle cx={75} cy={sy} r={R * d.umbR} className="sg-ecl-umb" />
-      <circle cx={75} cy={75} r={R} className="sg-ecl-moon-l" />
+    <svg viewBox="0 0 190 190" className="sg-ecl-diagram" role="img" aria-label={d.caption}>
+      <circle cx={C} cy={C} r={d.penR * S} className="sg-ecl-pen" />
+      <circle cx={C} cy={C} r={d.umbR * S} className="sg-ecl-umb" />
+      <polyline
+        points={d.discs.map((p) => `${px(p.sx)},${px(p.sy)}`).join(' ')}
+        className="sg-ecl-path"
+      />
+      {d.discs.map((p) => (
+        <g key={p.code}>
+          <circle
+            cx={px(p.sx)} cy={px(p.sy)} r={d.moonR * S}
+            className={p.greatest ? 'sg-ecl-disc-g' : 'sg-ecl-disc'}
+          />
+          <text x={px(p.sx)} y={px(p.sy) - d.moonR * S - 3} className="sg-ecl-lab">
+            {p.code}
+          </text>
+        </g>
+      ))}
     </svg>
   );
 }

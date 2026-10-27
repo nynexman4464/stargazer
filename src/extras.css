@@ -499,9 +499,28 @@ body {
   fill: var(--color-text-primary);
   opacity: 0.3;
 }
-.sg-ecl-moon-l {
+.sg-ecl-path {
+  fill: none;
+  stroke: var(--color-border);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+.sg-ecl-disc {
   fill: var(--color-text-primary);
-  opacity: 0.88;
+  opacity: 0.45;
+  stroke: var(--color-border);
+  stroke-width: 0.75;
+}
+.sg-ecl-disc-g {
+  fill: var(--color-text-primary);
+  opacity: 0.92;
+  stroke: var(--color-border);
+  stroke-width: 0.75;
+}
+.sg-ecl-lab {
+  fill: var(--color-text-secondary);
+  font-size: 8.5px;
+  text-anchor: middle;
 }
 
 /* NOAA OVATION aurora prediction map: square polar view, full card width. */

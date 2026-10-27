@@ -193,6 +193,31 @@ def parse_lunar(iso, text):
     else:
         note(f"lunar {iso}: shadow radii (f1/f2/f3) not found")
 
+    # Moon path polynomials (x, y) + t0 — the bulletin-figure
+    # diagram draws the Moon at each contact along this path.
+    m = re.search(r"at\s+(\d{1,2}):(\d{2}):(\d{2}(?:\.\d+)?)\s+TD\s+\(=t0\)", txt)
+    t0 = None
+    if m:
+        t0 = int(m.group(1)) + int(m.group(2)) / 60 + float(m.group(3)) / 3600
+    else:
+        note(f"lunar {iso}: elements t0 not found")
+    xs, ys = [], []
+    seg = txt[txt.rfind("Polynomial Besselian Elements"):]
+    end = seg.find("At time t1")
+    if end > 0:
+        seg = seg[:end]
+    expect = 0
+    for rm in re.finditer(r"\b([0-3])\s+(-?\d+\.\d+)\s+(-?\d+\.\d+)", seg):
+        if int(rm.group(1)) == expect:
+            xs.append(float(rm.group(2)))
+            ys.append(float(rm.group(3)))
+            expect += 1
+        if expect == 4:
+            break
+    if expect != 4:
+        note(f"lunar {iso}: path rows parsed {expect}/4")
+        xs = ys = None
+
     contacts = {k: None for k in
                 ("p1", "u1", "u2", "greatest", "u3", "u4", "p4")}
     seen = set()
@@ -211,7 +236,8 @@ def parse_lunar(iso, text):
         if contacts[req] is None:
             note(f"lunar {iso}: required contact {req} not found")
     return {"dT": dT, "penMag": pen, "umbMag": umb, "gamma": gamma,
-            "f1": f1, "f2": f2, "f3": f3, "contactsTD": contacts}
+            "f1": f1, "f2": f2, "f3": f3, "t0": t0, "x": xs, "y": ys,
+            "contactsTD": contacts}
 
 
 # ---------------------------------------------------------------- main

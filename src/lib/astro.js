@@ -994,20 +994,20 @@ export function eclipseEstimate(ev, loc, locName) {
       : 'the Moon passes only through Earth’s faint outer shadow — expect a soft shading on one side, no dark bite';
   const lines = [];
   const stepLines = [
-    ['p1', 'Earth’s faint outer shadow first touches the Moon'],
-    ['u1', 'The dark inner shadow first touches the Moon'],
-    ['u2', 'Totality begins — the whole Moon is in the dark shadow'],
-    ['greatest', null],
-    ['u3', 'Totality ends'],
-    ['u4', 'The dark inner shadow leaves the Moon'],
-    ['p4', 'Earth’s shadow leaves the Moon completely'],
+    ['p1', 'P1', 'Earth’s faint outer shadow first touches the Moon'],
+    ['u1', 'U1', 'The dark inner shadow first touches the Moon'],
+    ['u2', 'U2', 'Totality begins — the whole Moon is in the dark shadow'],
+    ['greatest', null, null],
+    ['u3', 'U3', 'Totality ends'],
+    ['u4', 'U4', 'The dark inner shadow leaves the Moon'],
+    ['p4', 'P4', 'Earth’s shadow leaves the Moon completely'],
   ];
-  for (const [key, label] of stepLines) {
+  for (const [key, code, label] of stepLines) {
     if (!c[key]) continue;
     if (key === 'greatest') {
       lines.push(`Greatest eclipse: ${fmtTime(c.greatest)} — ${shade}; Moon ${altNote('moon', c.greatest)}`);
     } else {
-      lines.push(`${label}: ${fmtTime(c[key])} — Moon ${altNote('moon', c[key])}`);
+      lines.push(`${code} — ${label}: ${fmtTime(c[key])} — Moon ${altNote('moon', c[key])}`);
     }
   }
   /* Moonrise/moonset inside the event window — e.g. the
@@ -1028,22 +1028,38 @@ export function eclipseEstimate(ev, loc, locName) {
     ? `Penumbral magnitude ${c.penMag.toFixed(2)} — how deeply the Moon dips into the faint shadow (1.0 would just touch the dark shadow).`
     : `Umbral magnitude ${c.umbMag.toFixed(2)} — how deeply the Moon enters the dark shadow (1.0 = fully inside).`;
   lines.push(magLine);
-  /* Diagram geometry in Moon radii: the shadow radii come
-     from the elements (f1/f2 against the Moon's f3), and the
-     axis distance at greatest follows from the penumbral
-     magnitude identity penMag = (f1 + f3 - rho) / (2 f3).
-     Gamma's sign says which side of the axis the Moon
-     passes (positive = Moon north of the axis, so the
-     shadow center sits south — below — the Moon). */
-  const diagram = ev.circ.f1 && ev.circ.f3
-    ? {
-        kind: 'lunar',
-        penR: ev.circ.f1 / ev.circ.f3,
-        umbR: ev.circ.f2 / ev.circ.f3,
-        off: (ev.circ.f1 + ev.circ.f3 - 2 * ev.circ.f3 * ev.circ.penMag) / ev.circ.f3,
-        gamma: ev.circ.gamma,
-        caption: 'The Moon in Earth’s shadow at greatest eclipse (north up): the dark circle is the umbra, the faint one the penumbra.',
-      }
+  /* The diagram Alex asked to match (the NASA bulletin
+     figure he sent, 2026-10-27): Earth's shadow circles
+     fixed, and the Moon drawn at each contact point along
+     its path — positions from the elements' x/y polynomials
+     evaluated at each contact's TD instant, in Earth radii,
+     mirrored into screen coords (north up, so the Moon
+     travels right to left as in the bulletin). */
+  const diagram = ev.circ.x && ev.circ.f3
+    ? (() => {
+        const dayMs = Date.parse(`${isoDate}T00:00:00Z`);
+        const posAt = (date) => {
+          const t = (date.getTime() + ev.circ.dT * 1000 - dayMs) / 3600000 - ev.circ.t0;
+          return { x: besselPoly(ev.circ.x, t), y: besselPoly(ev.circ.y, t) };
+        };
+        const discs = [];
+        for (const [key, code] of [
+          ['p1', 'P1'], ['u1', 'U1'], ['u2', 'U2'], ['greatest', 'Greatest'],
+          ['u3', 'U3'], ['u4', 'U4'], ['p4', 'P4'],
+        ]) {
+          if (!c[key]) continue;
+          const p = posAt(c[key]);
+          discs.push({ code, sx: -p.x, sy: -p.y, greatest: key === 'greatest' });
+        }
+        return {
+          kind: 'lunar',
+          discs,
+          penR: ev.circ.f1,
+          umbR: ev.circ.f2,
+          moonR: ev.circ.f3,
+          caption: 'The Moon’s path through Earth’s shadow — each disc is the Moon at a contact point (north up). The dark circle is the umbra, the faint one the penumbra.',
+        };
+      })()
     : null;
   return {
     heading: `Eclipse estimate — ${where}`,
