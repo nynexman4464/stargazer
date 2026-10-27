@@ -2817,7 +2817,15 @@ export function eventLook(ev, loc) {
        margin each side; the passage restriction inside
        lookTrack trims any spill into the adjacent days.
        Without a tz, fall back to the old browser-day scan. */
-    const dayStart = circ && circ.max && loc.tz ? zonedDayStart(circ.max, loc.tz) : null;
+    /* The day's anchor instant: greatest eclipse when
+       visible, the max-eclipse instant at night (atMax), or
+       closest approach on a miss (missAt) — the latter two
+       were missing here at first, so not-visible eclipses
+       silently fell back to the viewer's day and their Sun
+       tracks started at 7 AM in South Africa (Alex,
+       2026-10-27). */
+    const anchorInstant = circ ? (circ.max || circ.atMax || circ.missAt || null) : null;
+    const dayStart = anchorInstant && loc.tz ? zonedDayStart(anchorInstant, loc.tz) : null;
     const scanned = dayStart
       ? lookTrack((d) => sunRaDec(d), dayStart, loc, { startH: -1, hours: 26, daytime: true })
       : lookTrack((d) => sunRaDec(d), ev.date, loc, { startH: -21, hours: 24, daytime: true });
