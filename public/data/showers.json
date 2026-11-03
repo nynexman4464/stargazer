@@ -99,6 +99,28 @@
       "type": "major"
     },
     {
+      "date": "2026-11-05",
+      "id": "southern-taurids-2026",
+      "name": "Southern Taurids",
+      "note": "Low rates but large bright meteors; pairs with the Northern Taurids.",
+      "parent": "2P/Encke",
+      "peak_night": "2026-11-05 → 06",
+      "radiant": "Taurus",
+      "rate": "slow, bright, fireball-rich ('Halloween fireballs')",
+      "type": "minor"
+    },
+    {
+      "date": "2026-11-12",
+      "id": "northern-taurids-2026",
+      "name": "Northern Taurids",
+      "note": "Same fireball family as the Southern Taurids.",
+      "parent": "2P/Encke",
+      "peak_night": "2026-11-12 → 13",
+      "radiant": "Taurus",
+      "rate": "slow, bright, fireball-rich",
+      "type": "minor"
+    },
+    {
       "date": "2026-11-17",
       "id": "leonids-2026",
       "name": "Leonids",
