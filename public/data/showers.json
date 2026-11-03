@@ -7,7 +7,8 @@
     "Astronomy Now meteor shower calendar",
     "NASA Science — Quadrantids",
     "Lunar phases for 2027 moon notes: IMO 2027 calendar Table 4 (lunar phases)",
-    "IMO meteor shower calendar — radiant positions (RA/Dec in degrees) at each shower's maximum, in the top-level radiants map keyed by shower name; Southern Taurids use the Nov 5 maximum position to match this file's peak date"
+    "IMO meteor shower calendar — radiant positions (RA/Dec in degrees) at each shower's maximum, in the top-level radiants map keyed by shower name; Southern Taurids use the Nov 5 maximum position to match this file's peak date",
+    "Wikipedia/IMO 2026 meteor shower table (peak dates, ZHRs, radiants) — June Bootids, Aurigids, September Epsilon Perseids, Sigma Hydrids, July Gamma Draconids, October Camelopardalids added 2026-11-03; 2027–2036 instances repeat the canonical peak date, per this file's convention"
   ],
   "radiants": {
     "Quadrantids": {
@@ -73,6 +74,30 @@
     "Ursids": {
       "ra": 217,
       "dec": 76
+    },
+    "June Bootids": {
+      "ra": 221,
+      "dec": 48
+    },
+    "Aurigids": {
+      "ra": 92,
+      "dec": 39
+    },
+    "September Epsilon Perseids": {
+      "ra": 48,
+      "dec": 40
+    },
+    "Sigma Hydrids": {
+      "ra": 125,
+      "dec": 2
+    },
+    "July Gamma Draconids": {
+      "ra": 281,
+      "dec": 51
+    },
+    "October Camelopardalids": {
+      "ra": 164,
+      "dec": 79
     }
   },
   "events": [
@@ -143,6 +168,17 @@
       "type": "minor"
     },
     {
+      "date": "2026-12-09",
+      "id": "sigma-hydrids-2026",
+      "name": "Sigma Hydrids",
+      "note": "Steady meteors from Hydra.",
+      "parent": "possibly C/2023 P1 (Nishimura)",
+      "peak_night": "2026-12-09 → 10",
+      "radiant": "Hydra",
+      "rate": "roughly 7/hr",
+      "type": "minor"
+    },
+    {
       "date": "2026-12-13",
       "id": "geminids-2026",
       "name": "Geminids",
@@ -201,6 +237,28 @@
       "type": "major"
     },
     {
+      "date": "2027-06-22",
+      "id": "june-bootids-2027",
+      "name": "June Bootids",
+      "note": "Slow meteors from Boötes; watch for an outburst year.",
+      "parent": "7P/Pons–Winnecke",
+      "peak_night": "2027-06-22 → 23",
+      "radiant": "Boötes",
+      "rate": "usually quiet, but prone to surprise outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2027-07-28",
+      "id": "july-gamma-draconids-2027",
+      "name": "July Gamma Draconids",
+      "note": "Slow meteors from Draco.",
+      "parent": "unknown",
+      "peak_night": "2027-07-28 → 29",
+      "radiant": "Draco",
+      "rate": "roughly 5/hr",
+      "type": "minor"
+    },
+    {
       "date": "2027-07-29",
       "id": "southern-delta-aquariids-2027",
       "moon": "young waxing crescent (~15%), sets early — favorable",
@@ -246,6 +304,39 @@
       "peak_night": "2027-08-17 → 18",
       "radiant": "Cygnus",
       "rate": "a few per hour, noted for bright slow fireballs",
+      "type": "minor"
+    },
+    {
+      "date": "2027-09-01",
+      "id": "aurigids-2027",
+      "name": "Aurigids",
+      "note": "Fast, bright meteors from Auriga; outburst years can be spectacular.",
+      "parent": "C/1911 N1 (Kiess)",
+      "peak_night": "2027-09-01 → 02",
+      "radiant": "Auriga",
+      "rate": "roughly 6/hr, with rare outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2027-09-09",
+      "id": "september-epsilon-perseids-2027",
+      "name": "September Epsilon Perseids",
+      "note": "Fast, bright meteors from Perseus.",
+      "parent": "unknown",
+      "peak_night": "2027-09-09 → 10",
+      "radiant": "Perseus",
+      "rate": "roughly 8/hr",
+      "type": "minor"
+    },
+    {
+      "date": "2027-10-06",
+      "id": "october-camelopardalids-2027",
+      "name": "October Camelopardalids",
+      "note": "Very far-north radiant, nearly circumpolar from New England.",
+      "parent": "unknown (likely a long-period comet)",
+      "peak_night": "2027-10-06 → 07",
+      "radiant": "Camelopardalis",
+      "rate": "roughly 5/hr, peak lasts about a day",
       "type": "minor"
     },
     {
@@ -321,6 +412,17 @@
       "type": "minor"
     },
     {
+      "date": "2027-12-09",
+      "id": "sigma-hydrids-2027",
+      "name": "Sigma Hydrids",
+      "note": "Steady meteors from Hydra.",
+      "parent": "possibly C/2023 P1 (Nishimura)",
+      "peak_night": "2027-12-09 → 10",
+      "radiant": "Hydra",
+      "rate": "roughly 7/hr",
+      "type": "minor"
+    },
+    {
       "date": "2027-12-13",
       "id": "geminids-2027",
       "moon": "full Moon Dec 13 — very unfavorable",
@@ -390,6 +492,28 @@
       "type": "major"
     },
     {
+      "date": "2028-06-22",
+      "id": "june-bootids-2028",
+      "name": "June Bootids",
+      "note": "Slow meteors from Boötes; watch for an outburst year.",
+      "parent": "7P/Pons–Winnecke",
+      "peak_night": "2028-06-22 → 23",
+      "radiant": "Boötes",
+      "rate": "usually quiet, but prone to surprise outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2028-07-28",
+      "id": "july-gamma-draconids-2028",
+      "name": "July Gamma Draconids",
+      "note": "Slow meteors from Draco.",
+      "parent": "unknown",
+      "peak_night": "2028-07-28 → 29",
+      "radiant": "Draco",
+      "rate": "roughly 5/hr",
+      "type": "minor"
+    },
+    {
       "date": "2028-07-29",
       "id": "southern-delta-aquariids-2028",
       "name": "Southern Delta Aquariids",
@@ -431,6 +555,39 @@
       "peak_night": "2028-08-17 → 18",
       "radiant": "Cygnus",
       "rate": "a few per hour, noted for bright slow fireballs",
+      "type": "minor"
+    },
+    {
+      "date": "2028-09-01",
+      "id": "aurigids-2028",
+      "name": "Aurigids",
+      "note": "Fast, bright meteors from Auriga; outburst years can be spectacular.",
+      "parent": "C/1911 N1 (Kiess)",
+      "peak_night": "2028-09-01 → 02",
+      "radiant": "Auriga",
+      "rate": "roughly 6/hr, with rare outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2028-09-09",
+      "id": "september-epsilon-perseids-2028",
+      "name": "September Epsilon Perseids",
+      "note": "Fast, bright meteors from Perseus.",
+      "parent": "unknown",
+      "peak_night": "2028-09-09 → 10",
+      "radiant": "Perseus",
+      "rate": "roughly 8/hr",
+      "type": "minor"
+    },
+    {
+      "date": "2028-10-06",
+      "id": "october-camelopardalids-2028",
+      "name": "October Camelopardalids",
+      "note": "Very far-north radiant, nearly circumpolar from New England.",
+      "parent": "unknown (likely a long-period comet)",
+      "peak_night": "2028-10-06 → 07",
+      "radiant": "Camelopardalis",
+      "rate": "roughly 5/hr, peak lasts about a day",
       "type": "minor"
     },
     {
@@ -500,6 +657,17 @@
       "type": "minor"
     },
     {
+      "date": "2028-12-09",
+      "id": "sigma-hydrids-2028",
+      "name": "Sigma Hydrids",
+      "note": "Steady meteors from Hydra.",
+      "parent": "possibly C/2023 P1 (Nishimura)",
+      "peak_night": "2028-12-09 → 10",
+      "radiant": "Hydra",
+      "rate": "roughly 7/hr",
+      "type": "minor"
+    },
+    {
       "date": "2028-12-13",
       "id": "geminids-2028",
       "name": "Geminids",
@@ -566,6 +734,28 @@
       "type": "major"
     },
     {
+      "date": "2029-06-22",
+      "id": "june-bootids-2029",
+      "name": "June Bootids",
+      "note": "Slow meteors from Boötes; watch for an outburst year.",
+      "parent": "7P/Pons–Winnecke",
+      "peak_night": "2029-06-22 → 23",
+      "radiant": "Boötes",
+      "rate": "usually quiet, but prone to surprise outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2029-07-28",
+      "id": "july-gamma-draconids-2029",
+      "name": "July Gamma Draconids",
+      "note": "Slow meteors from Draco.",
+      "parent": "unknown",
+      "peak_night": "2029-07-28 → 29",
+      "radiant": "Draco",
+      "rate": "roughly 5/hr",
+      "type": "minor"
+    },
+    {
       "date": "2029-07-29",
       "id": "southern-delta-aquariids-2029",
       "name": "Southern Delta Aquariids",
@@ -607,6 +797,39 @@
       "peak_night": "2029-08-17 → 18",
       "radiant": "Cygnus",
       "rate": "a few per hour, noted for bright slow fireballs",
+      "type": "minor"
+    },
+    {
+      "date": "2029-09-01",
+      "id": "aurigids-2029",
+      "name": "Aurigids",
+      "note": "Fast, bright meteors from Auriga; outburst years can be spectacular.",
+      "parent": "C/1911 N1 (Kiess)",
+      "peak_night": "2029-09-01 → 02",
+      "radiant": "Auriga",
+      "rate": "roughly 6/hr, with rare outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2029-09-09",
+      "id": "september-epsilon-perseids-2029",
+      "name": "September Epsilon Perseids",
+      "note": "Fast, bright meteors from Perseus.",
+      "parent": "unknown",
+      "peak_night": "2029-09-09 → 10",
+      "radiant": "Perseus",
+      "rate": "roughly 8/hr",
+      "type": "minor"
+    },
+    {
+      "date": "2029-10-06",
+      "id": "october-camelopardalids-2029",
+      "name": "October Camelopardalids",
+      "note": "Very far-north radiant, nearly circumpolar from New England.",
+      "parent": "unknown (likely a long-period comet)",
+      "peak_night": "2029-10-06 → 07",
+      "radiant": "Camelopardalis",
+      "rate": "roughly 5/hr, peak lasts about a day",
       "type": "minor"
     },
     {
@@ -676,6 +899,17 @@
       "type": "minor"
     },
     {
+      "date": "2029-12-09",
+      "id": "sigma-hydrids-2029",
+      "name": "Sigma Hydrids",
+      "note": "Steady meteors from Hydra.",
+      "parent": "possibly C/2023 P1 (Nishimura)",
+      "peak_night": "2029-12-09 → 10",
+      "radiant": "Hydra",
+      "rate": "roughly 7/hr",
+      "type": "minor"
+    },
+    {
       "date": "2029-12-13",
       "id": "geminids-2029",
       "name": "Geminids",
@@ -742,6 +976,28 @@
       "type": "major"
     },
     {
+      "date": "2030-06-22",
+      "id": "june-bootids-2030",
+      "name": "June Bootids",
+      "note": "Slow meteors from Boötes; watch for an outburst year.",
+      "parent": "7P/Pons–Winnecke",
+      "peak_night": "2030-06-22 → 23",
+      "radiant": "Boötes",
+      "rate": "usually quiet, but prone to surprise outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2030-07-28",
+      "id": "july-gamma-draconids-2030",
+      "name": "July Gamma Draconids",
+      "note": "Slow meteors from Draco.",
+      "parent": "unknown",
+      "peak_night": "2030-07-28 → 29",
+      "radiant": "Draco",
+      "rate": "roughly 5/hr",
+      "type": "minor"
+    },
+    {
       "date": "2030-07-29",
       "id": "southern-delta-aquariids-2030",
       "name": "Southern Delta Aquariids",
@@ -783,6 +1039,39 @@
       "peak_night": "2030-08-17 → 18",
       "radiant": "Cygnus",
       "rate": "a few per hour, noted for bright slow fireballs",
+      "type": "minor"
+    },
+    {
+      "date": "2030-09-01",
+      "id": "aurigids-2030",
+      "name": "Aurigids",
+      "note": "Fast, bright meteors from Auriga; outburst years can be spectacular.",
+      "parent": "C/1911 N1 (Kiess)",
+      "peak_night": "2030-09-01 → 02",
+      "radiant": "Auriga",
+      "rate": "roughly 6/hr, with rare outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2030-09-09",
+      "id": "september-epsilon-perseids-2030",
+      "name": "September Epsilon Perseids",
+      "note": "Fast, bright meteors from Perseus.",
+      "parent": "unknown",
+      "peak_night": "2030-09-09 → 10",
+      "radiant": "Perseus",
+      "rate": "roughly 8/hr",
+      "type": "minor"
+    },
+    {
+      "date": "2030-10-06",
+      "id": "october-camelopardalids-2030",
+      "name": "October Camelopardalids",
+      "note": "Very far-north radiant, nearly circumpolar from New England.",
+      "parent": "unknown (likely a long-period comet)",
+      "peak_night": "2030-10-06 → 07",
+      "radiant": "Camelopardalis",
+      "rate": "roughly 5/hr, peak lasts about a day",
       "type": "minor"
     },
     {
@@ -852,6 +1141,17 @@
       "type": "minor"
     },
     {
+      "date": "2030-12-09",
+      "id": "sigma-hydrids-2030",
+      "name": "Sigma Hydrids",
+      "note": "Steady meteors from Hydra.",
+      "parent": "possibly C/2023 P1 (Nishimura)",
+      "peak_night": "2030-12-09 → 10",
+      "radiant": "Hydra",
+      "rate": "roughly 7/hr",
+      "type": "minor"
+    },
+    {
       "date": "2030-12-13",
       "id": "geminids-2030",
       "name": "Geminids",
@@ -918,6 +1218,28 @@
       "type": "major"
     },
     {
+      "date": "2031-06-22",
+      "id": "june-bootids-2031",
+      "name": "June Bootids",
+      "note": "Slow meteors from Boötes; watch for an outburst year.",
+      "parent": "7P/Pons–Winnecke",
+      "peak_night": "2031-06-22 → 23",
+      "radiant": "Boötes",
+      "rate": "usually quiet, but prone to surprise outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2031-07-28",
+      "id": "july-gamma-draconids-2031",
+      "name": "July Gamma Draconids",
+      "note": "Slow meteors from Draco.",
+      "parent": "unknown",
+      "peak_night": "2031-07-28 → 29",
+      "radiant": "Draco",
+      "rate": "roughly 5/hr",
+      "type": "minor"
+    },
+    {
       "date": "2031-07-29",
       "id": "southern-delta-aquariids-2031",
       "name": "Southern Delta Aquariids",
@@ -959,6 +1281,39 @@
       "peak_night": "2031-08-17 → 18",
       "radiant": "Cygnus",
       "rate": "a few per hour, noted for bright slow fireballs",
+      "type": "minor"
+    },
+    {
+      "date": "2031-09-01",
+      "id": "aurigids-2031",
+      "name": "Aurigids",
+      "note": "Fast, bright meteors from Auriga; outburst years can be spectacular.",
+      "parent": "C/1911 N1 (Kiess)",
+      "peak_night": "2031-09-01 → 02",
+      "radiant": "Auriga",
+      "rate": "roughly 6/hr, with rare outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2031-09-09",
+      "id": "september-epsilon-perseids-2031",
+      "name": "September Epsilon Perseids",
+      "note": "Fast, bright meteors from Perseus.",
+      "parent": "unknown",
+      "peak_night": "2031-09-09 → 10",
+      "radiant": "Perseus",
+      "rate": "roughly 8/hr",
+      "type": "minor"
+    },
+    {
+      "date": "2031-10-06",
+      "id": "october-camelopardalids-2031",
+      "name": "October Camelopardalids",
+      "note": "Very far-north radiant, nearly circumpolar from New England.",
+      "parent": "unknown (likely a long-period comet)",
+      "peak_night": "2031-10-06 → 07",
+      "radiant": "Camelopardalis",
+      "rate": "roughly 5/hr, peak lasts about a day",
       "type": "minor"
     },
     {
@@ -1028,6 +1383,17 @@
       "type": "minor"
     },
     {
+      "date": "2031-12-09",
+      "id": "sigma-hydrids-2031",
+      "name": "Sigma Hydrids",
+      "note": "Steady meteors from Hydra.",
+      "parent": "possibly C/2023 P1 (Nishimura)",
+      "peak_night": "2031-12-09 → 10",
+      "radiant": "Hydra",
+      "rate": "roughly 7/hr",
+      "type": "minor"
+    },
+    {
       "date": "2031-12-13",
       "id": "geminids-2031",
       "name": "Geminids",
@@ -1094,6 +1460,28 @@
       "type": "major"
     },
     {
+      "date": "2032-06-22",
+      "id": "june-bootids-2032",
+      "name": "June Bootids",
+      "note": "Slow meteors from Boötes; watch for an outburst year.",
+      "parent": "7P/Pons–Winnecke",
+      "peak_night": "2032-06-22 → 23",
+      "radiant": "Boötes",
+      "rate": "usually quiet, but prone to surprise outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2032-07-28",
+      "id": "july-gamma-draconids-2032",
+      "name": "July Gamma Draconids",
+      "note": "Slow meteors from Draco.",
+      "parent": "unknown",
+      "peak_night": "2032-07-28 → 29",
+      "radiant": "Draco",
+      "rate": "roughly 5/hr",
+      "type": "minor"
+    },
+    {
       "date": "2032-07-29",
       "id": "southern-delta-aquariids-2032",
       "name": "Southern Delta Aquariids",
@@ -1135,6 +1523,39 @@
       "peak_night": "2032-08-17 → 18",
       "radiant": "Cygnus",
       "rate": "a few per hour, noted for bright slow fireballs",
+      "type": "minor"
+    },
+    {
+      "date": "2032-09-01",
+      "id": "aurigids-2032",
+      "name": "Aurigids",
+      "note": "Fast, bright meteors from Auriga; outburst years can be spectacular.",
+      "parent": "C/1911 N1 (Kiess)",
+      "peak_night": "2032-09-01 → 02",
+      "radiant": "Auriga",
+      "rate": "roughly 6/hr, with rare outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2032-09-09",
+      "id": "september-epsilon-perseids-2032",
+      "name": "September Epsilon Perseids",
+      "note": "Fast, bright meteors from Perseus.",
+      "parent": "unknown",
+      "peak_night": "2032-09-09 → 10",
+      "radiant": "Perseus",
+      "rate": "roughly 8/hr",
+      "type": "minor"
+    },
+    {
+      "date": "2032-10-06",
+      "id": "october-camelopardalids-2032",
+      "name": "October Camelopardalids",
+      "note": "Very far-north radiant, nearly circumpolar from New England.",
+      "parent": "unknown (likely a long-period comet)",
+      "peak_night": "2032-10-06 → 07",
+      "radiant": "Camelopardalis",
+      "rate": "roughly 5/hr, peak lasts about a day",
       "type": "minor"
     },
     {
@@ -1204,6 +1625,17 @@
       "type": "minor"
     },
     {
+      "date": "2032-12-09",
+      "id": "sigma-hydrids-2032",
+      "name": "Sigma Hydrids",
+      "note": "Steady meteors from Hydra.",
+      "parent": "possibly C/2023 P1 (Nishimura)",
+      "peak_night": "2032-12-09 → 10",
+      "radiant": "Hydra",
+      "rate": "roughly 7/hr",
+      "type": "minor"
+    },
+    {
       "date": "2032-12-13",
       "id": "geminids-2032",
       "name": "Geminids",
@@ -1270,6 +1702,28 @@
       "type": "major"
     },
     {
+      "date": "2033-06-22",
+      "id": "june-bootids-2033",
+      "name": "June Bootids",
+      "note": "Slow meteors from Boötes; watch for an outburst year.",
+      "parent": "7P/Pons–Winnecke",
+      "peak_night": "2033-06-22 → 23",
+      "radiant": "Boötes",
+      "rate": "usually quiet, but prone to surprise outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2033-07-28",
+      "id": "july-gamma-draconids-2033",
+      "name": "July Gamma Draconids",
+      "note": "Slow meteors from Draco.",
+      "parent": "unknown",
+      "peak_night": "2033-07-28 → 29",
+      "radiant": "Draco",
+      "rate": "roughly 5/hr",
+      "type": "minor"
+    },
+    {
       "date": "2033-07-29",
       "id": "southern-delta-aquariids-2033",
       "name": "Southern Delta Aquariids",
@@ -1311,6 +1765,39 @@
       "peak_night": "2033-08-17 → 18",
       "radiant": "Cygnus",
       "rate": "a few per hour, noted for bright slow fireballs",
+      "type": "minor"
+    },
+    {
+      "date": "2033-09-01",
+      "id": "aurigids-2033",
+      "name": "Aurigids",
+      "note": "Fast, bright meteors from Auriga; outburst years can be spectacular.",
+      "parent": "C/1911 N1 (Kiess)",
+      "peak_night": "2033-09-01 → 02",
+      "radiant": "Auriga",
+      "rate": "roughly 6/hr, with rare outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2033-09-09",
+      "id": "september-epsilon-perseids-2033",
+      "name": "September Epsilon Perseids",
+      "note": "Fast, bright meteors from Perseus.",
+      "parent": "unknown",
+      "peak_night": "2033-09-09 → 10",
+      "radiant": "Perseus",
+      "rate": "roughly 8/hr",
+      "type": "minor"
+    },
+    {
+      "date": "2033-10-06",
+      "id": "october-camelopardalids-2033",
+      "name": "October Camelopardalids",
+      "note": "Very far-north radiant, nearly circumpolar from New England.",
+      "parent": "unknown (likely a long-period comet)",
+      "peak_night": "2033-10-06 → 07",
+      "radiant": "Camelopardalis",
+      "rate": "roughly 5/hr, peak lasts about a day",
       "type": "minor"
     },
     {
@@ -1380,6 +1867,17 @@
       "type": "minor"
     },
     {
+      "date": "2033-12-09",
+      "id": "sigma-hydrids-2033",
+      "name": "Sigma Hydrids",
+      "note": "Steady meteors from Hydra.",
+      "parent": "possibly C/2023 P1 (Nishimura)",
+      "peak_night": "2033-12-09 → 10",
+      "radiant": "Hydra",
+      "rate": "roughly 7/hr",
+      "type": "minor"
+    },
+    {
       "date": "2033-12-13",
       "id": "geminids-2033",
       "name": "Geminids",
@@ -1446,6 +1944,28 @@
       "type": "major"
     },
     {
+      "date": "2034-06-22",
+      "id": "june-bootids-2034",
+      "name": "June Bootids",
+      "note": "Slow meteors from Boötes; watch for an outburst year.",
+      "parent": "7P/Pons–Winnecke",
+      "peak_night": "2034-06-22 → 23",
+      "radiant": "Boötes",
+      "rate": "usually quiet, but prone to surprise outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2034-07-28",
+      "id": "july-gamma-draconids-2034",
+      "name": "July Gamma Draconids",
+      "note": "Slow meteors from Draco.",
+      "parent": "unknown",
+      "peak_night": "2034-07-28 → 29",
+      "radiant": "Draco",
+      "rate": "roughly 5/hr",
+      "type": "minor"
+    },
+    {
       "date": "2034-07-29",
       "id": "southern-delta-aquariids-2034",
       "name": "Southern Delta Aquariids",
@@ -1487,6 +2007,39 @@
       "peak_night": "2034-08-17 → 18",
       "radiant": "Cygnus",
       "rate": "a few per hour, noted for bright slow fireballs",
+      "type": "minor"
+    },
+    {
+      "date": "2034-09-01",
+      "id": "aurigids-2034",
+      "name": "Aurigids",
+      "note": "Fast, bright meteors from Auriga; outburst years can be spectacular.",
+      "parent": "C/1911 N1 (Kiess)",
+      "peak_night": "2034-09-01 → 02",
+      "radiant": "Auriga",
+      "rate": "roughly 6/hr, with rare outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2034-09-09",
+      "id": "september-epsilon-perseids-2034",
+      "name": "September Epsilon Perseids",
+      "note": "Fast, bright meteors from Perseus.",
+      "parent": "unknown",
+      "peak_night": "2034-09-09 → 10",
+      "radiant": "Perseus",
+      "rate": "roughly 8/hr",
+      "type": "minor"
+    },
+    {
+      "date": "2034-10-06",
+      "id": "october-camelopardalids-2034",
+      "name": "October Camelopardalids",
+      "note": "Very far-north radiant, nearly circumpolar from New England.",
+      "parent": "unknown (likely a long-period comet)",
+      "peak_night": "2034-10-06 → 07",
+      "radiant": "Camelopardalis",
+      "rate": "roughly 5/hr, peak lasts about a day",
       "type": "minor"
     },
     {
@@ -1556,6 +2109,17 @@
       "type": "minor"
     },
     {
+      "date": "2034-12-09",
+      "id": "sigma-hydrids-2034",
+      "name": "Sigma Hydrids",
+      "note": "Steady meteors from Hydra.",
+      "parent": "possibly C/2023 P1 (Nishimura)",
+      "peak_night": "2034-12-09 → 10",
+      "radiant": "Hydra",
+      "rate": "roughly 7/hr",
+      "type": "minor"
+    },
+    {
       "date": "2034-12-13",
       "id": "geminids-2034",
       "name": "Geminids",
@@ -1622,6 +2186,28 @@
       "type": "major"
     },
     {
+      "date": "2035-06-22",
+      "id": "june-bootids-2035",
+      "name": "June Bootids",
+      "note": "Slow meteors from Boötes; watch for an outburst year.",
+      "parent": "7P/Pons–Winnecke",
+      "peak_night": "2035-06-22 → 23",
+      "radiant": "Boötes",
+      "rate": "usually quiet, but prone to surprise outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2035-07-28",
+      "id": "july-gamma-draconids-2035",
+      "name": "July Gamma Draconids",
+      "note": "Slow meteors from Draco.",
+      "parent": "unknown",
+      "peak_night": "2035-07-28 → 29",
+      "radiant": "Draco",
+      "rate": "roughly 5/hr",
+      "type": "minor"
+    },
+    {
       "date": "2035-07-29",
       "id": "southern-delta-aquariids-2035",
       "name": "Southern Delta Aquariids",
@@ -1663,6 +2249,39 @@
       "peak_night": "2035-08-17 → 18",
       "radiant": "Cygnus",
       "rate": "a few per hour, noted for bright slow fireballs",
+      "type": "minor"
+    },
+    {
+      "date": "2035-09-01",
+      "id": "aurigids-2035",
+      "name": "Aurigids",
+      "note": "Fast, bright meteors from Auriga; outburst years can be spectacular.",
+      "parent": "C/1911 N1 (Kiess)",
+      "peak_night": "2035-09-01 → 02",
+      "radiant": "Auriga",
+      "rate": "roughly 6/hr, with rare outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2035-09-09",
+      "id": "september-epsilon-perseids-2035",
+      "name": "September Epsilon Perseids",
+      "note": "Fast, bright meteors from Perseus.",
+      "parent": "unknown",
+      "peak_night": "2035-09-09 → 10",
+      "radiant": "Perseus",
+      "rate": "roughly 8/hr",
+      "type": "minor"
+    },
+    {
+      "date": "2035-10-06",
+      "id": "october-camelopardalids-2035",
+      "name": "October Camelopardalids",
+      "note": "Very far-north radiant, nearly circumpolar from New England.",
+      "parent": "unknown (likely a long-period comet)",
+      "peak_night": "2035-10-06 → 07",
+      "radiant": "Camelopardalis",
+      "rate": "roughly 5/hr, peak lasts about a day",
       "type": "minor"
     },
     {
@@ -1732,6 +2351,17 @@
       "type": "minor"
     },
     {
+      "date": "2035-12-09",
+      "id": "sigma-hydrids-2035",
+      "name": "Sigma Hydrids",
+      "note": "Steady meteors from Hydra.",
+      "parent": "possibly C/2023 P1 (Nishimura)",
+      "peak_night": "2035-12-09 → 10",
+      "radiant": "Hydra",
+      "rate": "roughly 7/hr",
+      "type": "minor"
+    },
+    {
       "date": "2035-12-13",
       "id": "geminids-2035",
       "name": "Geminids",
@@ -1798,6 +2428,28 @@
       "type": "major"
     },
     {
+      "date": "2036-06-22",
+      "id": "june-bootids-2036",
+      "name": "June Bootids",
+      "note": "Slow meteors from Boötes; watch for an outburst year.",
+      "parent": "7P/Pons–Winnecke",
+      "peak_night": "2036-06-22 → 23",
+      "radiant": "Boötes",
+      "rate": "usually quiet, but prone to surprise outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2036-07-28",
+      "id": "july-gamma-draconids-2036",
+      "name": "July Gamma Draconids",
+      "note": "Slow meteors from Draco.",
+      "parent": "unknown",
+      "peak_night": "2036-07-28 → 29",
+      "radiant": "Draco",
+      "rate": "roughly 5/hr",
+      "type": "minor"
+    },
+    {
       "date": "2036-07-29",
       "id": "southern-delta-aquariids-2036",
       "name": "Southern Delta Aquariids",
@@ -1839,6 +2491,39 @@
       "peak_night": "2036-08-17 → 18",
       "radiant": "Cygnus",
       "rate": "a few per hour, noted for bright slow fireballs",
+      "type": "minor"
+    },
+    {
+      "date": "2036-09-01",
+      "id": "aurigids-2036",
+      "name": "Aurigids",
+      "note": "Fast, bright meteors from Auriga; outburst years can be spectacular.",
+      "parent": "C/1911 N1 (Kiess)",
+      "peak_night": "2036-09-01 → 02",
+      "radiant": "Auriga",
+      "rate": "roughly 6/hr, with rare outbursts",
+      "type": "minor"
+    },
+    {
+      "date": "2036-09-09",
+      "id": "september-epsilon-perseids-2036",
+      "name": "September Epsilon Perseids",
+      "note": "Fast, bright meteors from Perseus.",
+      "parent": "unknown",
+      "peak_night": "2036-09-09 → 10",
+      "radiant": "Perseus",
+      "rate": "roughly 8/hr",
+      "type": "minor"
+    },
+    {
+      "date": "2036-10-06",
+      "id": "october-camelopardalids-2036",
+      "name": "October Camelopardalids",
+      "note": "Very far-north radiant, nearly circumpolar from New England.",
+      "parent": "unknown (likely a long-period comet)",
+      "peak_night": "2036-10-06 → 07",
+      "radiant": "Camelopardalis",
+      "rate": "roughly 5/hr, peak lasts about a day",
       "type": "minor"
     },
     {
@@ -1905,6 +2590,17 @@
       "peak_night": "2036-11-21 → 22",
       "radiant": "Monoceros",
       "rate": "normally weak (~5/hr), but famous for rare brief outbursts (1925, 1935, 1985, 1995)",
+      "type": "minor"
+    },
+    {
+      "date": "2036-12-09",
+      "id": "sigma-hydrids-2036",
+      "name": "Sigma Hydrids",
+      "note": "Steady meteors from Hydra.",
+      "parent": "possibly C/2023 P1 (Nishimura)",
+      "peak_night": "2036-12-09 → 10",
+      "radiant": "Hydra",
+      "rate": "roughly 7/hr",
       "type": "minor"
     },
     {
